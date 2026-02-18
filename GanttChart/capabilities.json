@@ -1,0 +1,191 @@
+{
+    "dataRoles": [
+        { "displayName": "Task Name", "name": "taskName", "kind": "GroupingOrMeasure", "displayNameKey": "Role_TaskName" },
+        { "displayName": "Start Date", "name": "startDate", "kind": "Measure", "displayNameKey": "Role_StartDate" },
+        { "displayName": "End Date", "name": "endDate", "kind": "Measure", "displayNameKey": "Role_EndDate" },
+        { "displayName": "Task ID", "name": "taskId", "kind": "GroupingOrMeasure", "displayNameKey": "Role_TaskId" },
+        { "displayName": "Parent", "name": "parent", "kind": "GroupingOrMeasure", "displayNameKey": "Role_Parent" },
+        { "displayName": "Progress", "name": "progress", "kind": "GroupingOrMeasure", "displayNameKey": "Role_Progress" },
+        { "displayName": "Progress Base", "name": "progressBase", "kind": "GroupingOrMeasure", "displayNameKey": "Role_ProgressBase" },
+        { "displayName": "Milestone", "name": "milestone", "kind": "Measure", "displayNameKey": "Role_Milestone" },
+        { "displayName": "Resource", "name": "resource", "kind": "GroupingOrMeasure", "displayNameKey": "Role_Resource" },
+        { "displayName": "Dependencies", "name": "dependencies", "kind": "GroupingOrMeasure", "displayNameKey": "Role_Dependencies" },
+        { "displayName": "Priority", "name": "priority", "kind": "GroupingOrMeasure", "displayNameKey": "Role_Priority" },
+        { "displayName": "Status", "name": "status", "kind": "GroupingOrMeasure", "displayNameKey": "Role_Status" },
+        { "displayName": "WBS", "name": "wbs", "kind": "GroupingOrMeasure", "displayNameKey": "Role_WBS" },
+        { "displayName": "Planned Start", "name": "plannedStart", "kind": "Measure", "displayNameKey": "Role_PlannedStart" },
+        { "displayName": "Planned End", "name": "plannedEnd", "kind": "Measure", "displayNameKey": "Role_PlannedEnd" },
+        { "displayName": "Color", "name": "colorField", "kind": "GroupingOrMeasure", "displayNameKey": "Role_ColorField" },
+        { "displayName": "Tooltip Fields", "name": "tooltipFields", "kind": "GroupingOrMeasure", "displayNameKey": "Role_TooltipFields" }
+    ],
+    "objects": {
+        "timeline": {
+            "properties": {
+                "defaultZoom": { "type": { "text": true } },
+                "showTodayLine": { "type": { "bool": true } },
+                "todayLineColor": { "type": { "fill": { "solid": { "color": true } } } },
+                "todayLineWidth": { "type": { "numeric": true } },
+                "todayLineStyle": { "type": { "text": true } },
+                "showWeekends": { "type": { "bool": true } },
+                "weekendColor": { "type": { "fill": { "solid": { "color": true } } } },
+                "weekendOpacity": { "type": { "numeric": true } },
+                "showCurrentWeekHighlight": { "type": { "bool": true } },
+                "currentWeekColor": { "type": { "fill": { "solid": { "color": true } } } },
+                "timelinePadding": { "type": { "numeric": true } }
+            }
+        },
+        "taskSettings": {
+            "properties": {
+                "rowHeight": { "type": { "numeric": true } },
+                "barHeight": { "type": { "numeric": true } },
+                "barCornerRadius": { "type": { "numeric": true } },
+                "showProgress": { "type": { "bool": true } },
+                "progressStyle": { "type": { "text": true } },
+                "progressOpacity": { "type": { "numeric": true } },
+                "milestoneSize": { "type": { "numeric": true } },
+                "sortBy": { "type": { "text": true } },
+                "sortDirection": { "type": { "text": true } },
+                "showPlannedBars": { "type": { "bool": true } },
+                "plannedBarOpacity": { "type": { "numeric": true } },
+                "barBorderWidth": { "type": { "numeric": true } },
+                "barBorderColor": { "type": { "fill": { "solid": { "color": true } } } },
+                "groupBarStyle": { "type": { "text": true } }
+            }
+        },
+        "colorSettings": {
+            "properties": {
+                "defaultBarColor": { "type": { "fill": { "solid": { "color": true } } } },
+                "selectedBarColor": { "type": { "fill": { "solid": { "color": true } } } },
+                "groupBarColor": { "type": { "fill": { "solid": { "color": true } } } },
+                "dependencyLineColor": { "type": { "fill": { "solid": { "color": true } } } },
+                "progressColor": { "type": { "fill": { "solid": { "color": true } } } },
+                "milestoneFill": { "type": { "fill": { "solid": { "color": true } } } },
+                "plannedBarColor": { "type": { "fill": { "solid": { "color": true } } } },
+                "criticalPathColor": { "type": { "fill": { "solid": { "color": true } } } },
+                "colorByResource": { "type": { "bool": true } },
+                "colorByStatus": { "type": { "bool": true } },
+                "rowEvenColor": { "type": { "fill": { "solid": { "color": true } } } },
+                "rowOddColor": { "type": { "fill": { "solid": { "color": true } } } }
+            }
+        },
+        "gridSettings": {
+            "properties": {
+                "showGrid": { "type": { "bool": true } },
+                "gridWidth": { "type": { "numeric": true } },
+                "textSize": { "type": { "numeric": true } },
+                "indentSize": { "type": { "numeric": true } },
+                "showDateColumns": { "type": { "bool": true } },
+                "showResourceColumn": { "type": { "bool": true } },
+                "showProgressColumn": { "type": { "bool": true } },
+                "showDurationColumn": { "type": { "bool": true } },
+                "showStatusColumn": { "type": { "bool": true } },
+                "showPriorityColumn": { "type": { "bool": true } },
+                "showWbsColumn": { "type": { "bool": true } },
+                "dateFormat": { "type": { "text": true } },
+                "gridHeaderBackground": { "type": { "fill": { "solid": { "color": true } } } },
+                "gridHeaderFontColor": { "type": { "fill": { "solid": { "color": true } } } },
+                "gridFontColor": { "type": { "fill": { "solid": { "color": true } } } },
+                "gridLineColor": { "type": { "fill": { "solid": { "color": true } } } },
+                "gridBorderColor": { "type": { "fill": { "solid": { "color": true } } } }
+            }
+        },
+        "labelSettings": {
+            "properties": {
+                "showBarLabels": { "type": { "bool": true } },
+                "barLabelContent": { "type": { "text": true } },
+                "barLabelPosition": { "type": { "text": true } },
+                "barLabelFontSize": { "type": { "numeric": true } },
+                "barLabelFontColor": { "type": { "fill": { "solid": { "color": true } } } },
+                "showProgressLabels": { "type": { "bool": true } },
+                "progressLabelFontSize": { "type": { "numeric": true } }
+            }
+        },
+        "dependencySettings": {
+            "properties": {
+                "showDependencies": { "type": { "bool": true } },
+                "dependencyLineWidth": { "type": { "numeric": true } },
+                "dependencyLineStyle": { "type": { "text": true } },
+                "dependencyArrowSize": { "type": { "numeric": true } },
+                "dependencyRouting": { "type": { "text": true } }
+            }
+        },
+        "criticalPath": {
+            "properties": {
+                "showCriticalPath": { "type": { "bool": true } },
+                "criticalPathWidth": { "type": { "numeric": true } },
+                "highlightCriticalBars": { "type": { "bool": true } }
+            }
+        },
+        "headerSettings": {
+            "properties": {
+                "headerHeight": { "type": { "numeric": true } },
+                "headerBackground": { "type": { "fill": { "solid": { "color": true } } } },
+                "headerFontColor": { "type": { "fill": { "solid": { "color": true } } } },
+                "headerFontSize": { "type": { "numeric": true } },
+                "showAxisLines": { "type": { "bool": true } },
+                "axisLineColor": { "type": { "fill": { "solid": { "color": true } } } }
+            }
+        },
+        "toolbarSettings": {
+            "properties": {
+                "showToolbar": { "type": { "bool": true } },
+                "showZoomButtons": { "type": { "bool": true } },
+                "showExpandCollapseAll": { "type": { "bool": true } },
+                "showScrollToToday": { "type": { "bool": true } },
+                "showSearchBox": { "type": { "bool": true } },
+                "toolbarBackground": { "type": { "fill": { "solid": { "color": true } } } },
+                "buttonBackground": { "type": { "fill": { "solid": { "color": true } } } },
+                "buttonFontColor": { "type": { "fill": { "solid": { "color": true } } } },
+                "buttonBorderColor": { "type": { "fill": { "solid": { "color": true } } } },
+                "buttonActiveBackground": { "type": { "fill": { "solid": { "color": true } } } },
+                "buttonActiveFontColor": { "type": { "fill": { "solid": { "color": true } } } }
+            }
+        },
+        "scrollbarSettings": {
+            "properties": {
+                "scrollbarWidth": { "type": { "numeric": true } },
+                "scrollbarTrackColor": { "type": { "fill": { "solid": { "color": true } } } },
+                "scrollbarThumbColor": { "type": { "fill": { "solid": { "color": true } } } },
+                "scrollbarThumbHoverColor": { "type": { "fill": { "solid": { "color": true } } } },
+                "scrollbarBorderRadius": { "type": { "numeric": true } }
+            }
+        }
+    },
+    "dataViewMappings": [
+        {
+            "table": {
+                "rows": {
+                    "select": [
+                        { "for": { "in": "taskName" } },
+                        { "for": { "in": "startDate" } },
+                        { "for": { "in": "endDate" } },
+                        { "for": { "in": "taskId" } },
+                        { "for": { "in": "parent" } },
+                        { "for": { "in": "progress" } },
+                        { "for": { "in": "progressBase" } },
+                        { "for": { "in": "milestone" } },
+                        { "for": { "in": "resource" } },
+                        { "for": { "in": "dependencies" } },
+                        { "for": { "in": "priority" } },
+                        { "for": { "in": "status" } },
+                        { "for": { "in": "wbs" } },
+                        { "for": { "in": "plannedStart" } },
+                        { "for": { "in": "plannedEnd" } },
+                        { "for": { "in": "colorField" } },
+                        { "for": { "in": "tooltipFields" } }
+                    ],
+                    "dataReductionAlgorithm": {
+                        "top": {
+                            "count": 10000
+                        }
+                    }
+                }
+            }
+        }
+    ],
+    "tooltips": {
+        "supportedTypes": { "default": true, "canvas": true },
+        "roles": ["tooltipFields"]
+    },
+    "privileges": []
+}

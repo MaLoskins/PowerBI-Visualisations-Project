@@ -1,0 +1,245 @@
+/* ═══════════════════════════════════════════════
+   Gantt Chart – Power BI Custom Visual Styles
+   H1: Reduced nesting, reusable classes
+   H2: CSS / LESS variables for dynamic styling
+   ═══════════════════════════════════════════════ */
+
+/* ── LESS variables (shared colours, dimensions, transitions) ── */
+@color-border:        #e0e0e0;
+@color-border-light:  #f0f0f0;
+@color-border-mid:    #ccc;
+@color-border-dark:   #d0d0d0;
+@color-bg-white:      #fff;
+@color-bg-toolbar:    #fafafa;
+@color-bg-header:     #f5f5f5;
+@color-text-default:  #333;
+@color-text-mid:      #555;
+@color-text-muted:    #666;
+@color-text-faint:    #777;
+@color-accent:        #0078d4;
+@color-accent-faint:  rgba(0, 120, 212, 0.06);
+@color-accent-focus:  rgba(0, 120, 212, 0.2);
+@color-selected-row:  #e3f0ff;
+@color-toggle:        #666;
+@color-critical:      #D32F2F;
+@color-error-text:    #888;
+
+@font-stack:    "Segoe UI", "wf_segoe-ui_normal", "Helvetica Neue", Helvetica, Arial, sans-serif;
+@font-base:     11px;
+@font-toolbar:  10.5px;
+@font-cell:     10px;
+
+@toolbar-height:      34px;
+@toolbar-btn-height:  24px;
+@toolbar-sep-h:       18px;
+@toolbar-sep-w:       1px;
+@search-width:        140px;
+@resize-handle-w:     5px;
+@toggle-width:        14px;
+@grid-cell-date-w:    80px;
+@grid-cell-num-w:     44px;
+@grid-cell-extra-w:   72px;
+
+@transition-fast:     0.1s;
+@transition-ui:       0.15s;
+
+/* ── Scrollbar CSS custom properties (set by ScrollbarStyler.apply()) ── */
+.gantt-container {
+    --sb-width:       8px;
+    --sb-track:       #F0F0F0;
+    --sb-thumb:       #CCCCCC;
+    --sb-thumb-hover: #999999;
+    --sb-radius:      4px;
+
+    position: relative;
+    overflow: hidden;
+    font-family: @font-stack;
+    font-size: @font-base;
+    color: @color-text-default;
+    background: @color-bg-white;
+    display: flex;
+    flex-direction: column;
+    width: 100%;
+    height: 100%;
+    box-sizing: border-box;
+
+    *,
+    *::before,
+    *::after { box-sizing: border-box; }
+}
+
+.gantt-container.gantt-resizing { cursor: col-resize; user-select: none; }
+
+/* ── Error state ── */
+.gantt-error {
+    display: none;
+    position: absolute;
+    inset: 0;
+    z-index: 100;
+    background: @color-bg-white;
+    color: @color-error-text;
+    font-size: 13px;
+    justify-content: center;
+    align-items: center;
+    text-align: center;
+    padding: 32px;
+    line-height: 1.8;
+    white-space: pre-line;
+}
+
+/* ── Toolbar ── */
+.gantt-toolbar {
+    display: flex;
+    flex-shrink: 0;
+    height: @toolbar-height;
+    align-items: center;
+    padding: 0 6px;
+    border-bottom: 1px solid @color-border;
+    background: @color-bg-toolbar;
+    overflow: hidden;
+}
+
+.gantt-toolbar-group { display: flex; align-items: center; gap: 2px; }
+
+.gantt-toolbar-sep {
+    width: @toolbar-sep-w;
+    height: @toolbar-sep-h;
+    background: @color-border-mid;
+    margin: 0 6px;
+    flex-shrink: 0;
+}
+
+.gantt-zoom-btn,
+.gantt-tool-btn {
+    height: @toolbar-btn-height;
+    padding: 0 8px;
+    border: 1px solid @color-border-mid;
+    border-radius: 3px;
+    background: @color-bg-white;
+    color: @color-text-mid;
+    font-size: @font-toolbar;
+    font-family: inherit;
+    cursor: pointer;
+    outline: none;
+    transition: background @transition-ui, border-color @transition-ui, color @transition-ui;
+    white-space: nowrap;
+}
+
+.gantt-zoom-btn:hover,
+.gantt-tool-btn:hover { filter: brightness(0.93); }
+
+.gantt-search-input {
+    height: @toolbar-btn-height;
+    width: @search-width;
+    padding: 0 8px;
+    border: 1px solid @color-border-mid;
+    border-radius: 3px;
+    font-size: @font-toolbar;
+    font-family: inherit;
+    color: @color-text-default;
+    outline: none;
+    transition: border-color @transition-ui, box-shadow @transition-ui;
+
+    &:focus { border-color: @color-accent; box-shadow: 0 0 0 1px @color-accent-focus; }
+    &::placeholder { color: #aaa; }
+}
+
+/* ── Main area ── */
+.gantt-main { display: flex; flex: 1; overflow: hidden; min-height: 0; }
+
+.gantt-resize-handle {
+    width: @resize-handle-w;
+    flex-shrink: 0;
+    cursor: col-resize;
+    background: @color-border-dark;
+    transition: background @transition-ui;
+    z-index: 10;
+
+    &:hover { background: @color-accent; }
+}
+
+/* ── Grid pane ── */
+.gantt-grid { flex-shrink: 0; display: flex; flex-direction: column; overflow: hidden; background: @color-bg-white; }
+.gantt-grid-header { flex-shrink: 0; overflow: hidden; border-bottom: 1px solid @color-border-mid; background: @color-bg-header; }
+.gantt-grid-header-row { display: flex; width: 100%; font-weight: 600; }
+
+.gantt-grid-body {
+    flex: 1;
+    overflow-y: auto;
+    overflow-x: hidden;
+    position: relative;
+    scrollbar-width: none;
+
+    &::-webkit-scrollbar { width: 0; height: 0; }
+}
+
+.gantt-grid-row {
+    display: flex;
+    align-items: center;
+    border-bottom: 1px solid @color-border-light;
+    cursor: pointer;
+    transition: background @transition-fast;
+
+    &:hover { background: @color-accent-faint !important; }
+}
+
+.gantt-grid-row-group   { font-weight: 600; }
+.gantt-grid-row-selected { background: @color-selected-row !important; }
+
+.gantt-grid-cell {
+    flex-shrink: 0;
+    padding: 0 6px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.gantt-grid-cell-name   { flex: 1; min-width: 0; display: flex; align-items: center; gap: 2px; }
+.gantt-grid-cell-date   { width: @grid-cell-date-w;  text-align: center; font-size: @font-cell; color: @color-text-faint; }
+.gantt-grid-cell-num    { width: @grid-cell-num-w;   text-align: center; font-size: @font-cell; color: @color-text-muted; }
+.gantt-grid-cell-extra  { width: @grid-cell-extra-w; text-align: left;   font-size: @font-cell; color: @color-text-muted; }
+
+.gantt-toggle {
+    cursor: pointer;
+    user-select: none;
+    width: @toggle-width;
+    flex-shrink: 0;
+    text-align: center;
+    font-size: @font-base;
+    color: @color-toggle;
+
+    &:hover { color: @color-accent; }
+}
+
+.gantt-toggle-spacer { width: @toggle-width; flex-shrink: 0; display: inline-block; }
+.gantt-task-label    { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; min-width: 0; }
+.gantt-critical-label { color: @color-critical; font-weight: 600; }
+
+/* ── Timeline pane ── */
+.gantt-timeline { flex: 1; display: flex; flex-direction: column; overflow: hidden; min-width: 0; }
+.gantt-timeline-header { flex-shrink: 0; overflow: hidden; border-bottom: 1px solid @color-border-mid; background: @color-bg-header; }
+.gantt-timeline-header svg { display: block; }
+.gantt-timeline-body { flex: 1; overflow: auto; }
+
+/* ── SVG elements ── */
+.gantt-hline              { stroke: @color-border-light; stroke-width: 0.5; }
+.gantt-vline              { pointer-events: none; }
+.gantt-bar                { cursor: pointer; transition: opacity @transition-ui; }
+.gantt-bar-group          { cursor: pointer; }
+.gantt-progress           { pointer-events: none; }
+.gantt-bar-progress-label { pointer-events: none; text-shadow: 0 0 3px rgba(0, 0, 0, 0.6); }
+.gantt-bar-label-ext      { pointer-events: none; }
+.gantt-planned-bar        { pointer-events: none; }
+.gantt-today-line         { pointer-events: none; }
+.gantt-weekend            { pointer-events: none; }
+.gantt-dep-line           { pointer-events: none; }
+
+.gantt-group-bar {
+    rect, polygon, line { cursor: pointer; }
+}
+
+.gantt-milestone {
+    polygon, circle { cursor: pointer; }
+}
+
+.gantt-milestone-marker { cursor: pointer; }
