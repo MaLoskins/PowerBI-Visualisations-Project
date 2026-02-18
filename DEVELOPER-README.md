@@ -1,4 +1,4 @@
-# Power BI Custom Visuals — Developer Guide
+# Power BI Custom Visuals - Developer Guide
 
 > **Reference implementation:** `GanttChart/`
 > Every visual in this monorepo must follow the conventions below to ensure consistent theming, code quality, and maintainability across the suite.
@@ -9,20 +9,20 @@
 
 ```
 POWERBI/
-├── DEVELOPER-README.md          ← this file (root-level)
-├── GanttChart/                  ← reference visual
+├── DEVELOPER-README.md          <-- this file (root-level)
+├── GanttChart/                  <-- reference visual
 ├── advancedGauge/
 ├── waterfallChart/
 └── …
 ```
 
-Each visual is a standalone `pbiviz` project with its own `package.json`, `tsconfig.json`, and `pbiviz.json`. There is no shared workspace or monorepo tooling — visuals are independent and packageable in isolation.
+Each visual is a standalone `pbiviz` project with its own `package.json`, `tsconfig.json`, and `pbiviz.json`. There is no shared workspace or monorepo tooling - visuals are independent and packageable in isolation.
 
 ---
 
 ## 2. Project Structure (per visual)
 
-Every visual **must** follow this directory layout. The exact set of sub-folders and files scales with visual complexity — **each visual's prompt defines its own FILE STRUCTURE section that specifies which folders and files to create.** Simpler visuals may only need `visual.ts`, `settings.ts`, `types.ts`, and `constants.ts` plus a handful of modules; complex visuals (like the Gantt reference) will use the full set of sub-folders shown below. The naming conventions, separation of concerns, and import rules remain mandatory regardless of which folders are present.
+Every visual **must** follow this directory layout. The exact set of sub-folders and files scales with visual complexity - **each visual's prompt defines its own FILE STRUCTURE section that specifies which folders and files to create.** Simpler visuals may only need `visual.ts`, `settings.ts`, `types.ts`, and `constants.ts` plus a handful of modules; complex visuals (like the Gantt reference) will use the full set of sub-folders shown below. The naming conventions, separation of concerns, and import rules remain mandatory regardless of which folders are present.
 
 ```
 <VisualName>/
@@ -33,39 +33,39 @@ Every visual **must** follow this directory layout. The exact set of sub-folders
 ├── package.json
 ├── pbiviz.json
 ├── tsconfig.json
-├── tsconfig.dev.json              ← optional, for `pbiviz start`
+├── tsconfig.dev.json              <-- optional, for `pbiviz start`
 ├── style/
 │   └── visual.less
 └── src/
-    ├── visual.ts                  ← entry point / orchestrator (always present)
-    ├── settings.ts                ← formatting model + buildRenderConfig() (always present)
-    ├── types.ts                   ← domain interfaces, literal unions, RenderConfig
-    ├── constants.ts               ← palette arrays, magic numbers, shared config
-    ├── model/                     ← data transformation pipeline
-    │   ├── columns.ts             ← resolveColumns() – data-role → index mapping
-    │   ├── parser.ts              ← parseLeafRows() – row → domain model
-    │   └── hierarchy.ts           ← tree building, sorting, flattening (if needed)
-    ├── render/                    ← DOM / SVG drawing functions
-    │   ├── chart.ts               ← primary chart rendering
-    │   └── labels.ts              ← data labels, legends, etc.
-    ├── layout/                    ← scale & measurement logic
-    │   └── <scaleModule>.ts       ← d3 scale construction, layout math
-    ├── interactions/              ← selection, click, drag handlers
-    │   └── selection.ts           ← applySelectionStyles(), handleClick()
-    └── utils/                     ← pure helper functions (no side-effects)
-        ├── color.ts               ← colour resolution, hex validation
-        ├── dom.ts                 ← el(), clearChildren(), clamp()
-        └── format.ts              ← number/percent/currency formatting
+    ├── visual.ts                  <-- entry point / orchestrator (always present)
+    ├── settings.ts                <-- formatting model + buildRenderConfig() (always present)
+    ├── types.ts                   <-- domain interfaces, literal unions, RenderConfig
+    ├── constants.ts               <-- palette arrays, magic numbers, shared config
+    ├── model/                     <-- data transformation pipeline
+    │   ├── columns.ts             <-- resolveColumns() - data-role --> index mapping
+    │   ├── parser.ts              <-- parseLeafRows() - row --> domain model
+    │   └── hierarchy.ts           <-- tree building, sorting, flattening (if needed)
+    ├── render/                    <-- DOM / SVG drawing functions
+    │   ├── chart.ts               <-- primary chart rendering
+    │   └── labels.ts              <-- data labels, legends, etc.
+    ├── layout/                    <-- scale & measurement logic
+    │   └── <scaleModule>.ts       <-- d3 scale construction, layout math
+    ├── interactions/              <-- selection, click, drag handlers
+    │   └── selection.ts           <-- applySelectionStyles(), handleClick()
+    └── utils/                     <-- pure helper functions (no side-effects)
+        ├── color.ts               <-- colour resolution, hex validation
+        ├── dom.ts                 <-- el(), clearChildren(), clamp()
+        └── format.ts              <-- number/percent/currency formatting
 ```
 
-> **Note:** The tree above is the **maximum** layout showing all possible folders. Each prompt's FILE STRUCTURE section is authoritative for that visual — create exactly the folders and files it lists.
+> **Note:** The tree above is the **maximum** layout showing all possible folders. Each prompt's FILE STRUCTURE section is authoritative for that visual - create exactly the folders and files it lists.
 
 ### Folder Responsibilities
 
 | Folder | Purpose | May import from |
 |--------|---------|-----------------|
 | `model/` | Parse Power BI `DataViewTable` rows into typed domain objects, build hierarchy, sort, flatten | `types`, `constants`, `utils/` |
-| `render/` | Produce or update DOM/SVG elements from the domain model. Stateless — receives data + config, returns nothing or a position map | `types`, `constants`, `utils/` |
+| `render/` | Produce or update DOM/SVG elements from the domain model. Stateless - receives data + config, returns nothing or a position map | `types`, `constants`, `utils/` |
 | `layout/` | Compute scales, dimensions, px-per-unit. No DOM mutation | `types`, `constants`, `utils/` |
 | `interactions/` | Handle selection, click-to-select, multi-select, deselect | `types` |
 | `utils/` | Pure functions only. Zero Power BI imports, zero DOM side-effects (except `dom.ts` element factories) | `constants` only |
@@ -73,16 +73,16 @@ Every visual **must** follow this directory layout. The exact set of sub-folders
 
 ### Import Rules
 
-- `utils/` → may only import from `constants.ts`
-- `model/` → may import `types`, `constants`, `utils/`
-- `render/`, `layout/`, `interactions/`, `ui/` → may import `types`, `constants`, `utils/`
-- `settings.ts` → imports `types` only. **`settings.ts` must not import `constants.ts`; use literal hex strings (e.g., `"#3B82F6"`) for palette default values, not imported constants.**
-- `visual.ts` → imports everything (orchestrator)
+- `utils/` --> may only import from `constants.ts`
+- `model/` --> may import `types`, `constants`, `utils/`
+- `render/`, `layout/`, `interactions/`, `ui/` --> may import `types`, `constants`, `utils/`
+- `settings.ts` --> imports `types` only. **`settings.ts` must not import `constants.ts`; use literal hex strings (e.g., `"#3B82F6"`) for palette default values, not imported constants.**
+- `visual.ts` --> imports everything (orchestrator)
 - **Circular imports are forbidden.** The dependency graph is strictly top-down from `visual.ts`.
 
 ---
 
-## 3. Design System — "Slate + Blue"
+## 3. Design System - "Slate + Blue"
 
 All visuals share a single design language. Default colour values in `settings.ts` **must** draw from this palette.
 
@@ -150,7 +150,7 @@ Even rows: `#FFFFFF` (white). Odd rows: `#F8FAFC` (slate-50). These are the defa
 
 - **TypeScript ≥ 5.5**, strict mode enabled
 - **ESLint** with `@typescript-eslint` + `eslint-plugin-powerbi-visuals`
-- **No `enum` keyword** — use `as const` arrays with derived union types:
+- **No `enum` keyword** - use `as const` arrays with derived union types:
 
 ```ts
 export const ZOOM_LEVELS = ["day", "week", "month", "quarter", "year", "fit"] as const;
@@ -230,11 +230,11 @@ export interface RenderConfig {
 |-------------|-----------|------------|
 | `ToggleSwitch` | `.value` | none |
 | `NumUpDown` | `.value` | none (already numeric) |
-| `NumUpDown` (percent) | `.value` | **÷ 100** → 0–1 fraction |
+| `NumUpDown` (percent) | `.value` | **÷ 100** --> 0-1 fraction |
 | `ColorPicker` | `.value.value` | none (already hex string) |
 | `ItemDropdown` | `.value?.value` | `safeEnum()` to literal union |
 
-**Rule:** Render code must never see a percentage as 0–100. All percentages are converted to 0–1 fractions inside `buildRenderConfig()`.
+**Rule:** Render code must never see a percentage as 0-100. All percentages are converted to 0-1 fractions inside `buildRenderConfig()`.
 
 Render and layout modules must NOT import:
 
@@ -254,7 +254,7 @@ All Power BI SDK interaction must occur in visual.ts or interactions/ modules on
 
 Settings use the `powerbi-visuals-utils-formattingmodel` package with `SimpleCard` classes. Each card corresponds to one `objects` entry in `capabilities.json`.
 
-**Critical:** The `name` property on each Card class **must exactly match** the key in `capabilities.json` → `objects`.
+**Critical:** The `name` property on each Card class **must exactly match** the key in `capabilities.json` --> `objects`.
 
 ### Slice Factories
 
@@ -308,14 +308,14 @@ export class VisualFormattingSettingsModel extends Model {
 
 The main `Visual` class has three responsibilities and **no rendering logic of its own**:
 
-1. **DOM scaffolding** — build the entire DOM skeleton once in the `constructor`. All elements are created here and stored as private fields. Subsequent updates mutate existing elements, never recreate them.
-2. **Data pipeline** — in `update()`, gate on `VisualUpdateType` flags to skip expensive work on resize-only or style-only changes.
-3. **Render orchestration** — call into `render/`, `layout/`, `ui/`, and `interactions/` modules. The visual itself does not append SVG elements or set CSS.
+1. **DOM scaffolding** - build the entire DOM skeleton once in the `constructor`. All elements are created here and stored as private fields. Subsequent updates mutate existing elements, never recreate them.
+2. **Data pipeline** - in `update()`, gate on `VisualUpdateType` flags to skip expensive work on resize-only or style-only changes.
+3. **Render orchestration** - call into `render/`, `layout/`, `ui/`, and `interactions/` modules. The visual itself does not append SVG elements or set CSS.
 
 ### Update Type Gating
 
 ```ts
-// VisualUpdateType bit flags (const enum — numeric literals)
+// VisualUpdateType bit flags (const enum - numeric literals)
 // Data = 2, Resize = 4, ViewMode = 8, ResizeEnd = 16, Style = 32
 const updateType = options.type ?? 0;
 const hasData    = (updateType & 2) !== 0;
@@ -326,7 +326,7 @@ const isResizeOnly = !hasData && (updateType & (4 | 16)) !== 0;
 |----------|--------|
 | Resize only | Re-layout + re-render (skip data parse) |
 | Style/format change only | Rebuild `RenderConfig`, re-render (skip data parse) |
-| Data change | Full pipeline: parse → hierarchy → sort → flatten → render |
+| Data change | Full pipeline: parse --> hierarchy --> sort --> flatten --> render |
 
 ### DOM Creation Strategy
 
@@ -340,7 +340,7 @@ Every path that needs a visual refresh calls `layoutAndRender()`:
 
 ```
 layoutAndRender()
-  └── applyLayoutConfig()      ← set CSS layout properties
+  └── applyLayoutConfig()      <-- set CSS layout properties
   └── renderAll()
        ├── computeAndSetPxPerDay()
        ├── renderGridHeader()
@@ -360,25 +360,25 @@ The data pipeline follows a strict sequence. Each stage is a pure function (or n
 DataViewTable
     │
     ▼
-resolveColumns(table) → ColumnIndex
+resolveColumns(table) --> ColumnIndex
     │
     ▼
-parseLeafRows(table, cols, host) → ParseResult { tasks[], taskById, ... }
+parseLeafRows(table, cols, host) --> ParseResult { tasks[], taskById, ... }
     │
     ▼
-buildHierarchy(tasks, ...) → rootTasks[]      ← tree structure
+buildHierarchy(tasks, ...) --> rootTasks[]      <-- tree structure
     │
     ▼
-applySortRecursive(rootTasks, sortBy, dir)     ← in-place sort
+applySortRecursive(rootTasks, sortBy, dir)     <-- in-place sort
     │
     ▼
-flattenVisible(rootTasks, searchTerm) → flatVisible[]  ← display list
+flattenVisible(rootTasks, searchTerm) --> flatVisible[]  <-- display list
     │
     ▼
-computeTimeRange(tasks, padding) → { min, max }
+computeTimeRange(tasks, padding) --> { min, max }
     │
     ▼
-computeCriticalPath(tasks, taskById) → Set<id>         ← optional
+computeCriticalPath(tasks, taskById) --> Set<id>         <-- optional
 ```
 
 ### Column Resolution
@@ -389,9 +389,9 @@ computeCriticalPath(tasks, taskById) → Set<id>         ← optional
 
 `parseLeafRows()` iterates every row and produces typed domain objects. Key rules:
 
-- Rows missing required fields (start/end dates) are **silently skipped** — never throw.
-- Progress values are normalised to 0–1 regardless of input scale (0–1, 0–100, or ratio with a base).
-- Colour assignment happens here: explicit colour field → resource colour map → default.
+- Rows missing required fields (start/end dates) are **silently skipped** - never throw.
+- Progress values are normalised to 0-1 regardless of input scale (0-1, 0-100, or ratio with a base).
+- Colour assignment happens here: explicit colour field --> resource colour map --> default.
 - Selection IDs are created here via `host.createSelectionIdBuilder().withTable(table, r).createSelectionId()`.
 
 ### Domain Model
@@ -414,7 +414,7 @@ Every visual must define a primary domain interface (e.g., `GanttTask`, `GaugeSe
 
 - Use the `el()` factory from `utils/dom.ts`.
 - Clear container contents with `clearChildren()` before re-rendering.
-- Set inline styles from `RenderConfig` values — do not hard-code colours or dimensions.
+- Set inline styles from `RenderConfig` values - do not hard-code colours or dimensions.
 
 ### Interaction Callbacks
 
@@ -437,7 +437,7 @@ This keeps render code decoupled from Power BI APIs and makes it testable.
 
 ```less
 /* ═══════════════════════════════════════════════
-   <Visual Name> – Power BI Custom Visual Styles
+   <Visual Name> - Power BI Custom Visual Styles
    H1: Reduced nesting, reusable classes
    H2: CSS variables for dynamic styling
    ═══════════════════════════════════════════════ */
@@ -448,10 +448,10 @@ This keeps render code decoupled from Power BI APIs and makes it testable.
 1. **Flat selectors.** Avoid deep nesting. Target classes directly: `.gantt-grid-row`, not `.gantt-container .gantt-main .gantt-grid .gantt-grid-body .gantt-grid-row`.
 2. **CSS custom properties** for dynamic values that change at runtime (scrollbar dimensions, colours). Set them via JS on the container element; consume them in LESS.
 3. **`box-sizing: border-box`** globally on the container and all descendants.
-4. **Font stack:** `"Segoe UI", "wf_segoe-ui_normal", "Helvetica Neue", Helvetica, Arial, sans-serif` — this is the Power BI system font stack.
+4. **Font stack:** `"Segoe UI", "wf_segoe-ui_normal", "Helvetica Neue", Helvetica, Arial, sans-serif` - this is the Power BI system font stack.
 5. **Base font size:** `11px`. All `pt` / `px` sizes in the format pane are relative to this.
 6. **No colour literals in LESS** beyond structural defaults (borders, scrollbar fallbacks). All user-facing colours come from `RenderConfig` and are set via inline styles in JS.
-7. **Transitions** are limited to `0.1s–0.15s` for hover/focus feedback. No animation on data changes.
+7. **Transitions** are limited to `0.1s-0.15s` for hover/focus feedback. No animation on data changes.
 8. **Scrollbar hiding** for synced panes: `scrollbar-width: none` + `::-webkit-scrollbar { width: 0; height: 0; }`.
 9. **Prefix all classes** with the visual's registered prefix from Appendix B (e.g., `gantt-`, `agauge-`, `waterfall-`) to avoid dashboard collisions.
 
@@ -485,7 +485,7 @@ container.style.setProperty("--sb-width", cfg.scrollbarWidth + "px");
 
 ### Selection Application
 
-`applySelectionStyles()` operates on existing DOM — it does not recreate elements. It:
+`applySelectionStyles()` operates on existing DOM - it does not recreate elements. It:
 
 1. Reads active selection IDs from the manager.
 2. Dims unselected bars (`opacity: 0.25`) and grid rows (`opacity: 0.35`).
@@ -519,7 +519,7 @@ export class Toolbar {
 
 - DOM is created in the constructor and never destroyed.
 - `updateState()` is called on every render cycle to sync appearance with config.
-- Callbacks are passed in at construction time — the widget never imports Power BI APIs.
+- Callbacks are passed in at construction time - the widget never imports Power BI APIs.
 
 ---
 
@@ -559,7 +559,7 @@ export class Toolbar {
 | `d3-time-format` | 4.x | Axis tick formatting |
 | `powerbi-models` | latest | `BasicFilter`, `AdvancedFilter` for filter API (slicers only) |
 
-Import only the specific d3 module needed — never import all of d3. Only add a library to `package.json` when the prompt requires it.
+Import only the specific d3 module needed - never import all of d3. Only add a library to `package.json` when the prompt requires it.
 
 ### Dev Dependencies
 
@@ -592,8 +592,8 @@ When creating a new visual, verify every item:
 - [ ] `types.ts` defines domain interface + `RenderConfig` + all literal unions via `as const`
 - [ ] `constants.ts` uses `RESOURCE_COLORS` and `STATUS_COLORS` from the shared palette
 - [ ] `settings.ts` uses slice factories (`num`, `pct`, `color`, `toggle`, `dropdown`)
-- [ ] `settings.ts` exports `buildRenderConfig()` with percent → fraction conversion
-- [ ] `settings.ts` does not import `constants.ts` — palette defaults use literal hex strings
+- [ ] `settings.ts` exports `buildRenderConfig()` with percent --> fraction conversion
+- [ ] `settings.ts` does not import `constants.ts` - palette defaults use literal hex strings
 - [ ] Card `name` properties match `capabilities.json` object keys exactly
 - [ ] `visual.ts` builds all DOM in constructor, never in `update()`
 - [ ] `visual.ts` gates on `VisualUpdateType` flags
@@ -602,7 +602,7 @@ When creating a new visual, verify every item:
 - [ ] All CSS classes use the visual's registered prefix from Appendix B
 - [ ] `visual.less` uses the standard font stack and `box-sizing` reset
 - [ ] Default colours draw exclusively from the Slate + Blue palette
-- [ ] No `enum` keyword — use `as const` + derived union types
+- [ ] No `enum` keyword - use `as const` + derived union types
 - [ ] No `any` except documented Power BI SDK workarounds
 - [ ] `package.json` uses the same dependency versions listed in Section 14
 - [ ] Error overlay exists and is shown when required fields are missing
