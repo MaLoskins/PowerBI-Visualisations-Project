@@ -1,0 +1,15 @@
+category,value,isTotal,tooltipFields
+Revenue Q4,500000,false,Base period revenue
+New Customers,120000,false,Acquired 340 new accounts
+Upsells,75000,false,Enterprise tier upgrades
+Price Increase,45000,false,5% across standard plans
+Churn,-88000,false,Lost 210 accounts
+Refunds,-32000,false,SLA breach credits
+Subtotal Q1,0,true,Mid-period checkpoint
+Partner Revenue,63000,false,Channel partner deals
+Support Contracts,28000,false,Annual renewals
+Infrastructure Costs,-105000,false,Cloud + hosting spend
+Marketing Spend,-67000,false,Campaign budget
+Hiring Costs,-41000,false,12 new hires onboarded
+One-time Legal,-15000,false,Patent filing fees
+FX Adjustment,-9000,false,EUR/USD headwind

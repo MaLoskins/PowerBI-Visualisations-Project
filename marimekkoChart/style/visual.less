@@ -17,6 +17,7 @@
     overflow: hidden;
     font-family: "Segoe UI", "wf_segoe-ui_normal", "Helvetica Neue", Helvetica, Arial, sans-serif;
     font-size: 11px;
+    scrollbar-width: none;
 }
 
 /* ── SVG Root ── */
@@ -91,12 +92,8 @@
     text-overflow: ellipsis;
 }
 
-/* ── Scrollbar Hiding (if needed for future scroll) ── */
+/* ── Scrollbar Hiding ── */
 .marimekko-container::-webkit-scrollbar {
     width: 0;
     height: 0;
-}
-
-.marimekko-container {
-    scrollbar-width: none;
 }

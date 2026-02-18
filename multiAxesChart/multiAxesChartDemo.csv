@@ -1,0 +1,13 @@
+xCategory,measure1,measure2,measure3,measure4,measure5,measure6,tooltipRegion,tooltipCampaign
+Jan,128000,31200,1450,320,24.4,7.2,North,Winter Sale
+Feb,135000,34500,1520,335,25.6,7.4,North,Winter Sale
+Mar,142000,38900,1680,358,27.4,7.6,East,Spring Launch
+Apr,155000,43400,1820,392,28.0,7.8,East,Spring Launch
+May,168000,48700,2010,425,29.0,8.1,South,Summer Push
+Jun,175000,50200,2150,448,28.7,8.3,South,Summer Push
+Jul,183000,54800,2280,470,29.9,8.5,West,Summer Push
+Aug,179000,51300,2190,455,28.7,8.2,West,Back to School
+Sep,162000,44600,1880,410,27.5,7.9,North,Back to School
+Oct,171000,47900,1950,430,28.0,8.0,East,Fall Promo
+Nov,195000,59800,2450,498,30.7,8.6,South,Black Friday
+Dec,210000,67200,2680,532,32.0,8.9,West,Holiday Blitz

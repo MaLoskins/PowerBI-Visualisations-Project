@@ -1,0 +1,13 @@
+Category,Actual,Target,Range1_Bad,Range2_Satisfactory,Range3_Good,MaxValue,Department,Status
+Revenue ($M),270,250,150,220,300,320,Finance,On Track
+Profit ($M),85,100,50,80,120,130,Finance,At Risk
+New Customers,1450,1200,600,1000,1500,1800,Sales,Exceeding
+Satisfaction (%),72,85,50,70,90,100,Support,Below Target
+Avg Order Value,128,110,60,100,140,160,Sales,On Track
+Employee Retention (%),91,95,70,85,95,100,HR,Near Target
+Market Share (%),34,40,15,25,45,50,Strategy,Below Target
+Website Uptime (%),99.8,99.5,95,99,99.9,100,Engineering,Exceeding
+Defect Rate,12,20,30,20,10,35,Engineering,Exceeding
+Response Time (hrs),4.2,3,8,5,2,10,Support,At Risk
+Pipeline ($M),540,500,200,400,600,700,Sales,On Track
+Training Hours,38,40,15,30,50,60,HR,Near Target

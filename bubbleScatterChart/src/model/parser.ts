@@ -69,21 +69,23 @@ export function parseRows(
         categorySet.add(category);
 
         /* ── Optional fields ── */
-        const sizeVal = hasSize && row[cols.size] != null
-            ? Number(row[cols.size])
-            : null;
+        let sizeVal: number | null = null;
+        if (hasSize && row[cols.size] != null) {
+            const parsed = Number(row[cols.size]);
+            sizeVal = isNaN(parsed) ? null : parsed;
+        }
 
         const seriesVal = hasSeries && row[cols.series] != null
             ? String(row[cols.series])
             : null;
 
-        if (seriesVal) seriesSet.add(seriesVal);
+        if (seriesVal !== null) seriesSet.add(seriesVal);
 
         const playVal = hasPlayAxis && row[cols.playAxis] != null
             ? String(row[cols.playAxis])
             : null;
 
-        if (playVal) playAxisSet.add(playVal);
+        if (playVal !== null) playAxisSet.add(playVal);
 
         /* ── Tooltip extras ── */
         const tooltipExtras: TooltipExtra[] = [];

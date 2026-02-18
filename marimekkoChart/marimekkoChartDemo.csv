@@ -1,0 +1,31 @@
+Region,Product,Revenue,Units Sold,Margin %
+North America,Laptops,42000,1200,32
+North America,Phones,38000,4500,28
+North America,Tablets,18000,2100,25
+North America,Accessories,12000,8900,45
+North America,Wearables,9500,3200,38
+Europe,Laptops,35000,980,30
+Europe,Phones,31000,3700,26
+Europe,Tablets,14000,1600,22
+Europe,Accessories,8500,6200,42
+Europe,Wearables,7000,2400,35
+Asia Pacific,Laptops,52000,1500,34
+Asia Pacific,Phones,61000,7200,31
+Asia Pacific,Tablets,23000,2800,27
+Asia Pacific,Accessories,15000,11000,48
+Asia Pacific,Wearables,19000,6100,40
+Latin America,Laptops,11000,310,24
+Latin America,Phones,14500,1700,20
+Latin America,Tablets,6000,700,18
+Latin America,Accessories,3500,2500,36
+Latin America,Wearables,2800,900,30
+Middle East,Laptops,8000,220,26
+Middle East,Phones,9500,1100,22
+Middle East,Tablets,4200,480,19
+Middle East,Accessories,2100,1500,39
+Middle East,Wearables,-1500,50,0
+Africa,Laptops,4500,130,21
+Africa,Phones,6200,740,18
+Africa,Tablets,2000,230,15
+Africa,Accessories,1200,850,33
+Africa,Wearables,1800,580,28

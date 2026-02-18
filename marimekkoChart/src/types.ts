@@ -29,52 +29,52 @@ export type LegendPosition = (typeof LEGEND_POSITIONS)[number];
 
 /** A single segment within a Marimekko column */
 export interface MekkoSegment {
-    xCategory: string;
-    segmentCategory: string;
-    value: number;
+    readonly xCategory: string;
+    readonly segmentCategory: string;
+    readonly value: number;
     /** Absolute value used for computation (handles negatives) */
-    absValue: number;
-    isNegative: boolean;
+    readonly absValue: number;
+    readonly isNegative: boolean;
     /** Fraction of this segment within its column (0–1) */
-    fractionOfColumn: number;
+    readonly fractionOfColumn: number;
     /** Fraction of this segment of the grand total (0–1) */
-    fractionOfTotal: number;
-    /** Pixel y-offset within the column (from top) */
+    readonly fractionOfTotal: number;
+    /** Pixel y-offset within the column (from top) — set by layout pass */
     y: number;
-    /** Pixel height */
+    /** Pixel height — set by layout pass */
     height: number;
-    /** Colour assigned to this segment */
+    /** Colour assigned to this segment — set by render */
     color: string;
-    selectionId: ISelectionId | null;
-    tooltipExtras: TooltipExtra[];
-    rowIndex: number;
+    readonly selectionId: ISelectionId | null;
+    readonly tooltipExtras: readonly TooltipExtra[];
+    readonly rowIndex: number;
 }
 
 /** A Marimekko column (one per xCategory value) */
 export interface MekkoColumn {
-    xCategory: string;
-    columnTotal: number;
+    readonly xCategory: string;
+    readonly columnTotal: number;
     /** Fraction of grand total (determines width) */
-    fractionOfTotal: number;
-    /** Pixel x-offset */
+    readonly fractionOfTotal: number;
+    /** Pixel x-offset — set by layout pass */
     x: number;
-    /** Pixel width */
+    /** Pixel width — set by layout pass */
     width: number;
-    segments: MekkoSegment[];
+    readonly segments: MekkoSegment[];
 }
 
 /** Additional tooltip field */
 export interface TooltipExtra {
-    displayName: string;
-    value: string;
+    readonly displayName: string;
+    readonly value: string;
 }
 
 /** Parsed data result from the model pipeline */
 export interface ParseResult {
-    columns: MekkoColumn[];
-    segmentCategories: string[];
-    grandTotal: number;
-    hasNegatives: boolean;
+    readonly columns: MekkoColumn[];
+    readonly segmentCategories: readonly string[];
+    readonly grandTotal: number;
+    readonly hasNegatives: boolean;
 }
 
 /* ═══════════════════════════════════════════════
@@ -82,10 +82,10 @@ export interface ParseResult {
    ═══════════════════════════════════════════════ */
 
 export interface ColumnIndex {
-    xCategory: number;
-    segmentCategory: number;
-    value: number;
-    tooltipFields: number[];
+    readonly xCategory: number;
+    readonly segmentCategory: number;
+    readonly value: number;
+    readonly tooltipFields: readonly number[];
 }
 
 /* ═══════════════════════════════════════════════

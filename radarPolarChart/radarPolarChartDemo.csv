@@ -1,0 +1,19 @@
+axis,series,value,tooltipFields
+Speed,Player A,88,Elite tier
+Shooting,Player A,75,Above average
+Passing,Player A,92,Elite tier
+Dribbling,Player A,85,Elite tier
+Defense,Player A,40,Below average
+Physical,Player A,60,Average
+Speed,Player B,72,Above average
+Shooting,Player B,90,Elite tier
+Passing,Player B,65,Average
+Dribbling,Player B,70,Above average
+Defense,Player B,82,Elite tier
+Physical,Player B,88,Elite tier
+Speed,Player C,95,Elite tier
+Shooting,Player C,55,Average
+Passing,Player C,60,Average
+Dribbling,Player C,78,Above average
+Defense,Player C,70,Above average
+Physical,Player C,75,Above average

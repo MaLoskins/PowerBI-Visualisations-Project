@@ -12,11 +12,10 @@ import {
     Y_AXIS_TICKS,
     WIDTH_LABEL_OFFSET_Y,
     ROTATED_LABEL_EXTRA_BOTTOM,
+    FONT_FAMILY,
 } from "../constants";
 import { formatPercent, formatCompact } from "../utils/format";
 import { truncateText } from "../utils/dom";
-
-const FONT_FAMILY = '"Segoe UI", "wf_segoe-ui_normal", "Helvetica Neue", Helvetica, Arial, sans-serif';
 
 /* ═══════════════════════════════════════════════
    Y-Axis (percentage 0–100%)
@@ -134,9 +133,7 @@ export function renderWidthLabels(
             .attr("text-anchor", "middle")
             .attr("fill", cfg.xAxisFontColor)
             .attr("font-size", (cfg.xAxisFontSize - 1) + "px")
-            .attr("font-family", FONT_FAMILY);
-
-        g.select(".marimekko-width-label:last-child")
+            .attr("font-family", FONT_FAMILY)
             .text(labelText);
     }
 }

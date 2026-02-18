@@ -5,10 +5,8 @@
 "use strict";
 
 import { RenderConfig } from "../types";
-import { LEGEND_SWATCH_SIZE, LEGEND_ITEM_GAP } from "../constants";
+import { LEGEND_SWATCH_SIZE, LEGEND_ITEM_GAP, FONT_FAMILY } from "../constants";
 import { el, clearChildren } from "../utils/dom";
-
-const FONT_FAMILY = '"Segoe UI", "wf_segoe-ui_normal", "Helvetica Neue", Helvetica, Arial, sans-serif';
 
 /* ═══════════════════════════════════════════════
    Legend Rendering
@@ -17,7 +15,7 @@ const FONT_FAMILY = '"Segoe UI", "wf_segoe-ui_normal", "Helvetica Neue", Helveti
 /** Render the legend into the provided container div */
 export function renderLegend(
     container: HTMLDivElement,
-    segmentCategories: string[],
+    segmentCategories: readonly string[],
     colorMap: Map<string, string>,
     cfg: RenderConfig["legend"],
 ): void {

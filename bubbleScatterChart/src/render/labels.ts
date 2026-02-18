@@ -14,6 +14,7 @@ import { NumericScale } from "./axes";
 
 /**
  * Render data labels next to each bubble.
+ * Uses .join() for correct enter/update/exit handling.
  */
 export function renderDataLabels(
     labelGroup: Selection<SVGGElement, unknown, null, undefined>,
@@ -31,14 +32,13 @@ export function renderDataLabels(
     labelGroup
         .selectAll<SVGTextElement, ScatterDataPoint>(".bscatter-data-label")
         .data(points, (d) => d.id)
-        .enter()
-        .append("text")
+        .join("text")
         .attr("class", "bscatter-data-label")
-        .attr("x", (d) => xScale(clampForScale(d.x, axisCfg.xAxisScale))!)
-        .attr("y", (d) => yScale(clampForScale(d.y, axisCfg.yAxisScale))! - bubbleRadius - 4)
+        .attr("x", (d) => xScale(clampForScale(d.x, axisCfg.xAxisScale)) ?? 0)
+        .attr("y", (d) => (yScale(clampForScale(d.y, axisCfg.yAxisScale)) ?? 0) - bubbleRadius - 4)
         .attr("text-anchor", "middle")
         .attr("fill", cfg.labelFontColor)
-        .attr("font-size", cfg.labelFontSize + "px")
+        .attr("font-size", `${cfg.labelFontSize}px`)
         .style("pointer-events", "none")
         .text((d) => getLabelText(d, cfg.labelContent));
 }

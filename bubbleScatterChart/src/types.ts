@@ -32,22 +32,22 @@ export type LegendPosition = (typeof LEGEND_POSITIONS)[number];
 
 /** A single scatter data point parsed from the table row */
 export interface ScatterDataPoint {
-    id: string;
-    rowIndex: number;
-    x: number;
-    y: number;
-    size: number | null;
-    category: string;
-    series: string | null;
-    playAxisValue: string | null;
-    tooltipExtras: TooltipExtra[];
-    color: string;
-    selectionId: ISelectionId;
+    readonly id: string;
+    readonly rowIndex: number;
+    readonly x: number;
+    readonly y: number;
+    readonly size: number | null;
+    readonly category: string;
+    readonly series: string | null;
+    readonly playAxisValue: string | null;
+    readonly tooltipExtras: readonly TooltipExtra[];
+    readonly color: string;
+    readonly selectionId: ISelectionId;
 }
 
 export interface TooltipExtra {
-    displayName: string;
-    value: string;
+    readonly displayName: string;
+    readonly value: string;
 }
 
 /** Result of column resolution */
@@ -63,13 +63,13 @@ export interface ColumnIndex {
 
 /** Result of parsing */
 export interface ParseResult {
-    points: ScatterDataPoint[];
-    hasSize: boolean;
-    hasPlayAxis: boolean;
-    hasSeries: boolean;
-    playAxisValues: string[];
-    seriesValues: string[];
-    categoryValues: string[];
+    readonly points: ScatterDataPoint[];
+    readonly hasSize: boolean;
+    readonly hasPlayAxis: boolean;
+    readonly hasSeries: boolean;
+    readonly playAxisValues: string[];
+    readonly seriesValues: string[];
+    readonly categoryValues: string[];
 }
 
 /* ── RenderConfig (B1) ── */
@@ -80,90 +80,90 @@ export interface ParseResult {
  * Percent values are already converted to 0–1 fractions.
  */
 export interface RenderConfig {
-    chart: {
-        minBubbleRadius: number;
-        maxBubbleRadius: number;
-        bubbleOpacity: number;       // 0–1 fraction
-        bubbleBorderWidth: number;
-        bubbleBorderColor: string;
+    readonly chart: {
+        readonly minBubbleRadius: number;
+        readonly maxBubbleRadius: number;
+        readonly bubbleOpacity: number;       // 0–1 fraction
+        readonly bubbleBorderWidth: number;
+        readonly bubbleBorderColor: string;
     };
-    axis: {
-        xAxisLabel: string;
-        yAxisLabel: string;
-        xAxisScale: AxisScaleType;
-        yAxisScale: AxisScaleType;
-        xAxisMin: number | null;
-        xAxisMax: number | null;
-        yAxisMin: number | null;
-        yAxisMax: number | null;
-        axisFontSize: number;
-        axisFontColor: string;
-        showGridlines: boolean;
-        gridlineColor: string;
-        axisLineColor: string;
+    readonly axis: {
+        readonly xAxisLabel: string;
+        readonly yAxisLabel: string;
+        readonly xAxisScale: AxisScaleType;
+        readonly yAxisScale: AxisScaleType;
+        readonly xAxisMin: number | null;
+        readonly xAxisMax: number | null;
+        readonly yAxisMin: number | null;
+        readonly yAxisMax: number | null;
+        readonly axisFontSize: number;
+        readonly axisFontColor: string;
+        readonly showGridlines: boolean;
+        readonly gridlineColor: string;
+        readonly axisLineColor: string;
     };
-    quadrant: {
-        showQuadrants: boolean;
-        quadrantXValue: number;
-        quadrantYValue: number;
-        quadrantLineColor: string;
-        quadrantLineWidth: number;
-        quadrantLineStyle: QuadrantLineStyle;
-        showQuadrantLabels: boolean;
-        q1Label: string;
-        q2Label: string;
-        q3Label: string;
-        q4Label: string;
+    readonly quadrant: {
+        readonly showQuadrants: boolean;
+        readonly quadrantXValue: number;
+        readonly quadrantYValue: number;
+        readonly quadrantLineColor: string;
+        readonly quadrantLineWidth: number;
+        readonly quadrantLineStyle: QuadrantLineStyle;
+        readonly showQuadrantLabels: boolean;
+        readonly q1Label: string;
+        readonly q2Label: string;
+        readonly q3Label: string;
+        readonly q4Label: string;
     };
-    trend: {
-        showTrendLine: boolean;
-        trendLineType: TrendLineType;
-        trendLineColor: string;
-        trendLineWidth: number;
-        trendLineStyle: TrendLineStyle;
+    readonly trend: {
+        readonly showTrendLine: boolean;
+        readonly trendLineType: TrendLineType;
+        readonly trendLineColor: string;
+        readonly trendLineWidth: number;
+        readonly trendLineStyle: TrendLineStyle;
     };
-    label: {
-        showDataLabels: boolean;
-        labelContent: LabelContent;
-        labelFontSize: number;
-        labelFontColor: string;
+    readonly label: {
+        readonly showDataLabels: boolean;
+        readonly labelContent: LabelContent;
+        readonly labelFontSize: number;
+        readonly labelFontColor: string;
     };
-    color: {
-        defaultBubbleColor: string;
-        selectedBubbleColor: string;
-        colorByCategory: boolean;
+    readonly color: {
+        readonly defaultBubbleColor: string;
+        readonly selectedBubbleColor: string;
+        readonly colorByCategory: boolean;
     };
-    legend: {
-        showLegend: boolean;
-        legendPosition: LegendPosition;
-        legendFontSize: number;
-        legendFontColor: string;
+    readonly legend: {
+        readonly showLegend: boolean;
+        readonly legendPosition: LegendPosition;
+        readonly legendFontSize: number;
+        readonly legendFontColor: string;
     };
-    zoom: {
-        enableZoom: boolean;
-        enablePan: boolean;
-        showResetButton: boolean;
+    readonly zoom: {
+        readonly enableZoom: boolean;
+        readonly enablePan: boolean;
+        readonly showResetButton: boolean;
     };
-    play: {
-        playSpeed: number;
-        showPlayControls: boolean;
-        trailOpacity: number;        // 0–1 fraction
+    readonly play: {
+        readonly playSpeed: number;
+        readonly showPlayControls: boolean;
+        readonly trailOpacity: number;        // 0–1 fraction
     };
 }
 
 /* ── Chart Layout Dimensions ── */
 
 export interface ChartMargins {
-    top: number;
-    right: number;
-    bottom: number;
-    left: number;
+    readonly top: number;
+    readonly right: number;
+    readonly bottom: number;
+    readonly left: number;
 }
 
 export interface ChartDimensions {
-    width: number;
-    height: number;
-    plotWidth: number;
-    plotHeight: number;
-    margins: ChartMargins;
+    readonly width: number;
+    readonly height: number;
+    readonly plotWidth: number;
+    readonly plotHeight: number;
+    readonly margins: ChartMargins;
 }

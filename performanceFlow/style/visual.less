@@ -1,9 +1,83 @@
-p {
-    font-size: 20px;
-    font-weight: bold;
-    em {
-        background: yellow;
-        padding: 5px;
-        
-    }
+/* ═══════════════════════════════════════════════
+   Performance Flow – Power BI Custom Visual Styles
+   H1: Reduced nesting, reusable classes
+   H2: CSS variables for dynamic styling
+   ═══════════════════════════════════════════════ */
+
+/* ── Base Reset ── */
+
+.pflow-container {
+    box-sizing: border-box;
+    width: 100%;
+    height: 100%;
+    position: relative;
+    overflow: hidden;
+    font-family: "Segoe UI", "wf_segoe-ui_normal", "Helvetica Neue", Helvetica, Arial, sans-serif;
+    font-size: 11px;
+}
+
+.pflow-container *,
+.pflow-container *::before,
+.pflow-container *::after {
+    box-sizing: border-box;
+}
+
+/* ── SVG Root ── */
+
+.pflow-svg {
+    display: block;
+    width: 100%;
+    height: 100%;
+}
+
+/* ── Error Overlay ── */
+
+.pflow-error {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    color: #64748B;
+    font-size: 12px;
+    line-height: 1.5;
+    padding: 24px;
+    white-space: pre-line;
+    background: #FFFFFF;
+    z-index: 10;
+}
+
+/* ── Nodes ── */
+
+.pflow-node {
+    transition: fill-opacity 0.12s ease, stroke 0.12s ease;
+}
+
+.pflow-node:hover {
+    filter: brightness(1.08);
+}
+
+/* ── Links ── */
+
+.pflow-link {
+    transition: stroke-opacity 0.12s ease;
+    pointer-events: stroke;
+}
+
+/* ── Labels ── */
+
+.pflow-label {
+    pointer-events: none;
+    user-select: none;
+    font-family: "Segoe UI", "wf_segoe-ui_normal", "Helvetica Neue", Helvetica, Arial, sans-serif;
+}
+
+.pflow-value-label {
+    pointer-events: none;
+    user-select: none;
+    font-family: "Segoe UI", "wf_segoe-ui_normal", "Helvetica Neue", Helvetica, Arial, sans-serif;
 }

@@ -39,15 +39,6 @@ export function safeHex(value: string | undefined, fallback: string): string {
     return fallback;
 }
 
-/** Brighten a hex colour by a factor (> 1 lightens, < 1 darkens) */
-export function brighten(hex: string, factor: number): string {
-    const r = parseInt(hex.slice(1, 3), 16);
-    const g = parseInt(hex.slice(3, 5), 16);
-    const b = parseInt(hex.slice(5, 7), 16);
-    const clamp = (v: number) => Math.min(255, Math.max(0, Math.round(v * factor)));
-    return `#${clamp(r).toString(16).padStart(2, "0")}${clamp(g).toString(16).padStart(2, "0")}${clamp(b).toString(16).padStart(2, "0")}`;
-}
-
 /** Convert hex to rgba string */
 export function hexToRgba(hex: string, alpha: number): string {
     const r = parseInt(hex.slice(1, 3), 16);

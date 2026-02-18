@@ -25,36 +25,36 @@ export type XLabelRotation = (typeof X_LABEL_ROTATIONS)[number];
 
 /** A single data point within one trellis panel */
 export interface TrellisDataPoint {
-    trellisValue: string;
-    categoryValue: string;
-    value: number;
-    seriesValue: string | null;
-    selectionId: ISelectionId;
-    tooltipExtras: { displayName: string; value: string }[];
+    readonly trellisValue: string;
+    readonly categoryValue: string;
+    readonly value: number;
+    readonly seriesValue: string | null;
+    readonly selectionId: ISelectionId;
+    readonly tooltipExtras: ReadonlyArray<{ readonly displayName: string; readonly value: string }>;
     /** Colour assigned from palette/series */
-    color: string;
+    readonly color: string;
 }
 
 /** One panel in the trellis grid */
 export interface TrellisPanel {
-    trellisValue: string;
-    dataPoints: TrellisDataPoint[];
+    readonly trellisValue: string;
+    readonly dataPoints: readonly TrellisDataPoint[];
     /** Unique category labels in order */
-    categories: string[];
+    readonly categories: readonly string[];
     /** Unique series labels in order (empty if no series field) */
-    seriesNames: string[];
+    readonly seriesNames: readonly string[];
     /** Per-series grouped data for rendering */
-    seriesBuckets: Map<string, TrellisDataPoint[]>;
+    readonly seriesBuckets: Map<string, TrellisDataPoint[]>;
 }
 
 /** Result of the full parse pipeline */
 export interface ParseResult {
-    panels: TrellisPanel[];
-    globalMinValue: number;
-    globalMaxValue: number;
-    allCategories: string[];
-    allSeries: string[];
-    hasSeries: boolean;
+    readonly panels: readonly TrellisPanel[];
+    readonly globalMinValue: number;
+    readonly globalMaxValue: number;
+    readonly allCategories: readonly string[];
+    readonly allSeries: readonly string[];
+    readonly hasSeries: boolean;
 }
 
 /* ── Column Index ── */
@@ -70,86 +70,86 @@ export interface ColumnIndex {
 /* ── Layout ── */
 
 export interface GridLayout {
-    columns: number;
-    rows: number;
-    panelWidth: number;
-    panelHeight: number;
-    totalHeight: number;
+    readonly columns: number;
+    readonly rows: number;
+    readonly panelWidth: number;
+    readonly panelHeight: number;
+    readonly totalHeight: number;
 }
 
 /* ── Tooltip Item ── */
 
 export interface TooltipItem {
-    displayName: string;
-    value: string;
+    readonly displayName: string;
+    readonly value: string;
 }
 
 /* ── RenderConfig ── */
 
 export interface RenderConfig {
-    layout: {
-        columns: number;
-        panelPadding: number;
-        panelBorderWidth: number;
-        panelBorderColor: string;
-        panelBackground: string;
-        panelCornerRadius: number;
-        panelMinWidth: number;
-        panelMinHeight: number;
+    readonly layout: {
+        readonly columns: number;
+        readonly panelPadding: number;
+        readonly panelBorderWidth: number;
+        readonly panelBorderColor: string;
+        readonly panelBackground: string;
+        readonly panelCornerRadius: number;
+        readonly panelMinWidth: number;
+        readonly panelMinHeight: number;
     };
-    chart: {
-        chartType: ChartType;
-        barCornerRadius: number;
-        lineWidth: number;
-        lineSmoothing: boolean;
-        dotRadius: number;
-        areaOpacity: number;
+    readonly chart: {
+        readonly chartType: ChartType;
+        readonly barCornerRadius: number;
+        readonly lineWidth: number;
+        readonly lineSmoothing: boolean;
+        readonly dotRadius: number;
+        readonly areaOpacity: number;
     };
-    axis: {
-        sharedYScale: boolean;
-        showXAxis: boolean;
-        showYAxis: boolean;
-        showXGridlines: boolean;
-        showYGridlines: boolean;
-        axisFontSize: number;
-        axisFontColor: string;
-        gridlineColor: string;
-        xLabelRotation: XLabelRotation;
+    readonly axis: {
+        readonly sharedYScale: boolean;
+        readonly showXAxis: boolean;
+        readonly showYAxis: boolean;
+        readonly showXGridlines: boolean;
+        readonly showYGridlines: boolean;
+        readonly axisFontSize: number;
+        readonly axisFontColor: string;
+        readonly gridlineColor: string;
+        readonly xLabelRotation: XLabelRotation;
     };
-    title: {
-        showPanelTitles: boolean;
-        titleFontSize: number;
-        titleFontColor: string;
-        titleAlignment: TitleAlignment;
-        titleBackground: string;
+    readonly title: {
+        readonly showPanelTitles: boolean;
+        readonly titleFontSize: number;
+        readonly titleFontColor: string;
+        readonly titleAlignment: TitleAlignment;
+        readonly titleBackground: string;
     };
-    colors: {
-        colorPalette: ColorPalette;
-        defaultBarColor: string;
-        selectedBarColor: string;
+    readonly colors: {
+        readonly colorPalette: ColorPalette;
+        readonly defaultBarColor: string;
+        readonly selectedBarColor: string;
     };
-    labels: {
-        showDataLabels: boolean;
-        dataLabelFontSize: number;
-        dataLabelFontColor: string;
+    readonly labels: {
+        readonly showDataLabels: boolean;
+        readonly dataLabelFontSize: number;
+        readonly dataLabelFontColor: string;
     };
 }
 
 /* ── Interaction Callbacks ── */
 
 export interface PanelCallbacks {
-    onClick: (point: TrellisDataPoint, event: MouseEvent) => void;
-    onMouseOver: (
+    readonly onClick: (point: TrellisDataPoint, event: MouseEvent) => void;
+    readonly onMouseOver: (
         point: TrellisDataPoint,
         x: number,
         y: number,
         event: MouseEvent,
     ) => void;
-    onMouseMove: (
+    readonly onMouseMove: (
         point: TrellisDataPoint,
         x: number,
         y: number,
         event: MouseEvent,
     ) => void;
-    onMouseOut: () => void;
+    readonly onMouseOut: () => void;
 }

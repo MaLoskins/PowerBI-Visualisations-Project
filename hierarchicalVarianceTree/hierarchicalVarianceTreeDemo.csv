@@ -1,0 +1,37 @@
+Region,Product,Channel,Actual,Budget,Owner,Note
+North America,Software,Direct,4250000,4000000,Alice Chen,Strong Q4 renewals
+North America,Software,Partner,1850000,2100000,Alice Chen,Partner delays in onboarding
+North America,Software,Online,3100000,2900000,Alice Chen,New campaign lift
+North America,Hardware,Direct,2700000,3000000,Bob Martinez,Supply chain shortages
+North America,Hardware,Partner,1100000,1050000,Bob Martinez,Steady growth
+North America,Hardware,Online,950000,900000,Bob Martinez,Marketplace expansion
+North America,Services,Direct,1800000,1800000,Carol Davis,On target
+North America,Services,Partner,600000,750000,Carol Davis,Consulting pipeline weak
+North America,Services,Online,420000,350000,Carol Davis,Self-service uptake
+Europe,Software,Direct,3200000,3400000,David Kim,FX headwinds
+Europe,Software,Partner,2100000,1900000,David Kim,New reseller agreements
+Europe,Software,Online,1750000,1600000,David Kim,Localization improvements
+Europe,Hardware,Direct,1400000,1500000,Elena Rossi,Delayed product launch
+Europe,Hardware,Partner,800000,850000,Elena Rossi,Slightly below plan
+Europe,Hardware,Online,650000,600000,Elena Rossi,E-commerce push
+Europe,Services,Direct,1100000,1000000,Francois Blanc,Training demand surge
+Europe,Services,Partner,500000,550000,Francois Blanc,Contract renewals pending
+Europe,Services,Online,300000,280000,Francois Blanc,Webinar conversions
+Asia Pacific,Software,Direct,2800000,2500000,Grace Wong,Market share gains
+Asia Pacific,Software,Partner,1200000,1400000,Grace Wong,Regulatory delays
+Asia Pacific,Software,Online,1600000,1300000,Grace Wong,Mobile-first strategy
+Asia Pacific,Hardware,Direct,900000,1100000,Hiro Tanaka,Component costs up
+Asia Pacific,Hardware,Partner,450000,400000,Hiro Tanaka,Distribution wins
+Asia Pacific,Hardware,Online,380000,350000,Hiro Tanaka,New online storefront
+Asia Pacific,Services,Direct,700000,650000,Isha Patel,Consulting growth
+Asia Pacific,Services,Partner,250000,300000,Isha Patel,Slower ramp-up
+Asia Pacific,Services,Online,180000,150000,Isha Patel,Digital adoption
+Latin America,Software,Direct,800000,900000,Juan Garcia,Economic slowdown
+Latin America,Software,Partner,350000,300000,Juan Garcia,New partners signed
+Latin America,Software,Online,500000,450000,Juan Garcia,Regional campaign
+Latin America,Hardware,Direct,300000,400000,Maria Lopez,Import tariffs
+Latin America,Hardware,Partner,150000,180000,Maria Lopez,Distribution challenges
+Latin America,Hardware,Online,120000,100000,Maria Lopez,Marketplace entry
+Latin America,Services,Direct,200000,220000,Nina Santos,Budget constraints
+Latin America,Services,Partner,80000,90000,Nina Santos,Small market
+Latin America,Services,Online,60000,40000,Nina Santos,Self-service growth

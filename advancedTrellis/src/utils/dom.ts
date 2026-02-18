@@ -27,13 +27,3 @@ export function clearChildren(element: HTMLElement | SVGElement): void {
 export function clamp(value: number, min: number, max: number): number {
     return Math.max(min, Math.min(max, value));
 }
-
-/** Create an SVG element in the SVG namespace */
-export function svgEl<K extends keyof SVGElementTagNameMap>(
-    tag: K,
-    parent?: SVGElement,
-): SVGElementTagNameMap[K] {
-    const element = document.createElementNS("http://www.w3.org/2000/svg", tag);
-    if (parent) parent.appendChild(element);
-    return element;
-}

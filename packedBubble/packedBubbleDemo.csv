@@ -1,0 +1,31 @@
+category,value,group,colorField,tooltipFields,tooltipFields
+Cloud Platform,4200,Engineering,#3B82F6,North America,Sarah Chen
+Mobile App,3100,Engineering,#3B82F6,Europe,Raj Patel
+API Gateway,2750,Engineering,#3B82F6,North America,Mike Torres
+Data Pipeline,1800,Engineering,#3B82F6,Asia Pacific,Yuki Tanaka
+DevOps Tooling,950,Engineering,#3B82F6,North America,Alex Kim
+CI/CD Platform,620,Engineering,#3B82F6,Europe,Lena Müller
+Brand Campaign,3800,Marketing,#F59E0B,North America,Jessica Lee
+Social Media,2200,Marketing,#F59E0B,Europe,Omar Hassan
+Content Strategy,1650,Marketing,#F59E0B,North America,Dana Wright
+SEO Programme,1100,Marketing,#F59E0B,Asia Pacific,Priya Sharma
+Email Marketing,780,Marketing,#F59E0B,North America,Tom Bradley
+Events,450,Marketing,#F59E0B,Europe,Clara Rossi
+Enterprise Deals,5200,Sales,#10B981,North America,Brian Foster
+SMB Accounts,3400,Sales,#10B981,Europe,Sophie Martin
+Channel Partners,2100,Sales,#10B981,Asia Pacific,Wei Zhang
+Renewals,1500,Sales,#10B981,North America,Karen O'Brien
+Upsell Programme,900,Sales,#10B981,Europe,Lukas Novak
+Hiring Pipeline,2600,People,#8B5CF6,North America,Maria Gonzalez
+L&D Programme,1400,People,#8B5CF6,Europe,James Campbell
+Employee Engagement,1050,People,#8B5CF6,Asia Pacific,Aisha Patel
+Compensation Review,700,People,#8B5CF6,North America,Derek Huang
+Compliance Audit,1900,Finance,#EF4444,North America,Christine Park
+Revenue Forecasting,1600,Finance,#EF4444,Europe,Nils Eriksson
+Budget Planning,1200,Finance,#EF4444,Asia Pacific,Hiro Nakamura
+Procurement,550,Finance,#EF4444,North America,Rachel Adams
+Customer Onboarding,2900,Support,#06B6D4,North America,David Kim
+Tier 1 Helpdesk,2100,Support,#06B6D4,Europe,Anna Kowalski
+Knowledge Base,1300,Support,#06B6D4,Asia Pacific,Ravi Menon
+Escalation Handling,800,Support,#06B6D4,North America,Tanya Brooks
+Bug Triage,400,Support,#06B6D4,Europe,Felix Braun

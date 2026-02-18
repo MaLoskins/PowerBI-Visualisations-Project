@@ -1,9 +1,65 @@
-p {
-    font-size: 20px;
-    font-weight: bold;
-    em {
-        background: yellow;
-        padding: 5px;
-        
-    }
+/* ═══════════════════════════════════════════════
+   Tag Cloud - Power BI Custom Visual Styles
+   H1: Reduced nesting, reusable classes
+   H2: CSS variables for dynamic styling
+   ═══════════════════════════════════════════════ */
+
+.tcloud-container {
+    box-sizing: border-box;
+    width: 100%;
+    height: 100%;
+    position: relative;
+    overflow: hidden;
+    font-family: "Segoe UI", "wf_segoe-ui_normal", "Helvetica Neue", Helvetica, Arial, sans-serif;
+    font-size: 11px;
+}
+
+.tcloud-container *,
+.tcloud-container *::before,
+.tcloud-container *::after {
+    box-sizing: border-box;
+}
+
+/* ── SVG Canvas ── */
+
+.tcloud-svg {
+    width: 100%;
+    height: 100%;
+    display: block;
+}
+
+/* ── Word Elements ── */
+
+.tcloud-word {
+    cursor: pointer;
+    transition: opacity 0.1s ease;
+}
+
+.tcloud-word:hover {
+    filter: brightness(1.15);
+}
+
+.tcloud-word-dimmed {
+    opacity: 0.25;
+}
+
+/* ── Error Overlay ── */
+
+.tcloud-error {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    padding: 24px;
+    color: #64748B;
+    font-size: 13px;
+    line-height: 1.5;
+    white-space: pre-line;
+    background: #FFFFFF;
+    z-index: 10;
 }

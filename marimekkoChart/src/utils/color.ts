@@ -9,9 +9,10 @@ import {
     PASTEL_COLORS,
     VIVID_COLORS,
 } from "../constants";
+import { ColorPalette } from "../types";
 
 /** Resolve a colour from a palette by index, cycling through the array */
-export function colorByIndex(index: number, palette: "default" | "pastel" | "vivid"): string {
+export function colorByIndex(index: number, palette: ColorPalette): string {
     const colors = palette === "pastel"
         ? PASTEL_COLORS
         : palette === "vivid"
@@ -22,13 +23,13 @@ export function colorByIndex(index: number, palette: "default" | "pastel" | "viv
 
 /** Build a mapping of segmentCategory → colour */
 export function buildSegmentColorMap(
-    segmentCategories: string[],
-    palette: "default" | "pastel" | "vivid",
+    segmentCategories: readonly string[],
+    palette: ColorPalette,
 ): Map<string, string> {
     const map = new Map<string, string>();
-    segmentCategories.forEach((cat, i) => {
-        map.set(cat, colorByIndex(i, palette));
-    });
+    for (let i = 0; i < segmentCategories.length; i++) {
+        map.set(segmentCategories[i], colorByIndex(i, palette));
+    }
     return map;
 }
 

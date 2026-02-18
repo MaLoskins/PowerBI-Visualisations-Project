@@ -1,1 +1,26 @@
-{"visual":{"name":"tagCloud","displayName":"TagCloud","guid":"tagCloud03FA3BA9BE74499292C9BF7ECA91F12F","visualClassName":"Visual","version":"1.0.0.0","description":"","supportUrl":"","gitHubUrl":""},"apiVersion":"5.3.0","author":{"name":"","email":""},"assets":{"icon":"assets/icon.png"},"externalJS":null,"style":"style/visual.less","capabilities":"capabilities.json","dependencies":null,"stringResources":[],"version":"1.0.0.0"}
+{
+    "visual": {
+        "name": "tagCloud",
+        "displayName": "Tag Cloud",
+        "guid": "tagCloudD03F3871F39B45FA82FFE681727823B1",
+        "visualClassName": "Visual",
+        "version": "1.0.0.0",
+        "description": "A word cloud / tag cloud where each word is sized by a measure and optionally coloured by a second field. Words are packed tightly using a spiral placement algorithm with rotation options, word count limiting, and custom font selection.",
+        "supportUrl": "https://github.com",
+        "gitHubUrl": ""
+    },
+    "apiVersion": "5.3.0",
+    "author": {
+        "name": "Matthew Haskins",
+        "email": "matthew.haskins.mh@gmail.com"
+    },
+    "assets": {
+        "icon": "assets/icon.png"
+    },
+    "externalJS": null,
+    "style": "style/visual.less",
+    "capabilities": "capabilities.json",
+    "dependencies": null,
+    "stringResources": [],
+    "version": "1.0.0.0"
+}

@@ -37,17 +37,25 @@ export function renderTrendLine(
 
     /* ── Sample points across the x domain ── */
     const domain = xScale.domain() as [number, number];
-    const step = (domain[1] - domain[0]) / TREND_LINE_SAMPLES;
+    const domainRange = domain[1] - domain[0];
+
+    // Guard against zero-width domain (all x values identical)
+    if (!isFinite(domainRange) || Math.abs(domainRange) < 1e-15) return;
+
+    const step = domainRange / TREND_LINE_SAMPLES;
     const pathData: [number, number][] = [];
 
     for (let i = 0; i <= TREND_LINE_SAMPLES; i++) {
         const xVal = domain[0] + i * step;
         const yVal = predictFn(xVal);
-        const px = xScale(xVal)!;
-        const py = yScale(yVal)!;
+
+        if (!isFinite(yVal)) continue;
+
+        const px = xScale(xVal) ?? 0;
+        const py = yScale(yVal) ?? 0;
 
         // Only include points within the plot area (with small buffer)
-        if (px >= -10 && px <= dims.plotWidth + 10 && isFinite(py)) {
+        if (px >= -10 && px <= dims.plotWidth + 10) {
             pathData.push([px, Math.max(-10, Math.min(dims.plotHeight + 10, py))]);
         }
     }
@@ -63,7 +71,7 @@ export function renderTrendLine(
     trendGroup
         .append("path")
         .attr("class", "bscatter-trend-line")
-        .attr("d", lineGen(pathData)!)
+        .attr("d", lineGen(pathData) ?? "")
         .attr("fill", "none")
         .attr("stroke", cfg.trendLineColor)
         .attr("stroke-width", cfg.trendLineWidth)

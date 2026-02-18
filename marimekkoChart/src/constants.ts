@@ -89,3 +89,18 @@ export const Y_AXIS_TICKS = 5;
 
 /** Error class name */
 export const ERROR_CLASS = "marimekko-error";
+
+/** Shared font stack for all text elements */
+export const FONT_FAMILY = '"Segoe UI", "wf_segoe-ui_normal", "Helvetica Neue", Helvetica, Arial, sans-serif';
+
+/** Fallback colour when a segment category has no palette entry */
+export const FALLBACK_SEGMENT_COLOR = "#94A3B8";
+
+/** Opacity of un-selected segments when a selection is active */
+export const DIM_OPACITY = 0.25;
+
+/** Full opacity (no selection or selected) */
+export const FULL_OPACITY = 1.0;
+
+/** Stroke width for the selected-segment highlight */
+export const SELECTED_STROKE_WIDTH = 2;

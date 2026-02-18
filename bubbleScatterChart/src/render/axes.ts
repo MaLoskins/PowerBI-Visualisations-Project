@@ -13,7 +13,13 @@ import {
     RenderConfig,
     ScatterDataPoint,
 } from "../types";
-import { LOG_CLAMP_VALUE, DASH_ARRAYS } from "../constants";
+import {
+    LOG_CLAMP_VALUE,
+    DASH_ARRAYS,
+    AXIS_TICK_SIZE,
+    AXIS_TICK_LABEL_OFFSET,
+    AXIS_LABEL_Y_OFFSET,
+} from "../constants";
 import { formatNumber } from "../utils/format";
 
 export type NumericScale = ScaleLinear<number, number> | ScaleLogarithmic<number, number>;
@@ -105,6 +111,7 @@ export function buildScales(
 
 /**
  * Render X and Y axes, grid lines, and axis labels into the SVG group.
+ * Uses .join() for correct enter/update/exit on all tick and gridline elements.
  */
 export function renderAxes(
     axisGroup: Selection<SVGGElement, unknown, null, undefined>,
@@ -125,15 +132,14 @@ export function renderAxes(
     if (cfg.showGridlines) {
         const gridG = axisGroup.append("g").attr("class", "bscatter-gridlines");
 
-        // Vertical grid lines
+        // Vertical grid lines — use join() for correct enter/update/exit
         gridG
-            .selectAll(".bscatter-gridline-x")
+            .selectAll<SVGLineElement, number>(".bscatter-gridline-x")
             .data(xTicks)
-            .enter()
-            .append("line")
+            .join("line")
             .attr("class", "bscatter-gridline-x")
-            .attr("x1", (d) => xScale(d)!)
-            .attr("x2", (d) => xScale(d)!)
+            .attr("x1", (d) => xScale(d) ?? 0)
+            .attr("x2", (d) => xScale(d) ?? 0)
             .attr("y1", 0)
             .attr("y2", dims.plotHeight)
             .attr("stroke", cfg.gridlineColor)
@@ -142,15 +148,14 @@ export function renderAxes(
 
         // Horizontal grid lines
         gridG
-            .selectAll(".bscatter-gridline-y")
+            .selectAll<SVGLineElement, number>(".bscatter-gridline-y")
             .data(yTicks)
-            .enter()
-            .append("line")
+            .join("line")
             .attr("class", "bscatter-gridline-y")
             .attr("x1", 0)
             .attr("x2", dims.plotWidth)
-            .attr("y1", (d) => yScale(d)!)
-            .attr("y2", (d) => yScale(d)!)
+            .attr("y1", (d) => yScale(d) ?? 0)
+            .attr("y2", (d) => yScale(d) ?? 0)
             .attr("stroke", cfg.gridlineColor)
             .attr("stroke-width", 0.5)
             .attr("shape-rendering", "crispEdges");
@@ -173,25 +178,24 @@ export function renderAxes(
 
     // Tick marks and labels
     xAxisG
-        .selectAll(".bscatter-x-tick")
+        .selectAll<SVGGElement, number>(".bscatter-x-tick")
         .data(xTicks)
-        .enter()
-        .append("g")
+        .join("g")
         .attr("class", "bscatter-x-tick")
-        .attr("transform", (d) => `translate(${xScale(d)!},0)`)
+        .attr("transform", (d) => `translate(${xScale(d) ?? 0},0)`)
         .each(function (d) {
             const g = select(this);
             g.append("line")
-                .attr("y2", 6)
+                .attr("y2", AXIS_TICK_SIZE)
                 .attr("stroke", cfg.axisLineColor)
                 .attr("shape-rendering", "crispEdges");
             g.append("text")
-                .attr("y", 9)
+                .attr("y", AXIS_TICK_LABEL_OFFSET)
                 .attr("dy", "0.71em")
                 .attr("text-anchor", "middle")
                 .attr("fill", cfg.axisFontColor)
-                .attr("font-size", cfg.axisFontSize + "px")
-                .text(formatNumber(d));
+                .attr("font-size", `${cfg.axisFontSize}px`)
+                .text(formatNumber(Number(d)));
         });
 
     // X axis label
@@ -200,10 +204,10 @@ export function renderAxes(
             .append("text")
             .attr("class", "bscatter-axis-label")
             .attr("x", dims.plotWidth / 2)
-            .attr("y", 38)
+            .attr("y", AXIS_LABEL_Y_OFFSET)
             .attr("text-anchor", "middle")
             .attr("fill", cfg.axisFontColor)
-            .attr("font-size", (cfg.axisFontSize + 1) + "px")
+            .attr("font-size", `${cfg.axisFontSize + 1}px`)
             .text(cfg.xAxisLabel);
     }
 
@@ -223,25 +227,24 @@ export function renderAxes(
 
     // Tick marks and labels
     yAxisG
-        .selectAll(".bscatter-y-tick")
+        .selectAll<SVGGElement, number>(".bscatter-y-tick")
         .data(yTicks)
-        .enter()
-        .append("g")
+        .join("g")
         .attr("class", "bscatter-y-tick")
-        .attr("transform", (d) => `translate(0,${yScale(d)!})`)
+        .attr("transform", (d) => `translate(0,${yScale(d) ?? 0})`)
         .each(function (d) {
             const g = select(this);
             g.append("line")
-                .attr("x2", -6)
+                .attr("x2", -AXIS_TICK_SIZE)
                 .attr("stroke", cfg.axisLineColor)
                 .attr("shape-rendering", "crispEdges");
             g.append("text")
-                .attr("x", -9)
+                .attr("x", -AXIS_TICK_LABEL_OFFSET)
                 .attr("dy", "0.32em")
                 .attr("text-anchor", "end")
                 .attr("fill", cfg.axisFontColor)
-                .attr("font-size", cfg.axisFontSize + "px")
-                .text(formatNumber(d));
+                .attr("font-size", `${cfg.axisFontSize}px`)
+                .text(formatNumber(Number(d)));
         });
 
     // Y axis label
@@ -249,12 +252,15 @@ export function renderAxes(
         yAxisG
             .append("text")
             .attr("class", "bscatter-axis-label")
-            .attr("transform", `rotate(-90)`)
+            .attr("transform", "rotate(-90)")
             .attr("x", -dims.plotHeight / 2)
             .attr("y", -dims.margins.left + 14)
             .attr("text-anchor", "middle")
             .attr("fill", cfg.axisFontColor)
-            .attr("font-size", (cfg.axisFontSize + 1) + "px")
+            .attr("font-size", `${cfg.axisFontSize + 1}px`)
             .text(cfg.yAxisLabel);
     }
 }
+
+// Re-export DASH_ARRAYS so render modules that previously imported it from axes.ts continue to compile
+export { DASH_ARRAYS };

@@ -1,79 +1,169 @@
 {
     "dataRoles": [
         {
-            "displayName": "Category Data",
+            "displayName": "Category",
             "name": "category",
-            "kind": "Grouping"
+            "kind": "Grouping",
+            "description": "Label for each bubble"
         },
         {
-            "displayName": "Measure Data",
-            "name": "measure",
-            "kind": "Measure"
+            "displayName": "Value",
+            "name": "value",
+            "kind": "Measure",
+            "description": "Bubble size"
+        },
+        {
+            "displayName": "Group",
+            "name": "group",
+            "kind": "Grouping",
+            "description": "Optional cluster grouping field"
+        },
+        {
+            "displayName": "Color",
+            "name": "colorField",
+            "kind": "GroupingOrMeasure",
+            "description": "Explicit colour (hex) or categorical colour"
+        },
+        {
+            "displayName": "Tooltips",
+            "name": "tooltipFields",
+            "kind": "GroupingOrMeasure",
+            "description": "Additional tooltip fields"
         }
     ],
     "objects": {
-        "dataPoint": {
+        "bubbleSettings": {
             "properties": {
-                "defaultColor": {
-                    "type": {
-                        "fill": {
-                            "solid": {
-                                "color": true
-                            }
-                        }
-                    }
+                "minRadius": {
+                    "type": { "numeric": true }
                 },
-                "showAllDataPoints": {
-                    "type": {
-                        "bool": true
-                    }
+                "maxRadius": {
+                    "type": { "numeric": true }
                 },
-                "fill": {
-                    "type": {
-                        "fill": {
-                            "solid": {
-                                "color": true
-                            }
-                        }
-                    }
+                "bubbleOpacity": {
+                    "type": { "numeric": true }
                 },
-                "fillRule": {
-                    "type": {
-                        "fill": {}
-                    }
+                "bubbleBorderWidth": {
+                    "type": { "numeric": true }
                 },
-                 "fontSize": {
-                    "type": {
-                        "formatting": {
-                            "fontSize": true
-                        }
-                    }
+                "bubbleBorderColor": {
+                    "type": { "fill": { "solid": { "color": true } } }
+                },
+                "bubblePadding": {
+                    "type": { "numeric": true }
+                }
+            }
+        },
+        "forceSettings": {
+            "properties": {
+                "simulationStrength": {
+                    "type": { "numeric": true }
+                },
+                "collisionPadding": {
+                    "type": { "numeric": true }
+                },
+                "splitGroups": {
+                    "type": { "bool": true }
+                },
+                "groupPadding": {
+                    "type": { "numeric": true }
+                }
+            }
+        },
+        "labelSettings": {
+            "properties": {
+                "showLabels": {
+                    "type": { "bool": true }
+                },
+                "labelContent": {
+                    "type": { "enumeration": [
+                        { "displayName": "Name", "value": "name" },
+                        { "displayName": "Value", "value": "value" },
+                        { "displayName": "Name & Value", "value": "nameAndValue" }
+                    ] }
+                },
+                "labelFontSize": {
+                    "type": { "numeric": true }
+                },
+                "labelFontColor": {
+                    "type": { "fill": { "solid": { "color": true } } }
+                },
+                "minRadiusForLabel": {
+                    "type": { "numeric": true }
+                },
+                "wrapLabels": {
+                    "type": { "bool": true }
+                }
+            }
+        },
+        "colorSettings": {
+            "properties": {
+                "colorByGroup": {
+                    "type": { "bool": true }
+                },
+                "defaultBubbleColor": {
+                    "type": { "fill": { "solid": { "color": true } } }
+                },
+                "selectedBubbleColor": {
+                    "type": { "fill": { "solid": { "color": true } } }
+                }
+            }
+        },
+        "groupLabelSettings": {
+            "properties": {
+                "showGroupLabels": {
+                    "type": { "bool": true }
+                },
+                "groupLabelFontSize": {
+                    "type": { "numeric": true }
+                },
+                "groupLabelFontColor": {
+                    "type": { "fill": { "solid": { "color": true } } }
+                }
+            }
+        },
+        "legendSettings": {
+            "properties": {
+                "showLegend": {
+                    "type": { "bool": true }
+                },
+                "legendPosition": {
+                    "type": { "enumeration": [
+                        { "displayName": "Top", "value": "top" },
+                        { "displayName": "Bottom", "value": "bottom" },
+                        { "displayName": "Right", "value": "right" }
+                    ] }
+                },
+                "legendFontSize": {
+                    "type": { "numeric": true }
+                },
+                "legendFontColor": {
+                    "type": { "fill": { "solid": { "color": true } } }
                 }
             }
         }
     },
     "dataViewMappings": [
         {
-            "categorical": {
-                "categories": {
-                    "for": {
-                        "in": "category"
-                    },
-                    "dataReductionAlgorithm": {
-                        "top": {}
-                    }
-                },
-                "values": {
+            "table": {
+                "rows": {
                     "select": [
-                        {
-                            "bind": {
-                                "to": "measure"
-                            }
-                        }
-                    ]
+                        { "for": { "in": "category" } },
+                        { "for": { "in": "value" } },
+                        { "for": { "in": "group" } },
+                        { "for": { "in": "colorField" } },
+                        { "for": { "in": "tooltipFields" } }
+                    ],
+                    "dataReductionAlgorithm": {
+                        "top": { "count": 10000 }
+                    }
                 }
             }
         }
     ],
+    "tooltips": {
+        "supportedTypes": { "default": true, "canvas": true },
+        "roles": ["tooltipFields"]
+    },
     "privileges": []
 }

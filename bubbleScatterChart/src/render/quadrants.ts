@@ -8,7 +8,7 @@
 import { Selection } from "d3-selection";
 
 import { ChartDimensions, RenderConfig } from "../types";
-import { DASH_ARRAYS } from "../constants";
+import { DASH_ARRAYS, QUADRANT_LABEL_PAD, QUADRANT_LABEL_FONT_SIZE } from "../constants";
 import { NumericScale } from "./axes";
 
 /**
@@ -25,10 +25,10 @@ export function renderQuadrants(
 
     if (!cfg.showQuadrants) return;
 
-    const cx = xScale(cfg.quadrantXValue)!;
-    const cy = yScale(cfg.quadrantYValue)!;
+    const cx = xScale(cfg.quadrantXValue) ?? 0;
+    const cy = yScale(cfg.quadrantYValue) ?? 0;
 
-    const dashArray = DASH_ARRAYS[cfg.quadrantLineStyle] || "none";
+    const dashArray = DASH_ARRAYS[cfg.quadrantLineStyle] ?? "none";
 
     /* ── Vertical line (X = quadrantXValue) ── */
     if (cx >= 0 && cx <= dims.plotWidth) {
@@ -65,19 +65,19 @@ export function renderQuadrants(
     /* ── Quadrant labels ── */
     if (!cfg.showQuadrantLabels) return;
 
-    const labelPad = 8;
-    const labelFontSize = 11;
     const labelColor = cfg.quadrantLineColor;
+    const pad = QUADRANT_LABEL_PAD;
+    const fs = QUADRANT_LABEL_FONT_SIZE;
 
     // Q1: top-right (high x, high y)
     quadrantGroup
         .append("text")
         .attr("class", "bscatter-quadrant-label")
-        .attr("x", Math.min(dims.plotWidth - labelPad, Math.max(cx + labelPad, labelPad)))
-        .attr("y", Math.max(labelPad + labelFontSize, Math.min(cy - labelPad, dims.plotHeight - labelPad)))
-        .attr("text-anchor", cx + labelPad < dims.plotWidth / 2 ? "start" : "end")
+        .attr("x", Math.min(dims.plotWidth - pad, Math.max(cx + pad, pad)))
+        .attr("y", Math.max(pad + fs, Math.min(cy - pad, dims.plotHeight - pad)))
+        .attr("text-anchor", cx + pad < dims.plotWidth / 2 ? "start" : "end")
         .attr("fill", labelColor)
-        .attr("font-size", labelFontSize + "px")
+        .attr("font-size", `${fs}px`)
         .attr("opacity", 0.6)
         .style("pointer-events", "none")
         .text(cfg.q1Label);
@@ -86,11 +86,11 @@ export function renderQuadrants(
     quadrantGroup
         .append("text")
         .attr("class", "bscatter-quadrant-label")
-        .attr("x", Math.max(labelPad, Math.min(cx - labelPad, dims.plotWidth - labelPad)))
-        .attr("y", Math.max(labelPad + labelFontSize, Math.min(cy - labelPad, dims.plotHeight - labelPad)))
-        .attr("text-anchor", cx - labelPad > dims.plotWidth / 2 ? "end" : "start")
+        .attr("x", Math.max(pad, Math.min(cx - pad, dims.plotWidth - pad)))
+        .attr("y", Math.max(pad + fs, Math.min(cy - pad, dims.plotHeight - pad)))
+        .attr("text-anchor", cx - pad > dims.plotWidth / 2 ? "end" : "start")
         .attr("fill", labelColor)
-        .attr("font-size", labelFontSize + "px")
+        .attr("font-size", `${fs}px`)
         .attr("opacity", 0.6)
         .style("pointer-events", "none")
         .text(cfg.q2Label);
@@ -99,11 +99,11 @@ export function renderQuadrants(
     quadrantGroup
         .append("text")
         .attr("class", "bscatter-quadrant-label")
-        .attr("x", Math.max(labelPad, Math.min(cx - labelPad, dims.plotWidth - labelPad)))
-        .attr("y", Math.min(dims.plotHeight - labelPad, Math.max(cy + labelPad + labelFontSize, labelPad + labelFontSize)))
-        .attr("text-anchor", cx - labelPad > dims.plotWidth / 2 ? "end" : "start")
+        .attr("x", Math.max(pad, Math.min(cx - pad, dims.plotWidth - pad)))
+        .attr("y", Math.min(dims.plotHeight - pad, Math.max(cy + pad + fs, pad + fs)))
+        .attr("text-anchor", cx - pad > dims.plotWidth / 2 ? "end" : "start")
         .attr("fill", labelColor)
-        .attr("font-size", labelFontSize + "px")
+        .attr("font-size", `${fs}px`)
         .attr("opacity", 0.6)
         .style("pointer-events", "none")
         .text(cfg.q3Label);
@@ -112,11 +112,11 @@ export function renderQuadrants(
     quadrantGroup
         .append("text")
         .attr("class", "bscatter-quadrant-label")
-        .attr("x", Math.min(dims.plotWidth - labelPad, Math.max(cx + labelPad, labelPad)))
-        .attr("y", Math.min(dims.plotHeight - labelPad, Math.max(cy + labelPad + labelFontSize, labelPad + labelFontSize)))
-        .attr("text-anchor", cx + labelPad < dims.plotWidth / 2 ? "start" : "end")
+        .attr("x", Math.min(dims.plotWidth - pad, Math.max(cx + pad, pad)))
+        .attr("y", Math.min(dims.plotHeight - pad, Math.max(cy + pad + fs, pad + fs)))
+        .attr("text-anchor", cx + pad < dims.plotWidth / 2 ? "start" : "end")
         .attr("fill", labelColor)
-        .attr("font-size", labelFontSize + "px")
+        .attr("font-size", `${fs}px`)
         .attr("opacity", 0.6)
         .style("pointer-events", "none")
         .text(cfg.q4Label);

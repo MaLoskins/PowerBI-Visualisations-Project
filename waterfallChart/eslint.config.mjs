@@ -1,8 +1,16 @@
-import powerbiVisualsConfigs from "eslint-plugin-powerbi-visuals";
+import eslintPluginPowerbiVisuals from "eslint-plugin-powerbi-visuals";
+import typescriptEslintPlugin from "@typescript-eslint/eslint-plugin";
 
 export default [
-    powerbiVisualsConfigs.configs.recommended,
     {
-        ignores: ["node_modules/**", "dist/**", ".vscode/**", ".tmp/**"],
+        plugins: {
+            "powerbi-visuals": eslintPluginPowerbiVisuals,
+            "@typescript-eslint": typescriptEslintPlugin,
+        },
+        rules: {
+            "no-unused-vars": "off",
+            "@typescript-eslint/no-unused-vars": ["warn", { argsIgnorePattern: "^_" }],
+            "no-console": "off",
+        },
     },
 ];

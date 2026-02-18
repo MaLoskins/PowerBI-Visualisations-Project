@@ -15,18 +15,30 @@ import type {
     PanelCallbacks,
 } from "../types";
 import { hexToRgba } from "../utils/color";
-import { formatAxisTick, formatValue } from "../utils/format";
+import { formatAxisTick, formatValue, truncate } from "../utils/format";
 import {
     PANEL_MARGIN,
     X_AXIS_HEIGHT,
     Y_AXIS_WIDTH,
     MIN_BAR_WIDTH,
+    BAR_HOVER_OPACITY,
+    DOT_HOVER_SCALE,
+    LOLLIPOP_STEM_WIDTH,
+    Y_GRIDLINE_TICK_COUNT,
+    Y_AXIS_TICK_COUNT,
+    DATA_LABEL_OFFSET_Y,
+    Y_TICK_LABEL_OFFSET,
+    X_TICK_LABEL_OFFSET,
+    X_LABEL_MAX_CHARS,
 } from "../constants";
 
 /* ── Scale type aliases ── */
 type XScale = ScaleBand<string>;
 type YScale = ScaleLinear<number, number>;
 type GSelection = Selection<SVGGElement, unknown, null, undefined>;
+
+/* ── Clip path ID prefix ── */
+const CLIP_ID_PREFIX = "trellis-clip-";
 
 /* ── Public API ── */
 
@@ -57,7 +69,7 @@ export function renderChart(
             .attr("text-anchor", "middle")
             .attr("dominant-baseline", "central")
             .attr("fill", cfg.axis.axisFontColor)
-            .attr("font-size", cfg.axis.axisFontSize + "px")
+            .attr("font-size", `${cfg.axis.axisFontSize}px`)
             .text("No data");
         return;
     }
@@ -75,7 +87,7 @@ export function renderChart(
 
     /* ── Scales ── */
     const xScale: XScale = scaleBand<string>()
-        .domain(panel.categories)
+        .domain(panel.categories as string[])
         .range([0, plotW])
         .padding(0.15);
 
@@ -84,18 +96,32 @@ export function renderChart(
         .range([plotH, 0])
         .nice();
 
+    /* ── Clip path to prevent content overflow ── */
+    const clipId = `${CLIP_ID_PREFIX}${panel.trellisValue.replace(/\s+/g, "-")}`;
+    d3svg.append("defs")
+        .append("clipPath")
+        .attr("id", clipId)
+        .append("rect")
+        .attr("x", 0)
+        .attr("y", 0)
+        .attr("width", plotW)
+        .attr("height", plotH);
+
     /* ── Chart group ── */
     const g = d3svg
         .append("g")
         .attr("transform", `translate(${ml},${mt})`);
 
+    /* ── Plot content group (clipped) ── */
+    const plotG = g.append("g")
+        .attr("clip-path", `url(#${clipId})`);
+
     /* ── Gridlines ── */
     if (cfg.axis.showYGridlines) {
-        const ticks = yScale.ticks(5);
-        g.selectAll(".trellis-ygrid")
+        const ticks = yScale.ticks(Y_GRIDLINE_TICK_COUNT);
+        plotG.selectAll<SVGLineElement, number>(".trellis-ygrid")
             .data(ticks)
-            .enter()
-            .append("line")
+            .join("line")
             .attr("class", "trellis-ygrid")
             .attr("x1", 0)
             .attr("x2", plotW)
@@ -106,39 +132,38 @@ export function renderChart(
     }
 
     if (cfg.axis.showXGridlines) {
-        for (const cat of panel.categories) {
-            const cx = (xScale(cat) ?? 0) + xScale.bandwidth() / 2;
-            g.append("line")
-                .attr("class", "trellis-xgrid")
-                .attr("x1", cx)
-                .attr("x2", cx)
-                .attr("y1", 0)
-                .attr("y2", plotH)
-                .attr("stroke", cfg.axis.gridlineColor)
-                .attr("stroke-width", 0.5);
-        }
+        plotG.selectAll<SVGLineElement, string>(".trellis-xgrid")
+            .data(panel.categories as string[])
+            .join("line")
+            .attr("class", "trellis-xgrid")
+            .attr("x1", cat => (xScale(cat) ?? 0) + xScale.bandwidth() / 2)
+            .attr("x2", cat => (xScale(cat) ?? 0) + xScale.bandwidth() / 2)
+            .attr("y1", 0)
+            .attr("y2", plotH)
+            .attr("stroke", cfg.axis.gridlineColor)
+            .attr("stroke-width", 0.5);
     }
 
     /* ── Render chart type ── */
     const chartType = cfg.chart.chartType;
     if (chartType === "bar") {
-        renderBars(g, panel, xScale, yScale, plotH, cfg, callbacks);
+        renderBars(plotG, panel, xScale, yScale, plotH, cfg, callbacks);
     } else if (chartType === "line") {
-        renderLines(g, panel, xScale, yScale, cfg, callbacks);
+        renderLines(plotG, panel, xScale, yScale, cfg, callbacks);
     } else if (chartType === "area") {
-        renderAreas(g, panel, xScale, yScale, plotH, cfg, callbacks);
+        renderAreas(plotG, panel, xScale, yScale, plotH, cfg, callbacks);
     } else if (chartType === "lollipop") {
-        renderLollipops(g, panel, xScale, yScale, plotH, cfg, callbacks);
+        renderLollipops(plotG, panel, xScale, yScale, plotH, cfg, callbacks);
     }
 
     /* ── Data labels ── */
     if (cfg.labels.showDataLabels) {
-        renderDataLabels(g, panel, xScale, yScale, plotH, cfg);
+        renderDataLabels(g, panel, xScale, yScale, cfg);
     }
 
     /* ── Axes ── */
     if (cfg.axis.showXAxis) {
-        renderXAxis(g, panel.categories, xScale, plotH, cfg, extraXMargin);
+        renderXAxis(g, panel.categories as string[], xScale, plotH, cfg, extraXMargin);
     }
 
     if (cfg.axis.showYAxis) {
@@ -188,7 +213,7 @@ function renderBars(
                 .style("cursor", "pointer")
                 .on("click", (event: MouseEvent) => callbacks.onClick(pt, event))
                 .on("mouseover", function (event: MouseEvent) {
-                    select(this).attr("opacity", 0.8);
+                    select(this).attr("opacity", BAR_HOVER_OPACITY);
                     const rect = (event.target as Element).getBoundingClientRect();
                     callbacks.onMouseOver(pt, rect.left + rect.width / 2, rect.top, event);
                 })
@@ -202,6 +227,9 @@ function renderBars(
                 });
         }
     }
+
+    /* Suppress unused plotH warning — kept for API consistency */
+    void plotH;
 }
 
 /* ── Line Renderer ── */
@@ -223,7 +251,7 @@ function renderLines(
         const points = panel.seriesBuckets.get(sKey) ?? [];
         if (points.length === 0) continue;
 
-        const color = points[0].color;
+        const lineColor = points[0].color;
 
         const lineGen = d3Line<TrellisDataPoint>()
             .x(d => (xScale(d.categoryValue) ?? 0) + xScale.bandwidth() / 2)
@@ -239,37 +267,12 @@ function renderLines(
             .attr("class", "trellis-line")
             .attr("d", lineGen(sorted) ?? "")
             .attr("fill", "none")
-            .attr("stroke", color)
+            .attr("stroke", lineColor)
             .attr("stroke-width", cfg.chart.lineWidth);
 
         /* Dots */
         if (cfg.chart.dotRadius > 0) {
-            for (const pt of sorted) {
-                const cx = (xScale(pt.categoryValue) ?? 0) + xScale.bandwidth() / 2;
-                const cy = yScale(pt.value);
-                g.append("circle")
-                    .attr("class", "trellis-dot")
-                    .attr("cx", cx)
-                    .attr("cy", cy)
-                    .attr("r", cfg.chart.dotRadius)
-                    .attr("fill", color)
-                    .attr("data-sid", pt.selectionId.getKey() as string)
-                    .style("cursor", "pointer")
-                    .on("click", (event: MouseEvent) => callbacks.onClick(pt, event))
-                    .on("mouseover", function (event: MouseEvent) {
-                        select(this).attr("r", cfg.chart.dotRadius * 1.5);
-                        const rect = (event.target as Element).getBoundingClientRect();
-                        callbacks.onMouseOver(pt, rect.left + rect.width / 2, rect.top, event);
-                    })
-                    .on("mousemove", function (event: MouseEvent) {
-                        const rect = (event.target as Element).getBoundingClientRect();
-                        callbacks.onMouseMove(pt, rect.left + rect.width / 2, rect.top, event);
-                    })
-                    .on("mouseout", function () {
-                        select(this).attr("r", cfg.chart.dotRadius);
-                        callbacks.onMouseOut();
-                    });
-            }
+            renderDots(g, sorted, xScale, yScale, lineColor, cfg, callbacks);
         }
     }
 }
@@ -294,7 +297,7 @@ function renderAreas(
         const points = panel.seriesBuckets.get(sKey) ?? [];
         if (points.length === 0) continue;
 
-        const color = points[0].color;
+        const areaColor = points[0].color;
 
         const sorted = [...points].sort(
             (a, b) => panel.categories.indexOf(a.categoryValue) - panel.categories.indexOf(b.categoryValue),
@@ -310,7 +313,7 @@ function renderAreas(
         g.append("path")
             .attr("class", "trellis-area")
             .attr("d", areaGen(sorted) ?? "")
-            .attr("fill", hexToRgba(color, cfg.chart.areaOpacity))
+            .attr("fill", hexToRgba(areaColor, cfg.chart.areaOpacity))
             .attr("stroke", "none");
 
         /* Stroke line on top */
@@ -323,39 +326,17 @@ function renderAreas(
             .attr("class", "trellis-area-line")
             .attr("d", lineGen(sorted) ?? "")
             .attr("fill", "none")
-            .attr("stroke", color)
+            .attr("stroke", areaColor)
             .attr("stroke-width", cfg.chart.lineWidth);
 
         /* Dots */
         if (cfg.chart.dotRadius > 0) {
-            for (const pt of sorted) {
-                const cx = (xScale(pt.categoryValue) ?? 0) + xScale.bandwidth() / 2;
-                const cy = yScale(pt.value);
-                g.append("circle")
-                    .attr("class", "trellis-dot")
-                    .attr("cx", cx)
-                    .attr("cy", cy)
-                    .attr("r", cfg.chart.dotRadius)
-                    .attr("fill", color)
-                    .attr("data-sid", pt.selectionId.getKey() as string)
-                    .style("cursor", "pointer")
-                    .on("click", (event: MouseEvent) => callbacks.onClick(pt, event))
-                    .on("mouseover", function (event: MouseEvent) {
-                        select(this).attr("r", cfg.chart.dotRadius * 1.5);
-                        const rect = (event.target as Element).getBoundingClientRect();
-                        callbacks.onMouseOver(pt, rect.left + rect.width / 2, rect.top, event);
-                    })
-                    .on("mousemove", function (event: MouseEvent) {
-                        const rect = (event.target as Element).getBoundingClientRect();
-                        callbacks.onMouseMove(pt, rect.left + rect.width / 2, rect.top, event);
-                    })
-                    .on("mouseout", function () {
-                        select(this).attr("r", cfg.chart.dotRadius);
-                        callbacks.onMouseOut();
-                    });
-            }
+            renderDots(g, sorted, xScale, yScale, areaColor, cfg, callbacks);
         }
     }
+
+    /* Suppress unused plotH warning — kept for API consistency */
+    void plotH;
 }
 
 /* ── Lollipop Renderer ── */
@@ -395,7 +376,7 @@ function renderLollipops(
                 .attr("y1", yBase)
                 .attr("y2", cy)
                 .attr("stroke", pt.color)
-                .attr("stroke-width", 1.5);
+                .attr("stroke-width", LOLLIPOP_STEM_WIDTH);
 
             /* Dot */
             g.append("circle")
@@ -408,7 +389,7 @@ function renderLollipops(
                 .style("cursor", "pointer")
                 .on("click", (event: MouseEvent) => callbacks.onClick(pt, event))
                 .on("mouseover", function (event: MouseEvent) {
-                    select(this).attr("r", cfg.chart.dotRadius * 1.5);
+                    select(this).attr("r", cfg.chart.dotRadius * DOT_HOVER_SCALE);
                     const rect = (event.target as Element).getBoundingClientRect();
                     callbacks.onMouseOver(pt, rect.left + rect.width / 2, rect.top, event);
                 })
@@ -422,6 +403,48 @@ function renderLollipops(
                 });
         }
     }
+
+    /* Suppress unused plotH warning — kept for API consistency */
+    void plotH;
+}
+
+/* ── Shared Dot Renderer (Line / Area) ── */
+
+function renderDots(
+    g: GSelection,
+    points: TrellisDataPoint[],
+    xScale: XScale,
+    yScale: YScale,
+    dotColor: string,
+    cfg: RenderConfig,
+    callbacks: PanelCallbacks,
+): void {
+    for (const pt of points) {
+        const cx = (xScale(pt.categoryValue) ?? 0) + xScale.bandwidth() / 2;
+        const cy = yScale(pt.value);
+        g.append("circle")
+            .attr("class", "trellis-dot")
+            .attr("cx", cx)
+            .attr("cy", cy)
+            .attr("r", cfg.chart.dotRadius)
+            .attr("fill", dotColor)
+            .attr("data-sid", pt.selectionId.getKey() as string)
+            .style("cursor", "pointer")
+            .on("click", (event: MouseEvent) => callbacks.onClick(pt, event))
+            .on("mouseover", function (event: MouseEvent) {
+                select(this).attr("r", cfg.chart.dotRadius * DOT_HOVER_SCALE);
+                const rect = (event.target as Element).getBoundingClientRect();
+                callbacks.onMouseOver(pt, rect.left + rect.width / 2, rect.top, event);
+            })
+            .on("mousemove", function (event: MouseEvent) {
+                const rect = (event.target as Element).getBoundingClientRect();
+                callbacks.onMouseMove(pt, rect.left + rect.width / 2, rect.top, event);
+            })
+            .on("mouseout", function () {
+                select(this).attr("r", cfg.chart.dotRadius);
+                callbacks.onMouseOut();
+            });
+    }
 }
 
 /* ── Data Labels ── */
@@ -431,12 +454,11 @@ function renderDataLabels(
     panel: TrellisPanel,
     xScale: XScale,
     yScale: YScale,
-    plotH: number,
     cfg: RenderConfig,
 ): void {
     for (const pt of panel.dataPoints) {
         const cx = (xScale(pt.categoryValue) ?? 0) + xScale.bandwidth() / 2;
-        const cy = yScale(pt.value) - 4;
+        const cy = yScale(pt.value) - DATA_LABEL_OFFSET_Y;
 
         g.append("text")
             .attr("class", "trellis-data-label")
@@ -444,7 +466,7 @@ function renderDataLabels(
             .attr("y", cy)
             .attr("text-anchor", "middle")
             .attr("fill", cfg.labels.dataLabelFontColor)
-            .attr("font-size", cfg.labels.dataLabelFontSize + "px")
+            .attr("font-size", `${cfg.labels.dataLabelFontSize}px`)
             .text(formatValue(pt.value));
     }
 }
@@ -457,7 +479,7 @@ function renderXAxis(
     xScale: XScale,
     plotH: number,
     cfg: RenderConfig,
-    extraXMargin: number,
+    _extraXMargin: number,
 ): void {
     const rotation = Number(cfg.axis.xLabelRotation);
     const axisG = g.append("g")
@@ -476,15 +498,15 @@ function renderXAxis(
         const cx = (xScale(cat) ?? 0) + xScale.bandwidth() / 2;
         const label = axisG.append("text")
             .attr("x", cx)
-            .attr("y", 12)
+            .attr("y", X_TICK_LABEL_OFFSET)
             .attr("fill", cfg.axis.axisFontColor)
-            .attr("font-size", cfg.axis.axisFontSize + "px")
+            .attr("font-size", `${cfg.axis.axisFontSize}px`)
             .attr("text-anchor", rotation === 0 ? "middle" : "end")
             .attr("dominant-baseline", "central")
-            .text(cat.length > 10 ? cat.slice(0, 9) + "…" : cat);
+            .text(truncate(cat, X_LABEL_MAX_CHARS));
 
         if (rotation !== 0) {
-            label.attr("transform", `rotate(-${rotation}, ${cx}, 12)`);
+            label.attr("transform", `rotate(-${rotation}, ${cx}, ${X_TICK_LABEL_OFFSET})`);
         }
     }
 }
@@ -496,7 +518,7 @@ function renderYAxis(
     yScale: YScale,
     cfg: RenderConfig,
 ): void {
-    const ticks = yScale.ticks(4);
+    const ticks = yScale.ticks(Y_AXIS_TICK_COUNT);
     const axisG = g.append("g").attr("class", "trellis-y-axis");
 
     /* Axis line */
@@ -510,10 +532,10 @@ function renderYAxis(
     for (const t of ticks) {
         const y = yScale(t);
         axisG.append("text")
-            .attr("x", -6)
+            .attr("x", -Y_TICK_LABEL_OFFSET)
             .attr("y", y)
             .attr("fill", cfg.axis.axisFontColor)
-            .attr("font-size", cfg.axis.axisFontSize + "px")
+            .attr("font-size", `${cfg.axis.axisFontSize}px`)
             .attr("text-anchor", "end")
             .attr("dominant-baseline", "central")
             .text(formatAxisTick(t));

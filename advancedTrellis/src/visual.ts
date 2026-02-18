@@ -21,7 +21,6 @@ import type {
     ParseResult,
     TrellisDataPoint,
     PanelCallbacks,
-    TooltipItem,
 } from "./types";
 import { resolveColumns, hasRequiredColumns } from "./model/columns";
 import { parseRows } from "./model/parser";
@@ -30,9 +29,7 @@ import { updatePanel } from "./render/panel";
 import { handleClick, handleBackgroundClick, applySelectionStyles } from "./interactions/selection";
 import { el } from "./utils/dom";
 import { formatValue } from "./utils/format";
-
-/* ── Maximum panel pool size (P1) ── */
-const MAX_PANELS = 200;
+import { MAX_PANELS } from "./constants";
 
 /* ═══════════════════════════════════════════════
    Visual Class
@@ -144,7 +141,6 @@ export class Visual implements IVisual {
         /* ── Update type gating ── */
         const updateType = options.type ?? 0;
         const hasData = (updateType & 2) !== 0;
-        const isResizeOnly = !hasData && (updateType & (4 | 16)) !== 0;
 
         /* ── Data pipeline (skip on resize-only) ── */
         if (hasData || !this.hasRenderedOnce) {
@@ -192,8 +188,8 @@ export class Visual implements IVisual {
         const data = this.parseResult!;
 
         /* ── Container sizing ── */
-        this.container.style.width = viewport.width + "px";
-        this.container.style.height = viewport.height + "px";
+        this.container.style.width = `${viewport.width}px`;
+        this.container.style.height = `${viewport.height}px`;
 
         /* ── Compute grid layout ── */
         const grid = computeGridLayout(
@@ -206,8 +202,8 @@ export class Visual implements IVisual {
         /* ── Update grid container styles ── */
         this.gridContainer.style.display = "flex";
         this.gridContainer.style.flexWrap = "wrap";
-        this.gridContainer.style.gap = cfg.layout.panelPadding + "px";
-        this.gridContainer.style.padding = cfg.layout.panelPadding + "px";
+        this.gridContainer.style.gap = `${cfg.layout.panelPadding}px`;
+        this.gridContainer.style.padding = `${cfg.layout.panelPadding}px`;
         this.gridContainer.style.alignContent = "flex-start";
 
         /* ── Y scale bounds ── */
@@ -267,11 +263,11 @@ export class Visual implements IVisual {
                     applySelectionStyles(this.gridContainer, this.selectionManager);
                 });
             },
-            onMouseOver: (point: TrellisDataPoint, x: number, y: number, event: MouseEvent) => {
-                this.showTooltip(point, x, y, event);
+            onMouseOver: (point: TrellisDataPoint, x: number, y: number, _event: MouseEvent) => {
+                this.showTooltip(point, x, y);
             },
-            onMouseMove: (point: TrellisDataPoint, x: number, y: number, event: MouseEvent) => {
-                this.moveTooltip(point, x, y, event);
+            onMouseMove: (point: TrellisDataPoint, x: number, y: number, _event: MouseEvent) => {
+                this.moveTooltip(point, x, y);
             },
             onMouseOut: () => {
                 this.hideTooltip();
@@ -296,7 +292,7 @@ export class Visual implements IVisual {
         return items;
     }
 
-    private showTooltip(point: TrellisDataPoint, x: number, y: number, event: MouseEvent): void {
+    private showTooltip(point: TrellisDataPoint, x: number, y: number): void {
         this.tooltipService.show({
             dataItems: this.buildTooltipItems(point),
             identities: [point.selectionId],
@@ -305,7 +301,7 @@ export class Visual implements IVisual {
         });
     }
 
-    private moveTooltip(point: TrellisDataPoint, x: number, y: number, event: MouseEvent): void {
+    private moveTooltip(point: TrellisDataPoint, x: number, y: number): void {
         this.tooltipService.move({
             dataItems: this.buildTooltipItems(point),
             identities: [point.selectionId],

@@ -9,6 +9,7 @@ import { zoom, ZoomBehavior, zoomIdentity, ZoomTransform } from "d3-zoom";
 import { select } from "d3-selection";
 
 import { RenderConfig, ChartDimensions } from "../types";
+import { ZOOM_SCALE_MIN, ZOOM_SCALE_MAX } from "../constants";
 import { NumericScale } from "../render/axes";
 
 export interface ZoomState {
@@ -38,14 +39,17 @@ export function initZoom(
     if (!cfg.enableZoom && !cfg.enablePan) return state;
 
     const zoomBehavior = zoom<SVGSVGElement, unknown>()
-        .scaleExtent([0.1, 20])
+        .scaleExtent([ZOOM_SCALE_MIN, ZOOM_SCALE_MAX])
         .extent([[0, 0], [dims.plotWidth, dims.plotHeight]])
-        .translateExtent([[-dims.plotWidth * 2, -dims.plotHeight * 2], [dims.plotWidth * 3, dims.plotHeight * 3]])
+        .translateExtent([
+            [-dims.plotWidth * 2, -dims.plotHeight * 2],
+            [dims.plotWidth * 3, dims.plotHeight * 3],
+        ])
         .filter((event: Event) => {
             // Disable zoom on scroll if zoom disabled, disable drag if pan disabled
             if (event.type === "wheel" && !cfg.enableZoom) return false;
             if ((event.type === "mousedown" || event.type === "touchstart") && !cfg.enablePan) return false;
-            // Don't zoom on double-click (reserved)
+            // Don't zoom on double-click (reserved for reset)
             if (event.type === "dblclick") return false;
             return true;
         })
@@ -87,7 +91,6 @@ export function resetZoom(
     zoomState: ZoomState,
 ): void {
     if (!zoomState.behavior) return;
-    // Apply identity transform immediately — avoids d3-transition dependency
     select<SVGSVGElement, unknown>(svgEl).call(
         zoomState.behavior.transform,
         zoomIdentity,

@@ -62,7 +62,7 @@ export function buildPlayControls(
     container.appendChild(slider);
 
     /* ── Frame label ── */
-    const frameLabel = el("span", "bscatter-play-label", playValues[0] || "");
+    const frameLabel = el("span", "bscatter-play-label", playValues[0] ?? "");
     frameLabel.style.minWidth = "80px";
     frameLabel.style.textAlign = "center";
     container.appendChild(frameLabel);
@@ -72,8 +72,18 @@ export function buildPlayControls(
     function updateFrame(idx: number): void {
         state.currentIndex = idx;
         slider.value = String(idx);
-        frameLabel.textContent = playValues[idx] || "";
+        frameLabel.textContent = playValues[idx] ?? "";
         callbacks.onFrameChange(idx);
+    }
+
+    function pause(): void {
+        state.isPlaying = false;
+        playBtn.textContent = "▶";
+        playBtn.title = "Play";
+        if (state.timer !== null) {
+            clearInterval(state.timer);
+            state.timer = null;
+        }
     }
 
     function play(): void {
@@ -83,26 +93,21 @@ export function buildPlayControls(
         state.timer = setInterval(() => {
             const next = (state.currentIndex + 1) % playValues.length;
             updateFrame(next);
-            if (next === 0 && state.currentIndex === playValues.length - 1) {
-                // Looped back; optionally stop
+            // Stop at the last frame instead of looping
+            if (next === playValues.length - 1) {
+                pause();
             }
         }, cfg.playSpeed);
-    }
-
-    function pause(): void {
-        state.isPlaying = false;
-        playBtn.textContent = "▶";
-        playBtn.title = "Play";
-        if (state.timer) {
-            clearInterval(state.timer);
-            state.timer = null;
-        }
     }
 
     playBtn.addEventListener("click", () => {
         if (state.isPlaying) {
             pause();
         } else {
+            // Restart from beginning if already at the last frame
+            if (state.currentIndex >= playValues.length - 1) {
+                updateFrame(0);
+            }
             play();
         }
     });
@@ -150,7 +155,7 @@ export function getTrailPoints(
  * Clean up play timer when visual is destroyed or data changes.
  */
 export function destroyPlayControls(state: PlayAxisState): void {
-    if (state.timer) {
+    if (state.timer !== null) {
         clearInterval(state.timer);
         state.timer = null;
     }

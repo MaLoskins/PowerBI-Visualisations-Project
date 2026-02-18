@@ -6,6 +6,7 @@
 "use strict";
 
 import { RenderConfig } from "../types";
+import { LEGEND_VERTICAL_WIDTH } from "../constants";
 import { el, clearChildren } from "../utils/dom";
 import { getCategoryColor } from "../utils/color";
 
@@ -32,7 +33,7 @@ export function renderLegend(
     container.style.padding = "4px 8px";
     container.style.justifyContent = "center";
     container.style.alignItems = "center";
-    container.style.fontSize = cfg.legendFontSize + "px";
+    container.style.fontSize = `${cfg.legendFontSize}px`;
     container.style.color = cfg.legendFontColor;
 
     for (const entry of entries) {
@@ -70,6 +71,6 @@ export function getLegendSize(
     if (!cfg.showLegend || entryCount === 0) return 0;
     // Rough estimate based on font size + padding
     const isVertical = cfg.legendPosition === "left" || cfg.legendPosition === "right";
-    if (isVertical) return 120;
+    if (isVertical) return LEGEND_VERTICAL_WIDTH;
     return cfg.legendFontSize + 20;
 }

@@ -38,9 +38,6 @@ export const DEFAULT_MARGINS = {
     left: 60,
 } as const;
 
-/** Extra padding when legend is visible */
-export const LEGEND_PADDING = 30;
-
 /** Extra padding when play controls are visible */
 export const PLAY_CONTROLS_HEIGHT = 48;
 
@@ -68,3 +65,35 @@ export const DASH_ARRAYS: Record<string, string> = {
     dashed: "6,4",
     dotted: "2,2",
 };
+
+/* ── Axis Rendering ── */
+
+/** Length of axis tick marks (px) */
+export const AXIS_TICK_SIZE = 6;
+
+/** Offset from axis line to tick label text (px) */
+export const AXIS_TICK_LABEL_OFFSET = 9;
+
+/** Y offset for X-axis title below the tick labels (px) */
+export const AXIS_LABEL_Y_OFFSET = 38;
+
+/* ── Quadrant Labels ── */
+
+/** Padding between quadrant lines and corner labels (px) */
+export const QUADRANT_LABEL_PAD = 8;
+
+/** Font size for quadrant corner labels (px) */
+export const QUADRANT_LABEL_FONT_SIZE = 11;
+
+/* ── Legend ── */
+
+/** Width of a vertical (left/right) legend column (px) */
+export const LEGEND_VERTICAL_WIDTH = 120;
+
+/* ── Zoom ── */
+
+/** Minimum zoom scale factor */
+export const ZOOM_SCALE_MIN = 0.1;
+
+/** Maximum zoom scale factor */
+export const ZOOM_SCALE_MAX = 20;

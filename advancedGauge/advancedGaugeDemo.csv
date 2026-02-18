@@ -1,0 +1,11 @@
+KPI,value,target,minValue,maxValue,range1Max,range2Max,range3Max,Department,Region,Status
+Revenue ($K),742,800,0,1000,300,600,850,Sales,North America,On Track
+Profit Margin (%),0.68,0.75,0,1,0.3,0.6,0.8,Finance,Global,Good
+Customer Satisfaction,87,90,0,100,50,70,85,Support,EMEA,Above Target
+Defect Rate,12,5,0,50,5,15,30,Engineering,APAC,Needs Improvement
+Completion Rate (%),0.93,0.85,0,1,0.25,0.5,0.75,Operations,North America,Excellent
+Server Uptime (%),0.997,0.999,0.95,1,0.97,0.99,0.995,IT,Global,Warning
+Pipeline Value ($K),1250,1000,0,1500,400,800,1100,Sales,EMEA,Ahead
+Employee Engagement,3.8,4.0,1,5,2,3,4,HR,North America,Good
+Response Time (ms),320,250,0,1000,250,500,750,Engineering,APAC,On Track
+Budget Utilisation (%),0.47,0.80,0,1,0.25,0.5,0.75,Finance,Global,Under Budget

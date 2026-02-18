@@ -8,6 +8,9 @@
         "outDir": "./.tmp/build/",
         "moduleResolution": "node",
         "declaration": true,
+        "noImplicitAny": true,
+        "noImplicitReturns": true,
+        "strictBindCallApply": true,
         "lib": [
             "es2022",
             "dom"

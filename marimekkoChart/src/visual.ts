@@ -28,18 +28,20 @@ import {
     MekkoColumn,
     MekkoSegment,
     ChartCallbacks,
+    LegendPosition,
 } from "./types";
 import {
     CHART_MARGINS,
     LEGEND_AREA_HEIGHT,
     LEGEND_AREA_WIDTH,
     ERROR_CLASS,
+    FALLBACK_SEGMENT_COLOR,
 } from "./constants";
 
 import { resolveColumns } from "./model/columns";
 import { parseData } from "./model/parser";
 import { buildSegmentColorMap } from "./utils/color";
-import { el, clearChildren } from "./utils/dom";
+import { el } from "./utils/dom";
 import { formatPercent, formatCompact } from "./utils/format";
 import { layoutColumns, ensureHatchPattern, renderSegments, attachBackgroundClick } from "./render/chart";
 import { renderYAxis, renderXAxis, renderWidthLabels, extraBottomForRotation } from "./render/axes";
@@ -132,7 +134,6 @@ export class Visual implements IVisual {
             /* ── Gate on update type ── */
             const updateType = options.type ?? 0;
             const hasData = (updateType & 2) !== 0;
-            const isResizeOnly = !hasData && (updateType & (4 | 16)) !== 0;
 
             /* ── Always rebuild config (cheap) ── */
             const dv = options.dataViews?.[0];
@@ -169,7 +170,7 @@ export class Visual implements IVisual {
                 );
                 for (const col of this.data.columns) {
                     for (const seg of col.segments) {
-                        seg.color = this.colorMap.get(seg.segmentCategory) ?? "#94A3B8";
+                        seg.color = this.colorMap.get(seg.segmentCategory) ?? FALLBACK_SEGMENT_COLOR;
                     }
                 }
             }
@@ -241,7 +242,7 @@ export class Visual implements IVisual {
 
         /* Hatch pattern for negatives */
         if (data.hasNegatives) {
-            ensureHatchPattern(svg as unknown as d3.Selection<SVGSVGElement, unknown, null, undefined>);
+            ensureHatchPattern(svg as d3.Selection<SVGSVGElement, unknown, null, undefined>);
         }
 
         /* Callbacks for interactions */
@@ -267,7 +268,7 @@ export class Visual implements IVisual {
 
         /* Background click */
         attachBackgroundClick(
-            svg as unknown as d3.Selection<SVGSVGElement, unknown, null, undefined>,
+            svg as d3.Selection<SVGSVGElement, unknown, null, undefined>,
             callbacks,
         );
 
@@ -290,7 +291,7 @@ export class Visual implements IVisual {
     private positionLegend(
         cfg: RenderConfig,
         viewport: powerbi.IViewport,
-        position: string,
+        position: LegendPosition,
         svgHeight: number,
     ): void {
         const lc = this.legendContainer;
@@ -338,7 +339,6 @@ export class Visual implements IVisual {
 
         chartGSel.selectAll<SVGGElement, unknown>(".marimekko-segment").each(function () {
             const segG = d3.select(this);
-            const xCat = segG.select(".marimekko-segment-rect").attr("x");
 
             segG.on("mouseover", (event: MouseEvent) => {
                 /* Find matching segment data from DOM attributes */

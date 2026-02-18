@@ -1,9 +1,134 @@
-p {
-    font-size: 20px;
-    font-weight: bold;
-    em {
-        background: yellow;
-        padding: 5px;
-        
-    }
+/* ═══════════════════════════════════════════════
+   Multi-Axes Combo Chart – Power BI Custom Visual Styles
+   H1: Reduced nesting, reusable classes
+   H2: CSS variables for dynamic styling
+   Prefix: maxes-
+   ═══════════════════════════════════════════════ */
+
+.maxes-container {
+    box-sizing: border-box;
+    width: 100%;
+    height: 100%;
+    position: relative;
+    overflow: hidden;
+    font-family: "Segoe UI", "wf_segoe-ui_normal", "Helvetica Neue", Helvetica, Arial, sans-serif;
+    font-size: 11px;
+}
+
+.maxes-container *,
+.maxes-container *::before,
+.maxes-container *::after {
+    box-sizing: border-box;
+}
+
+.maxes-svg {
+    display: block;
+    width: 100%;
+    height: 100%;
+}
+
+/* ── Error Overlay ── */
+
+.maxes-error {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    color: #64748B;
+    font-size: 13px;
+    padding: 24px;
+    white-space: pre-line;
+    line-height: 1.5;
+    background: #FFFFFF;
+    z-index: 10;
+}
+
+/* ── Bars ── */
+
+.maxes-bar {
+    transition: opacity 0.1s ease;
+}
+
+/* ── Lines ── */
+
+.maxes-line {
+    transition: opacity 0.1s ease;
+    pointer-events: none;
+}
+
+.maxes-area {
+    transition: opacity 0.1s ease;
+    pointer-events: none;
+}
+
+/* ── Dots ── */
+
+.maxes-dot {
+    transition: opacity 0.1s ease, stroke 0.1s ease;
+}
+
+/* ── Axis ── */
+
+.maxes-axis-line {
+    shape-rendering: crispEdges;
+}
+
+.maxes-axis-tick {
+    shape-rendering: crispEdges;
+}
+
+.maxes-axis-label {
+    font-family: "Segoe UI", "wf_segoe-ui_normal", "Helvetica Neue", Helvetica, Arial, sans-serif;
+    pointer-events: none;
+    user-select: none;
+}
+
+.maxes-axis-title {
+    font-family: "Segoe UI", "wf_segoe-ui_normal", "Helvetica Neue", Helvetica, Arial, sans-serif;
+    pointer-events: none;
+    user-select: none;
+}
+
+.maxes-x-label {
+    font-family: "Segoe UI", "wf_segoe-ui_normal", "Helvetica Neue", Helvetica, Arial, sans-serif;
+    pointer-events: none;
+    user-select: none;
+}
+
+/* ── Gridlines ── */
+
+.maxes-gridline {
+    shape-rendering: crispEdges;
+}
+
+.maxes-x-gridline {
+    shape-rendering: crispEdges;
+}
+
+/* ── Legend ── */
+
+.maxes-legend-label {
+    font-family: "Segoe UI", "wf_segoe-ui_normal", "Helvetica Neue", Helvetica, Arial, sans-serif;
+    pointer-events: none;
+    user-select: none;
+}
+
+/* ── Data Labels ── */
+
+.maxes-data-label {
+    font-family: "Segoe UI", "wf_segoe-ui_normal", "Helvetica Neue", Helvetica, Arial, sans-serif;
+    pointer-events: none;
+    user-select: none;
+    transition: opacity 0.1s ease;
+}
+
+/* ── Background ── */
+
+.maxes-bg-rect {
+    cursor: default;
 }

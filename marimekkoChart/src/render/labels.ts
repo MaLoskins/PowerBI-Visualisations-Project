@@ -7,11 +7,9 @@
 import * as d3 from "d3-selection";
 
 import { MekkoColumn, RenderConfig } from "../types";
-import { MIN_LABEL_HEIGHT_FACTOR, LABEL_PADDING_PX } from "../constants";
+import { MIN_LABEL_HEIGHT_FACTOR, LABEL_PADDING_PX, FONT_FAMILY } from "../constants";
 import { buildSegmentLabelText } from "../utils/format";
 import { truncateText } from "../utils/dom";
-
-const FONT_FAMILY = '"Segoe UI", "wf_segoe-ui_normal", "Helvetica Neue", Helvetica, Arial, sans-serif';
 
 /* ═══════════════════════════════════════════════
    Segment Labels

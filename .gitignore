@@ -35,9 +35,16 @@ yarn-debug.log*
 yarn-error.log*
 
 # Test data
-*.csv
 *.xlsx
 
 # Other
 Useful-Notes.md
 DROPIN
+1. DROPIN
+2. SOURCE-CONTENT
+_icon_previews
+make_pbiviz_icons.py
+Useful-Commands.md
+Demo.pbix
+3. COMPILED-VISUALS
+4. DEMO-DATA

@@ -1,53 +1,470 @@
 {
     "dataRoles": [
         {
-            "displayName": "Category Data",
-            "name": "category",
+            "displayName": "X Axis (Category)",
+            "name": "xCategory",
             "kind": "Grouping"
         },
         {
-            "displayName": "Measure Data",
-            "name": "measure",
+            "displayName": "Measure 1",
+            "name": "measure1",
             "kind": "Measure"
+        },
+        {
+            "displayName": "Measure 2",
+            "name": "measure2",
+            "kind": "Measure"
+        },
+        {
+            "displayName": "Measure 3",
+            "name": "measure3",
+            "kind": "Measure"
+        },
+        {
+            "displayName": "Measure 4",
+            "name": "measure4",
+            "kind": "Measure"
+        },
+        {
+            "displayName": "Measure 5",
+            "name": "measure5",
+            "kind": "Measure"
+        },
+        {
+            "displayName": "Measure 6",
+            "name": "measure6",
+            "kind": "Measure"
+        },
+        {
+            "displayName": "Tooltip Fields",
+            "name": "tooltipFields",
+            "kind": "GroupingOrMeasure"
         }
     ],
     "objects": {
-        "dataPoint": {
+        "series1Settings": {
             "properties": {
-                "defaultColor": {
+                "chartType": {
                     "type": {
-                        "fill": {
-                            "solid": {
-                                "color": true
-                            }
-                        }
+                        "enumeration": [
+                            { "displayName": "Bar", "value": "bar" },
+                            { "displayName": "Line", "value": "line" },
+                            { "displayName": "Area", "value": "area" },
+                            { "displayName": "None", "value": "none" }
+                        ]
                     }
                 },
-                "showAllDataPoints": {
+                "axis": {
                     "type": {
-                        "bool": true
+                        "enumeration": [
+                            { "displayName": "Left Primary", "value": "leftPrimary" },
+                            { "displayName": "Left Secondary", "value": "leftSecondary" },
+                            { "displayName": "Right", "value": "right" }
+                        ]
                     }
                 },
-                "fill": {
+                "color": {
+                    "type": { "fill": { "solid": { "color": true } } }
+                },
+                "lineWidth": {
+                    "type": { "numeric": true }
+                },
+                "lineStyle": {
                     "type": {
-                        "fill": {
-                            "solid": {
-                                "color": true
-                            }
-                        }
+                        "enumeration": [
+                            { "displayName": "Solid", "value": "solid" },
+                            { "displayName": "Dashed", "value": "dashed" },
+                            { "displayName": "Dotted", "value": "dotted" }
+                        ]
                     }
                 },
-                "fillRule": {
+                "dotRadius": {
+                    "type": { "numeric": true }
+                },
+                "areaOpacity": {
+                    "type": { "numeric": true }
+                },
+                "barCornerRadius": {
+                    "type": { "numeric": true }
+                }
+            }
+        },
+        "series2Settings": {
+            "properties": {
+                "chartType": {
                     "type": {
-                        "fill": {}
+                        "enumeration": [
+                            { "displayName": "Bar", "value": "bar" },
+                            { "displayName": "Line", "value": "line" },
+                            { "displayName": "Area", "value": "area" },
+                            { "displayName": "None", "value": "none" }
+                        ]
                     }
                 },
-                 "fontSize": {
+                "axis": {
                     "type": {
-                        "formatting": {
-                            "fontSize": true
-                        }
+                        "enumeration": [
+                            { "displayName": "Left Primary", "value": "leftPrimary" },
+                            { "displayName": "Left Secondary", "value": "leftSecondary" },
+                            { "displayName": "Right", "value": "right" }
+                        ]
                     }
+                },
+                "color": {
+                    "type": { "fill": { "solid": { "color": true } } }
+                },
+                "lineWidth": {
+                    "type": { "numeric": true }
+                },
+                "lineStyle": {
+                    "type": {
+                        "enumeration": [
+                            { "displayName": "Solid", "value": "solid" },
+                            { "displayName": "Dashed", "value": "dashed" },
+                            { "displayName": "Dotted", "value": "dotted" }
+                        ]
+                    }
+                },
+                "dotRadius": {
+                    "type": { "numeric": true }
+                },
+                "areaOpacity": {
+                    "type": { "numeric": true }
+                },
+                "barCornerRadius": {
+                    "type": { "numeric": true }
+                }
+            }
+        },
+        "series3Settings": {
+            "properties": {
+                "chartType": {
+                    "type": {
+                        "enumeration": [
+                            { "displayName": "Bar", "value": "bar" },
+                            { "displayName": "Line", "value": "line" },
+                            { "displayName": "Area", "value": "area" },
+                            { "displayName": "None", "value": "none" }
+                        ]
+                    }
+                },
+                "axis": {
+                    "type": {
+                        "enumeration": [
+                            { "displayName": "Left Primary", "value": "leftPrimary" },
+                            { "displayName": "Left Secondary", "value": "leftSecondary" },
+                            { "displayName": "Right", "value": "right" }
+                        ]
+                    }
+                },
+                "color": {
+                    "type": { "fill": { "solid": { "color": true } } }
+                },
+                "lineWidth": {
+                    "type": { "numeric": true }
+                },
+                "lineStyle": {
+                    "type": {
+                        "enumeration": [
+                            { "displayName": "Solid", "value": "solid" },
+                            { "displayName": "Dashed", "value": "dashed" },
+                            { "displayName": "Dotted", "value": "dotted" }
+                        ]
+                    }
+                },
+                "dotRadius": {
+                    "type": { "numeric": true }
+                },
+                "areaOpacity": {
+                    "type": { "numeric": true }
+                },
+                "barCornerRadius": {
+                    "type": { "numeric": true }
+                }
+            }
+        },
+        "series4Settings": {
+            "properties": {
+                "chartType": {
+                    "type": {
+                        "enumeration": [
+                            { "displayName": "Bar", "value": "bar" },
+                            { "displayName": "Line", "value": "line" },
+                            { "displayName": "Area", "value": "area" },
+                            { "displayName": "None", "value": "none" }
+                        ]
+                    }
+                },
+                "axis": {
+                    "type": {
+                        "enumeration": [
+                            { "displayName": "Left Primary", "value": "leftPrimary" },
+                            { "displayName": "Left Secondary", "value": "leftSecondary" },
+                            { "displayName": "Right", "value": "right" }
+                        ]
+                    }
+                },
+                "color": {
+                    "type": { "fill": { "solid": { "color": true } } }
+                },
+                "lineWidth": {
+                    "type": { "numeric": true }
+                },
+                "lineStyle": {
+                    "type": {
+                        "enumeration": [
+                            { "displayName": "Solid", "value": "solid" },
+                            { "displayName": "Dashed", "value": "dashed" },
+                            { "displayName": "Dotted", "value": "dotted" }
+                        ]
+                    }
+                },
+                "dotRadius": {
+                    "type": { "numeric": true }
+                },
+                "areaOpacity": {
+                    "type": { "numeric": true }
+                },
+                "barCornerRadius": {
+                    "type": { "numeric": true }
+                }
+            }
+        },
+        "series5Settings": {
+            "properties": {
+                "chartType": {
+                    "type": {
+                        "enumeration": [
+                            { "displayName": "Bar", "value": "bar" },
+                            { "displayName": "Line", "value": "line" },
+                            { "displayName": "Area", "value": "area" },
+                            { "displayName": "None", "value": "none" }
+                        ]
+                    }
+                },
+                "axis": {
+                    "type": {
+                        "enumeration": [
+                            { "displayName": "Left Primary", "value": "leftPrimary" },
+                            { "displayName": "Left Secondary", "value": "leftSecondary" },
+                            { "displayName": "Right", "value": "right" }
+                        ]
+                    }
+                },
+                "color": {
+                    "type": { "fill": { "solid": { "color": true } } }
+                },
+                "lineWidth": {
+                    "type": { "numeric": true }
+                },
+                "lineStyle": {
+                    "type": {
+                        "enumeration": [
+                            { "displayName": "Solid", "value": "solid" },
+                            { "displayName": "Dashed", "value": "dashed" },
+                            { "displayName": "Dotted", "value": "dotted" }
+                        ]
+                    }
+                },
+                "dotRadius": {
+                    "type": { "numeric": true }
+                },
+                "areaOpacity": {
+                    "type": { "numeric": true }
+                },
+                "barCornerRadius": {
+                    "type": { "numeric": true }
+                }
+            }
+        },
+        "series6Settings": {
+            "properties": {
+                "chartType": {
+                    "type": {
+                        "enumeration": [
+                            { "displayName": "Bar", "value": "bar" },
+                            { "displayName": "Line", "value": "line" },
+                            { "displayName": "Area", "value": "area" },
+                            { "displayName": "None", "value": "none" }
+                        ]
+                    }
+                },
+                "axis": {
+                    "type": {
+                        "enumeration": [
+                            { "displayName": "Left Primary", "value": "leftPrimary" },
+                            { "displayName": "Left Secondary", "value": "leftSecondary" },
+                            { "displayName": "Right", "value": "right" }
+                        ]
+                    }
+                },
+                "color": {
+                    "type": { "fill": { "solid": { "color": true } } }
+                },
+                "lineWidth": {
+                    "type": { "numeric": true }
+                },
+                "lineStyle": {
+                    "type": {
+                        "enumeration": [
+                            { "displayName": "Solid", "value": "solid" },
+                            { "displayName": "Dashed", "value": "dashed" },
+                            { "displayName": "Dotted", "value": "dotted" }
+                        ]
+                    }
+                },
+                "dotRadius": {
+                    "type": { "numeric": true }
+                },
+                "areaOpacity": {
+                    "type": { "numeric": true }
+                },
+                "barCornerRadius": {
+                    "type": { "numeric": true }
+                }
+            }
+        },
+        "xAxisSettings": {
+            "properties": {
+                "showXAxis": {
+                    "type": { "bool": true }
+                },
+                "xAxisFontSize": {
+                    "type": { "numeric": true }
+                },
+                "xAxisFontColor": {
+                    "type": { "fill": { "solid": { "color": true } } }
+                },
+                "xLabelRotation": {
+                    "type": {
+                        "enumeration": [
+                            { "displayName": "0°", "value": "0" },
+                            { "displayName": "45°", "value": "45" },
+                            { "displayName": "90°", "value": "90" }
+                        ]
+                    }
+                },
+                "showXGridlines": {
+                    "type": { "bool": true }
+                },
+                "gridlineColor": {
+                    "type": { "fill": { "solid": { "color": true } } }
+                }
+            }
+        },
+        "yAxisLeftSettings": {
+            "properties": {
+                "showAxis": {
+                    "type": { "bool": true }
+                },
+                "axisLabel": {
+                    "type": { "text": true }
+                },
+                "axisFontSize": {
+                    "type": { "numeric": true }
+                },
+                "axisFontColor": {
+                    "type": { "fill": { "solid": { "color": true } } }
+                },
+                "axisMin": {
+                    "type": { "numeric": true }
+                },
+                "axisMax": {
+                    "type": { "numeric": true }
+                },
+                "showGridlines": {
+                    "type": { "bool": true }
+                }
+            }
+        },
+        "yAxisLeftSecondarySettings": {
+            "properties": {
+                "showAxis": {
+                    "type": { "bool": true }
+                },
+                "axisLabel": {
+                    "type": { "text": true }
+                },
+                "axisFontSize": {
+                    "type": { "numeric": true }
+                },
+                "axisFontColor": {
+                    "type": { "fill": { "solid": { "color": true } } }
+                },
+                "axisMin": {
+                    "type": { "numeric": true }
+                },
+                "axisMax": {
+                    "type": { "numeric": true }
+                },
+                "showGridlines": {
+                    "type": { "bool": true }
+                }
+            }
+        },
+        "yAxisRightSettings": {
+            "properties": {
+                "showAxis": {
+                    "type": { "bool": true }
+                },
+                "axisLabel": {
+                    "type": { "text": true }
+                },
+                "axisFontSize": {
+                    "type": { "numeric": true }
+                },
+                "axisFontColor": {
+                    "type": { "fill": { "solid": { "color": true } } }
+                },
+                "axisMin": {
+                    "type": { "numeric": true }
+                },
+                "axisMax": {
+                    "type": { "numeric": true }
+                },
+                "showGridlines": {
+                    "type": { "bool": true }
+                }
+            }
+        },
+        "legendSettings": {
+            "properties": {
+                "showLegend": {
+                    "type": { "bool": true }
+                },
+                "legendPosition": {
+                    "type": {
+                        "enumeration": [
+                            { "displayName": "Top", "value": "top" },
+                            { "displayName": "Bottom", "value": "bottom" }
+                        ]
+                    }
+                },
+                "legendFontSize": {
+                    "type": { "numeric": true }
+                },
+                "legendFontColor": {
+                    "type": { "fill": { "solid": { "color": true } } }
+                }
+            }
+        },
+        "labelSettings": {
+            "properties": {
+                "showDataLabels": {
+                    "type": { "bool": true }
+                },
+                "dataLabelFontSize": {
+                    "type": { "numeric": true }
+                },
+                "dataLabelFontColor": {
+                    "type": { "fill": { "solid": { "color": true } } }
+                }
+            }
+        },
+        "colorSettings": {
+            "properties": {
+                "selectedColor": {
+                    "type": { "fill": { "solid": { "color": true } } }
                 }
             }
         }
@@ -56,24 +473,28 @@
         {
             "categorical": {
                 "categories": {
-                    "for": {
-                        "in": "category"
-                    },
+                    "for": { "in": "xCategory" },
                     "dataReductionAlgorithm": {
-                        "top": {}
+                        "top": { "count": 10000 }
                     }
                 },
                 "values": {
                     "select": [
-                        {
-                            "bind": {
-                                "to": "measure"
-                            }
-                        }
+                        { "bind": { "to": "measure1" } },
+                        { "bind": { "to": "measure2" } },
+                        { "bind": { "to": "measure3" } },
+                        { "bind": { "to": "measure4" } },
+                        { "bind": { "to": "measure5" } },
+                        { "bind": { "to": "measure6" } },
+                        { "bind": { "to": "tooltipFields" } }
                     ]
                 }
             }
         }
     ],
+    "tooltips": {
+        "supportedTypes": { "default": true, "canvas": true },
+        "roles": ["tooltipFields"]
+    },
     "privileges": []
 }

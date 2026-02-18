@@ -7,14 +7,7 @@
 import * as d3 from "d3-selection";
 
 import { MekkoSegment } from "../types";
-
-/* ═══════════════════════════════════════════════
-   Selection Styles
-   ═══════════════════════════════════════════════ */
-
-const DIM_OPACITY = 0.25;
-const FULL_OPACITY = 1.0;
-const SELECTED_STROKE_WIDTH = 2;
+import { DIM_OPACITY, FULL_OPACITY, SELECTED_STROKE_WIDTH } from "../constants";
 
 /**
  * Apply selection highlighting to segment rects.

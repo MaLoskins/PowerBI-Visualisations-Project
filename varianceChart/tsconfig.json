@@ -8,6 +8,12 @@
         "outDir": "./.tmp/build/",
         "moduleResolution": "node",
         "declaration": true,
+        "strictNullChecks": false,
+        "noImplicitAny": true,
+        "strictFunctionTypes": true,
+        "strictPropertyInitialization": false,
+        "noImplicitReturns": true,
+        "noImplicitThis": true,
         "lib": [
             "es2022",
             "dom"

@@ -406,7 +406,6 @@ export class Visual implements IVisual {
                     yScaleZoomed,
                     cfg,
                     result.hasSize,
-                    cfg.axis,
                 );
             }
         }

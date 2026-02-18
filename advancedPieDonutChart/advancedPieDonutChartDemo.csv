@@ -1,0 +1,35 @@
+Category,Value,OuterCategory,Region,Status
+Engineering,4200000,Backend,North America,Active
+Engineering,3100000,Frontend,North America,Active
+Engineering,1800000,DevOps,Europe,Active
+Engineering,950000,QA,Asia Pacific,Active
+Engineering,620000,Mobile,Europe,Active
+Sales,3800000,Enterprise,North America,Active
+Sales,2600000,Mid-Market,Europe,Active
+Sales,1400000,SMB,Asia Pacific,Active
+Sales,480000,Channel Partners,North America,Pilot
+Marketing,2900000,Digital,North America,Active
+Marketing,1700000,Brand,Europe,Active
+Marketing,850000,Events,Asia Pacific,Active
+Marketing,320000,Content,North America,Active
+Operations,2100000,Infrastructure,North America,Active
+Operations,1300000,Supply Chain,Europe,Active
+Operations,700000,Facilities,Asia Pacific,Active
+Customer Success,1800000,Onboarding,North America,Active
+Customer Success,1200000,Support,Europe,Active
+Customer Success,550000,Training,Asia Pacific,Active
+Product,1600000,Research,North America,Active
+Product,1100000,Design,Europe,Active
+Product,480000,Analytics,Asia Pacific,Active
+Finance,950000,Accounting,North America,Active
+Finance,620000,FP&A,Europe,Active
+Finance,280000,Compliance,North America,Active
+Legal,420000,Corporate,North America,Active
+Legal,310000,IP,Europe,Active
+HR,680000,Recruiting,North America,Active
+HR,390000,L&D,Europe,Active
+HR,180000,Benefits,Asia Pacific,Pilot
+Security,350000,AppSec,North America,Active
+Security,210000,Infrastructure,Europe,Active
+Exec Office,290000,Strategy,North America,Active
+Exec Office,150000,Admin,North America,Active

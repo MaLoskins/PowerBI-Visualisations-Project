@@ -7,6 +7,7 @@
  */
 "use strict";
 
+import powerbi from "powerbi-visuals-api";
 import { formattingSettings } from "powerbi-visuals-utils-formattingmodel";
 
 import FormattingSettingsCard = formattingSettings.SimpleCard;
@@ -95,12 +96,6 @@ function safeEnum<T extends string>(
     if (val && (allowed as readonly string[]).includes(val)) return val as T;
     return fallback;
 }
-
-/* ═══════════════════════════════════════════════
-   powerbi import (for ValidatorType)
-   ═══════════════════════════════════════════════ */
-
-import powerbi from "powerbi-visuals-api";
 
 /* ═══════════════════════════════════════════════
    Card: chartSettings

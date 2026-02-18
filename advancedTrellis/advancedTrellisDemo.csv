@@ -1,0 +1,133 @@
+trellisBy,category,value,series,tooltipFields1,tooltipFields2
+North America,Jan,48500,Electronics,320,0.24
+North America,Feb,52300,Electronics,345,0.26
+North America,Mar,61200,Electronics,410,0.28
+North America,Apr,58700,Electronics,390,0.27
+North America,May,63400,Electronics,425,0.29
+North America,Jun,67800,Electronics,455,0.30
+North America,Jan,31200,Apparel,540,0.42
+North America,Feb,28900,Apparel,500,0.40
+North America,Mar,35600,Apparel,615,0.44
+North America,Apr,41200,Apparel,710,0.45
+North America,May,44800,Apparel,775,0.46
+North America,Jun,39500,Apparel,680,0.43
+North America,Jan,18400,Home & Garden,210,0.35
+North America,Feb,19800,Home & Garden,225,0.36
+North America,Mar,24500,Home & Garden,280,0.38
+North America,Apr,28900,Home & Garden,330,0.39
+North America,May,32100,Home & Garden,365,0.40
+North America,Jun,30200,Home & Garden,345,0.38
+Europe,Jan,41200,Electronics,275,0.22
+Europe,Feb,43800,Electronics,290,0.23
+Europe,Mar,50500,Electronics,340,0.25
+Europe,Apr,48900,Electronics,325,0.24
+Europe,May,55200,Electronics,370,0.27
+Europe,Jun,59400,Electronics,400,0.28
+Europe,Jan,27800,Apparel,480,0.40
+Europe,Feb,25600,Apparel,440,0.38
+Europe,Mar,32100,Apparel,555,0.42
+Europe,Apr,36500,Apparel,630,0.43
+Europe,May,39200,Apparel,675,0.44
+Europe,Jun,35800,Apparel,620,0.41
+Europe,Jan,15200,Home & Garden,175,0.33
+Europe,Feb,16800,Home & Garden,190,0.34
+Europe,Mar,21400,Home & Garden,245,0.36
+Europe,Apr,25600,Home & Garden,290,0.37
+Europe,May,28300,Home & Garden,325,0.38
+Europe,Jun,26100,Home & Garden,300,0.36
+Asia Pacific,Jan,62400,Electronics,520,0.18
+Asia Pacific,Feb,68900,Electronics,575,0.19
+Asia Pacific,Mar,75200,Electronics,630,0.20
+Asia Pacific,Apr,71800,Electronics,600,0.19
+Asia Pacific,May,82500,Electronics,690,0.21
+Asia Pacific,Jun,89100,Electronics,745,0.22
+Asia Pacific,Jan,22100,Apparel,410,0.36
+Asia Pacific,Feb,24500,Apparel,455,0.37
+Asia Pacific,Mar,28900,Apparel,535,0.39
+Asia Pacific,Apr,31200,Apparel,580,0.40
+Asia Pacific,May,34800,Apparel,645,0.41
+Asia Pacific,Jun,32500,Apparel,605,0.39
+Asia Pacific,Jan,12800,Home & Garden,160,0.30
+Asia Pacific,Feb,14200,Home & Garden,178,0.31
+Asia Pacific,Mar,18500,Home & Garden,230,0.33
+Asia Pacific,Apr,21900,Home & Garden,275,0.34
+Asia Pacific,May,24600,Home & Garden,308,0.35
+Asia Pacific,Jun,22800,Home & Garden,285,0.33
+Latin America,Jan,15800,Electronics,130,0.16
+Latin America,Feb,17200,Electronics,142,0.17
+Latin America,Mar,21500,Electronics,178,0.19
+Latin America,Apr,19800,Electronics,164,0.18
+Latin America,May,24100,Electronics,200,0.20
+Latin America,Jun,26500,Electronics,220,0.21
+Latin America,Jan,9800,Apparel,185,0.34
+Latin America,Feb,8900,Apparel,168,0.32
+Latin America,Mar,12400,Apparel,235,0.36
+Latin America,Apr,14600,Apparel,275,0.37
+Latin America,May,16200,Apparel,306,0.38
+Latin America,Jun,14100,Apparel,266,0.35
+Latin America,Jan,5200,Home & Garden,68,0.28
+Latin America,Feb,5800,Home & Garden,76,0.29
+Latin America,Mar,7900,Home & Garden,103,0.31
+Latin America,Apr,9400,Home & Garden,123,0.32
+Latin America,May,10800,Home & Garden,142,0.33
+Latin America,Jun,9900,Home & Garden,130,0.31
+Middle East,Jan,8900,Electronics,72,0.15
+Middle East,Feb,9600,Electronics,78,0.16
+Middle East,Mar,12400,Electronics,101,0.18
+Middle East,Apr,11200,Electronics,91,0.17
+Middle East,May,14800,Electronics,120,0.19
+Middle East,Jun,16200,Electronics,132,0.20
+Middle East,Jan,4500,Apparel,88,0.30
+Middle East,Feb,4100,Apparel,80,0.28
+Middle East,Mar,5800,Apparel,113,0.32
+Middle East,Apr,6900,Apparel,135,0.33
+Middle East,May,7600,Apparel,148,0.34
+Middle East,Jun,6800,Apparel,133,0.31
+Middle East,Jan,2800,Home & Garden,35,0.26
+Middle East,Feb,3100,Home & Garden,39,0.27
+Middle East,Mar,4200,Home & Garden,53,0.29
+Middle East,Apr,5100,Home & Garden,64,0.30
+Middle East,May,5900,Home & Garden,74,0.31
+Middle East,Jun,5400,Home & Garden,68,0.29
+Africa,Jan,3200,Electronics,28,0.12
+Africa,Feb,3800,Electronics,33,0.13
+Africa,Mar,5100,Electronics,44,0.15
+Africa,Apr,4600,Electronics,40,0.14
+Africa,May,6200,Electronics,54,0.16
+Africa,Jun,7100,Electronics,62,0.17
+Africa,Jan,2100,Apparel,42,0.26
+Africa,Feb,1900,Apparel,38,0.24
+Africa,Mar,2800,Apparel,56,0.28
+Africa,Apr,3400,Apparel,68,0.29
+Africa,May,3900,Apparel,78,0.30
+Africa,Jun,3500,Apparel,70,0.27
+Africa,Jan,1100,Home & Garden,15,0.22
+Africa,Feb,1300,Home & Garden,18,0.23
+Africa,Mar,1800,Home & Garden,24,0.25
+Africa,Apr,2200,Home & Garden,30,0.26
+Africa,May,2600,Home & Garden,35,0.27
+Africa,Jun,2300,Home & Garden,31,0.25
+Oceania,Jan,11200,Electronics,92,0.20
+Oceania,Feb,12500,Electronics,103,0.21
+Oceania,Mar,15800,Electronics,130,0.23
+Oceania,Apr,14200,Electronics,117,0.22
+Oceania,May,17500,Electronics,144,0.24
+Oceania,Jun,19200,Electronics,158,0.25
+Oceania,Jan,6800,Apparel,125,0.36
+Oceania,Feb,6200,Apparel,114,0.34
+Oceania,Mar,8500,Apparel,156,0.38
+Oceania,Apr,9800,Apparel,180,0.39
+Oceania,May,10900,Apparel,200,0.40
+Oceania,Jun,9600,Apparel,176,0.37
+Oceania,Jan,3800,Home & Garden,48,0.28
+Oceania,Feb,4200,Home & Garden,53,0.29
+Oceania,Mar,5600,Home & Garden,70,0.31
+Oceania,Apr,6800,Home & Garden,85,0.32
+Oceania,May,7500,Home & Garden,94,0.33
+Oceania,Jun,6900,Home & Garden,87,0.31
+Emerging Markets,Jan,1800,Electronics,16,0.10
+Emerging Markets,Mar,2900,Electronics,25,0.13
+Emerging Markets,May,4100,Electronics,36,0.15
+Emerging Markets,Jan,900,Apparel,19,0.22
+Emerging Markets,Apr,1800,Apparel,38,0.26
+Emerging Markets,Jun,2200,Apparel,46,0.28

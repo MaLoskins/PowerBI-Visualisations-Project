@@ -9,6 +9,7 @@ import { clamp } from "../utils/dom";
 
 /**
  * Compute the trellis grid layout: number of columns/rows, panel dimensions.
+ * Handles all grid configurations: 1×N, N×1, and N×M.
  */
 export function computeGridLayout(
     viewportWidth: number,
@@ -16,12 +17,16 @@ export function computeGridLayout(
     panelCount: number,
     cfg: RenderConfig["layout"],
 ): GridLayout {
+    if (panelCount === 0) {
+        return { columns: 1, rows: 0, panelWidth: 0, panelHeight: 0, totalHeight: 0 };
+    }
+
     /* Auto-column calculation when columns = 0 */
     let cols: number;
     if (cfg.columns > 0) {
-        cols = cfg.columns;
+        cols = Math.min(cfg.columns, panelCount);
     } else {
-        cols = Math.floor(viewportWidth / cfg.panelMinWidth);
+        cols = Math.floor(viewportWidth / Math.max(1, cfg.panelMinWidth));
         cols = clamp(cols, 1, panelCount);
     }
 

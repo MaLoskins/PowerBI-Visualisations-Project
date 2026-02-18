@@ -40,14 +40,14 @@ export function parseRows(
         const categoryRaw = row[cols.category];
         const valueRaw = row[cols.value];
 
-        /* Skip rows missing required fields (T1) */
+        /* Skip rows missing required fields */
         if (trellisRaw == null || categoryRaw == null || valueRaw == null) continue;
 
         const trellisValue = String(trellisRaw);
         const categoryValue = String(categoryRaw);
         const value = Number(valueRaw);
 
-        if (isNaN(value)) continue;
+        if (!isFinite(value)) continue;
 
         const seriesValue =
             cols.series >= 0 && row[cols.series] != null
@@ -57,7 +57,7 @@ export function parseRows(
         /* Build tooltip extras */
         const tooltipExtras: { displayName: string; value: string }[] = [];
         for (const ti of cols.tooltipFields) {
-            if (row[ti] != null) {
+            if (ti < tableColumns.length && row[ti] != null) {
                 tooltipExtras.push({
                     displayName: tableColumns[ti]?.displayName ?? "Field",
                     value: String(row[ti]),
@@ -66,12 +66,15 @@ export function parseRows(
         }
 
         /* Assign colour by series or default */
-        let color = defaultBarColor;
+        let pointColor = defaultBarColor;
         if (seriesValue !== null) {
             if (!seriesIndexMap.has(seriesValue)) {
                 seriesIndexMap.set(seriesValue, seriesIndexMap.size);
             }
-            color = getColorByIndex(palette, seriesIndexMap.get(seriesValue)!);
+            const seriesIdx = seriesIndexMap.get(seriesValue);
+            if (seriesIdx !== undefined) {
+                pointColor = getColorByIndex(palette, seriesIdx);
+            }
         }
 
         /* Selection ID */
@@ -87,7 +90,7 @@ export function parseRows(
             seriesValue,
             selectionId,
             tooltipExtras,
-            color,
+            color: pointColor,
         };
 
         /* Track global range */
@@ -103,10 +106,10 @@ export function parseRows(
         panelMap.get(trellisValue)!.push(point);
     }
 
-    /* Ensure Y domain includes zero for bar charts */
+    /* Ensure Y domain includes zero */
     if (globalMin > 0) globalMin = 0;
     if (globalMax < 0) globalMax = 0;
-    if (globalMin === Infinity) {
+    if (!isFinite(globalMin)) {
         globalMin = 0;
         globalMax = 1;
     }
@@ -124,7 +127,9 @@ export function parseRows(
         for (const pt of points) {
             catSet.add(pt.categoryValue);
             const sKey = pt.seriesValue ?? "__default__";
-            serSet.add(pt.seriesValue ?? "");
+            if (pt.seriesValue !== null) {
+                serSet.add(pt.seriesValue);
+            }
             if (!seriesBuckets.has(sKey)) {
                 seriesBuckets.set(sKey, []);
             }
@@ -135,7 +140,7 @@ export function parseRows(
             trellisValue,
             dataPoints: points,
             categories: Array.from(catSet),
-            seriesNames: Array.from(serSet).filter(Boolean),
+            seriesNames: Array.from(serSet),
             seriesBuckets,
         });
     }

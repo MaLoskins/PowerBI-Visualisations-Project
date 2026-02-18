@@ -1,9 +1,109 @@
-p {
-    font-size: 20px;
-    font-weight: bold;
-    em {
-        background: yellow;
-        padding: 5px;
-        
+/* ═══════════════════════════════════════════════
+   Variance Chart - Power BI Custom Visual Styles
+   H1: Flat selectors, reusable classes
+   H2: CSS variables for dynamic styling
+   ═══════════════════════════════════════════════ */
+
+.variance-container {
+    box-sizing: border-box;
+    font-family: "Segoe UI", "wf_segoe-ui_normal", "Helvetica Neue", Helvetica, Arial, sans-serif;
+    font-size: 11px;
+    position: relative;
+    width: 100%;
+    height: 100%;
+    overflow: hidden;
+
+    *,
+    *::before,
+    *::after {
+        box-sizing: border-box;
     }
+}
+
+/* ── SVG Canvas ── */
+
+.variance-svg {
+    display: block;
+    width: 100%;
+    height: 100%;
+}
+
+/* ── Error Overlay ── */
+
+.variance-error {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    color: #64748B;
+    font-size: 13px;
+    line-height: 1.5;
+    padding: 24px;
+    white-space: pre-line;
+    background: #FFFFFF;
+    z-index: 10;
+}
+
+/* ── Bar hover ── */
+
+.variance-bar-group {
+    &:hover .variance-actual-bar {
+        filter: brightness(1.08);
+    }
+
+    &:hover .variance-budget-bar {
+        filter: brightness(1.05);
+    }
+}
+
+/* ── Axis labels ── */
+
+.variance-axis-label {
+    font-family: "Segoe UI", "wf_segoe-ui_normal", "Helvetica Neue", Helvetica, Arial, sans-serif;
+    user-select: none;
+}
+
+/* ── Data labels ── */
+
+.variance-label {
+    font-family: "Segoe UI", "wf_segoe-ui_normal", "Helvetica Neue", Helvetica, Arial, sans-serif;
+    user-select: none;
+    pointer-events: none;
+}
+
+/* ── Legend ── */
+
+.variance-legend-label {
+    font-family: "Segoe UI", "wf_segoe-ui_normal", "Helvetica Neue", Helvetica, Arial, sans-serif;
+    user-select: none;
+}
+
+/* ── Variance Panel ── */
+
+.variance-panel-header {
+    font-family: "Segoe UI", "wf_segoe-ui_normal", "Helvetica Neue", Helvetica, Arial, sans-serif;
+    user-select: none;
+}
+
+.variance-panel-label {
+    font-family: "Segoe UI", "wf_segoe-ui_normal", "Helvetica Neue", Helvetica, Arial, sans-serif;
+    user-select: none;
+}
+
+/* ── Transitions (hover feedback only, 0.1s per H2) ── */
+
+.variance-actual-bar,
+.variance-budget-bar,
+.variance-delta-bar,
+.variance-lollipop-dot {
+    transition: filter 0.1s ease, opacity 0.15s ease;
+}
+
+.variance-bar-group {
+    transition: opacity 0.15s ease;
 }

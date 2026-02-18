@@ -1,9 +1,144 @@
-p {
-    font-size: 20px;
-    font-weight: bold;
-    em {
-        background: yellow;
-        padding: 5px;
-        
-    }
+/* ═══════════════════════════════════════════════
+   Radar / Polar Chart – Power BI Custom Visual Styles
+   H1: Flat selectors with radar- prefix
+   H2: CSS variables for dynamic styling
+   ═══════════════════════════════════════════════ */
+
+.radar-container {
+    box-sizing: border-box;
+    width: 100%;
+    height: 100%;
+    overflow: hidden;
+    position: relative;
+    font-family: "Segoe UI", "wf_segoe-ui_normal", "Helvetica Neue", Helvetica, Arial, sans-serif;
+    font-size: 11px;
+}
+
+.radar-container *,
+.radar-container *::before,
+.radar-container *::after {
+    box-sizing: border-box;
+}
+
+/* ── SVG Canvas ── */
+
+.radar-svg {
+    width: 100%;
+    height: 100%;
+    display: block;
+}
+
+/* ── Grid ── */
+
+.radar-grid-ring {
+    fill: none;
+    pointer-events: none;
+}
+
+.radar-spoke {
+    pointer-events: none;
+}
+
+.radar-grid-label {
+    pointer-events: none;
+    user-select: none;
+}
+
+/* ── Axis Labels ── */
+
+.radar-axis-label {
+    user-select: none;
+    pointer-events: none;
+}
+
+/* ── Data Polygons ── */
+
+.radar-polygon {
+    cursor: pointer;
+    transition: opacity 0.1s ease;
+}
+
+.radar-polygon.radar-dimmed {
+    opacity: 0.15;
+}
+
+/* ── Dots ── */
+
+.radar-dot {
+    cursor: pointer;
+    transition: opacity 0.1s ease;
+}
+
+.radar-dot.radar-dimmed {
+    opacity: 0.15;
+}
+
+/* ── Legend ── */
+
+.radar-legend {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 12px;
+    position: absolute;
+    pointer-events: none;
+}
+
+.radar-legend.radar-legend-top {
+    top: 4px;
+    left: 50%;
+    transform: translateX(-50%);
+    justify-content: center;
+}
+
+.radar-legend.radar-legend-bottom {
+    bottom: 4px;
+    left: 50%;
+    transform: translateX(-50%);
+    justify-content: center;
+}
+
+.radar-legend.radar-legend-right {
+    top: 50%;
+    right: 8px;
+    transform: translateY(-50%);
+    flex-direction: column;
+}
+
+.radar-legend-item {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    pointer-events: auto;
+    cursor: default;
+}
+
+.radar-legend-swatch {
+    width: 10px;
+    height: 10px;
+    border-radius: 2px;
+    flex-shrink: 0;
+}
+
+.radar-legend-label {
+    white-space: nowrap;
+}
+
+/* ── Error Overlay ── */
+
+.radar-error {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    color: #64748B;
+    font-size: 13px;
+    line-height: 1.5;
+    padding: 24px;
+    background: #FFFFFF;
+    z-index: 10;
 }

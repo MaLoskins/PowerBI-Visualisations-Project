@@ -1,79 +1,205 @@
 {
     "dataRoles": [
         {
-            "displayName": "Category Data",
+            "displayName": "Category",
             "name": "category",
-            "kind": "Grouping"
+            "kind": "Grouping",
+            "displayNameKey": "Role_Category"
         },
         {
-            "displayName": "Measure Data",
-            "name": "measure",
-            "kind": "Measure"
+            "displayName": "Actual",
+            "name": "actual",
+            "kind": "Measure",
+            "displayNameKey": "Role_Actual"
+        },
+        {
+            "displayName": "Budget",
+            "name": "budget",
+            "kind": "Measure",
+            "displayNameKey": "Role_Budget"
+        },
+        {
+            "displayName": "Tooltip Fields",
+            "name": "tooltipFields",
+            "kind": "GroupingOrMeasure",
+            "displayNameKey": "Role_TooltipFields"
         }
     ],
     "objects": {
-        "dataPoint": {
+        "chartSettings": {
             "properties": {
-                "defaultColor": {
+                "orientation": {
                     "type": {
-                        "fill": {
-                            "solid": {
-                                "color": true
-                            }
-                        }
+                        "enumeration": [
+                            { "displayName": "Vertical", "value": "vertical" },
+                            { "displayName": "Horizontal", "value": "horizontal" }
+                        ]
                     }
                 },
-                "showAllDataPoints": {
+                "barWidth": {
+                    "type": { "numeric": true }
+                },
+                "budgetWidth": {
+                    "type": { "numeric": true }
+                },
+                "barCornerRadius": {
+                    "type": { "numeric": true }
+                },
+                "barGap": {
+                    "type": { "numeric": true }
+                },
+                "showVarianceIndicator": {
+                    "type": { "bool": true }
+                },
+                "varianceStyle": {
                     "type": {
-                        "bool": true
+                        "enumeration": [
+                            { "displayName": "Delta Bar", "value": "deltaBar" },
+                            { "displayName": "Lollipop", "value": "lollipop" },
+                            { "displayName": "Arrow", "value": "arrow" },
+                            { "displayName": "Connector Line", "value": "connectorLine" }
+                        ]
+                    }
+                }
+            }
+        },
+        "variancePanelSettings": {
+            "properties": {
+                "showVariancePanel": {
+                    "type": { "bool": true }
+                },
+                "panelWidth": {
+                    "type": { "numeric": true }
+                },
+                "panelBackground": {
+                    "type": { "fill": { "solid": { "color": true } } }
+                },
+                "panelBorderColor": {
+                    "type": { "fill": { "solid": { "color": true } } }
+                }
+            }
+        },
+        "colorSettings": {
+            "properties": {
+                "actualColor": {
+                    "type": { "fill": { "solid": { "color": true } } }
+                },
+                "budgetColor": {
+                    "type": { "fill": { "solid": { "color": true } } }
+                },
+                "favourableColor": {
+                    "type": { "fill": { "solid": { "color": true } } }
+                },
+                "unfavourableColor": {
+                    "type": { "fill": { "solid": { "color": true } } }
+                },
+                "selectedColor": {
+                    "type": { "fill": { "solid": { "color": true } } }
+                }
+            }
+        },
+        "axisSettings": {
+            "properties": {
+                "showXAxis": {
+                    "type": { "bool": true }
+                },
+                "showYAxis": {
+                    "type": { "bool": true }
+                },
+                "axisFontSize": {
+                    "type": { "numeric": true }
+                },
+                "axisFontColor": {
+                    "type": { "fill": { "solid": { "color": true } } }
+                },
+                "showGridlines": {
+                    "type": { "bool": true }
+                },
+                "gridlineColor": {
+                    "type": { "fill": { "solid": { "color": true } } }
+                },
+                "xLabelRotation": {
+                    "type": {
+                        "enumeration": [
+                            { "displayName": "0°", "value": "0" },
+                            { "displayName": "45°", "value": "45" },
+                            { "displayName": "90°", "value": "90" }
+                        ]
+                    }
+                }
+            }
+        },
+        "labelSettings": {
+            "properties": {
+                "showValueLabels": {
+                    "type": { "bool": true }
+                },
+                "labelContent": {
+                    "type": {
+                        "enumeration": [
+                            { "displayName": "Actual", "value": "actual" },
+                            { "displayName": "Variance", "value": "variance" },
+                            { "displayName": "Both", "value": "both" },
+                            { "displayName": "Percent", "value": "percent" }
+                        ]
                     }
                 },
-                "fill": {
+                "labelFontSize": {
+                    "type": { "numeric": true }
+                },
+                "labelFontColor": {
+                    "type": { "fill": { "solid": { "color": true } } }
+                },
+                "showVariancePercent": {
+                    "type": { "bool": true }
+                }
+            }
+        },
+        "legendSettings": {
+            "properties": {
+                "showLegend": {
+                    "type": { "bool": true }
+                },
+                "legendPosition": {
                     "type": {
-                        "fill": {
-                            "solid": {
-                                "color": true
-                            }
-                        }
+                        "enumeration": [
+                            { "displayName": "Top", "value": "top" },
+                            { "displayName": "Bottom", "value": "bottom" }
+                        ]
                     }
                 },
-                "fillRule": {
-                    "type": {
-                        "fill": {}
-                    }
+                "legendFontSize": {
+                    "type": { "numeric": true }
                 },
-                 "fontSize": {
-                    "type": {
-                        "formatting": {
-                            "fontSize": true
-                        }
-                    }
+                "legendFontColor": {
+                    "type": { "fill": { "solid": { "color": true } } }
                 }
             }
         }
     },
     "dataViewMappings": [
         {
-            "categorical": {
-                "categories": {
-                    "for": {
-                        "in": "category"
-                    },
-                    "dataReductionAlgorithm": {
-                        "top": {}
-                    }
-                },
-                "values": {
+            "table": {
+                "rows": {
                     "select": [
-                        {
-                            "bind": {
-                                "to": "measure"
-                            }
-                        }
-                    ]
+                        { "for": { "in": "category" } },
+                        { "for": { "in": "actual" } },
+                        { "for": { "in": "budget" } },
+                        { "for": { "in": "tooltipFields" } }
+                    ],
+                    "dataReductionAlgorithm": {
+                        "top": { "count": 10000 }
+                    }
                 }
             }
         }
     ],
+    "tooltips": {
+        "supportedTypes": {
+            "default": true,
+            "canvas": true
+        },
+        "roles": ["tooltipFields"]
+    },
     "privileges": []
 }

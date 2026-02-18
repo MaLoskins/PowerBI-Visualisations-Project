@@ -1,79 +1,159 @@
 {
     "dataRoles": [
         {
-            "displayName": "Category Data",
-            "name": "category",
-            "kind": "Grouping"
+            "displayName": "Word",
+            "name": "word",
+            "kind": "Grouping",
+            "description": "The text to display in the word cloud"
         },
         {
-            "displayName": "Measure Data",
-            "name": "measure",
-            "kind": "Measure"
+            "displayName": "Size",
+            "name": "size",
+            "kind": "Measure",
+            "description": "Determines font size of each word"
+        },
+        {
+            "displayName": "Color Field",
+            "name": "colorField",
+            "kind": "GroupingOrMeasure",
+            "description": "Colour category or explicit hex value"
+        },
+        {
+            "displayName": "Tooltip Fields",
+            "name": "tooltipFields",
+            "kind": "GroupingOrMeasure",
+            "description": "Additional tooltip information"
         }
     ],
     "objects": {
-        "dataPoint": {
+        "wordSettings": {
             "properties": {
-                "defaultColor": {
+                "minFontSize": {
+                    "type": { "numeric": true }
+                },
+                "maxFontSize": {
+                    "type": { "numeric": true }
+                },
+                "fontFamily": {
                     "type": {
-                        "fill": {
-                            "solid": {
-                                "color": true
-                            }
-                        }
+                        "enumeration": [
+                            { "displayName": "Segoe UI", "value": "Segoe UI" },
+                            { "displayName": "Arial", "value": "Arial" },
+                            { "displayName": "Impact", "value": "Impact" },
+                            { "displayName": "Georgia", "value": "Georgia" },
+                            { "displayName": "Courier New", "value": "Courier New" },
+                            { "displayName": "Comic Sans MS", "value": "Comic Sans MS" }
+                        ]
                     }
                 },
-                "showAllDataPoints": {
+                "fontWeight": {
                     "type": {
-                        "bool": true
+                        "enumeration": [
+                            { "displayName": "Normal", "value": "normal" },
+                            { "displayName": "Bold", "value": "bold" },
+                            { "displayName": "Black (900)", "value": "900" }
+                        ]
                     }
                 },
-                "fill": {
+                "maxWords": {
+                    "type": { "numeric": true }
+                },
+                "padding": {
+                    "type": { "numeric": true }
+                }
+            }
+        },
+        "rotationSettings": {
+            "properties": {
+                "rotationMode": {
                     "type": {
-                        "fill": {
-                            "solid": {
-                                "color": true
-                            }
-                        }
+                        "enumeration": [
+                            { "displayName": "None", "value": "none" },
+                            { "displayName": "Right Angle", "value": "rightAngle" },
+                            { "displayName": "Random", "value": "random" },
+                            { "displayName": "Custom", "value": "custom" }
+                        ]
                     }
                 },
-                "fillRule": {
+                "customAngle": {
+                    "type": { "numeric": true }
+                },
+                "rightAngleChance": {
+                    "type": { "numeric": true }
+                },
+                "randomMin": {
+                    "type": { "numeric": true }
+                },
+                "randomMax": {
+                    "type": { "numeric": true }
+                }
+            }
+        },
+        "colorSettings": {
+            "properties": {
+                "colorMode": {
                     "type": {
-                        "fill": {}
+                        "enumeration": [
+                            { "displayName": "Palette", "value": "palette" },
+                            { "displayName": "Gradient", "value": "gradient" },
+                            { "displayName": "Field", "value": "field" },
+                            { "displayName": "Single Colour", "value": "single" }
+                        ]
                     }
                 },
-                 "fontSize": {
+                "singleColor": {
+                    "type": { "fill": { "solid": { "color": true } } }
+                },
+                "gradientStart": {
+                    "type": { "fill": { "solid": { "color": true } } }
+                },
+                "gradientEnd": {
+                    "type": { "fill": { "solid": { "color": true } } }
+                },
+                "selectedColor": {
+                    "type": { "fill": { "solid": { "color": true } } }
+                },
+                "hoverOpacity": {
+                    "type": { "numeric": true }
+                }
+            }
+        },
+        "layoutSettings": {
+            "properties": {
+                "spiralType": {
                     "type": {
-                        "formatting": {
-                            "fontSize": true
-                        }
+                        "enumeration": [
+                            { "displayName": "Archimedean", "value": "archimedean" },
+                            { "displayName": "Rectangular", "value": "rectangular" }
+                        ]
                     }
+                },
+                "centerBias": {
+                    "type": { "numeric": true }
                 }
             }
         }
     },
     "dataViewMappings": [
         {
-            "categorical": {
-                "categories": {
-                    "for": {
-                        "in": "category"
-                    },
-                    "dataReductionAlgorithm": {
-                        "top": {}
-                    }
-                },
-                "values": {
+            "table": {
+                "rows": {
                     "select": [
-                        {
-                            "bind": {
-                                "to": "measure"
-                            }
-                        }
-                    ]
+                        { "for": { "in": "word" } },
+                        { "for": { "in": "size" } },
+                        { "for": { "in": "colorField" } },
+                        { "for": { "in": "tooltipFields" } }
+                    ],
+                    "dataReductionAlgorithm": {
+                        "top": { "count": 10000 }
+                    }
                 }
             }
         }
     ],
+    "tooltips": {
+        "supportedTypes": { "default": true, "canvas": true },
+        "roles": ["tooltipFields"]
+    },
     "privileges": []
 }

@@ -1,0 +1,99 @@
+Region,Country,City,Department
+North America,United States,New York,Engineering
+North America,United States,New York,Marketing
+North America,United States,New York,Sales
+North America,United States,New York,Finance
+North America,United States,New York,Human Resources
+North America,United States,San Francisco,Engineering
+North America,United States,San Francisco,Marketing
+North America,United States,San Francisco,Design
+North America,United States,San Francisco,Product
+North America,United States,Chicago,Sales
+North America,United States,Chicago,Operations
+North America,United States,Chicago,Finance
+North America,United States,Austin,Engineering
+North America,United States,Austin,Design
+North America,United States,Seattle,Engineering
+North America,United States,Seattle,Product
+North America,United States,Seattle,Cloud Services
+North America,Canada,Toronto,Engineering
+North America,Canada,Toronto,Marketing
+North America,Canada,Toronto,Sales
+North America,Canada,Vancouver,Engineering
+North America,Canada,Vancouver,Design
+North America,Canada,Montreal,Finance
+North America,Canada,Montreal,Legal
+North America,Mexico,Mexico City,Sales
+North America,Mexico,Mexico City,Operations
+North America,Mexico,Guadalajara,Engineering
+Europe,United Kingdom,London,Engineering
+Europe,United Kingdom,London,Marketing
+Europe,United Kingdom,London,Sales
+Europe,United Kingdom,London,Finance
+Europe,United Kingdom,London,Legal
+Europe,United Kingdom,Manchester,Engineering
+Europe,United Kingdom,Manchester,Operations
+Europe,United Kingdom,Edinburgh,Design
+Europe,Germany,Berlin,Engineering
+Europe,Germany,Berlin,Marketing
+Europe,Germany,Berlin,Design
+Europe,Germany,Munich,Engineering
+Europe,Germany,Munich,Sales
+Europe,Germany,Frankfurt,Finance
+Europe,Germany,Frankfurt,Operations
+Europe,France,Paris,Engineering
+Europe,France,Paris,Marketing
+Europe,France,Paris,Sales
+Europe,France,Paris,Design
+Europe,France,Lyon,Engineering
+Europe,France,Lyon,Operations
+Europe,Netherlands,Amsterdam,Engineering
+Europe,Netherlands,Amsterdam,Marketing
+Europe,Netherlands,Amsterdam,Data Science
+Europe,Sweden,Stockholm,Engineering
+Europe,Sweden,Stockholm,Design
+Europe,Ireland,Dublin,Engineering
+Europe,Ireland,Dublin,Cloud Services
+Asia Pacific,Japan,Tokyo,Engineering
+Asia Pacific,Japan,Tokyo,Marketing
+Asia Pacific,Japan,Tokyo,Sales
+Asia Pacific,Japan,Osaka,Engineering
+Asia Pacific,Japan,Osaka,Operations
+Asia Pacific,Australia,Sydney,Engineering
+Asia Pacific,Australia,Sydney,Marketing
+Asia Pacific,Australia,Sydney,Sales
+Asia Pacific,Australia,Melbourne,Engineering
+Asia Pacific,Australia,Melbourne,Design
+Asia Pacific,Singapore,Singapore,Engineering
+Asia Pacific,Singapore,Singapore,Finance
+Asia Pacific,Singapore,Singapore,Sales
+Asia Pacific,India,Bangalore,Engineering
+Asia Pacific,India,Bangalore,Data Science
+Asia Pacific,India,Bangalore,Cloud Services
+Asia Pacific,India,Mumbai,Sales
+Asia Pacific,India,Mumbai,Marketing
+Asia Pacific,India,Hyderabad,Engineering
+Asia Pacific,India,Hyderabad,Operations
+Asia Pacific,South Korea,Seoul,Engineering
+Asia Pacific,South Korea,Seoul,Marketing
+Latin America,Brazil,Sao Paulo,Engineering
+Latin America,Brazil,Sao Paulo,Sales
+Latin America,Brazil,Sao Paulo,Marketing
+Latin America,Brazil,Rio de Janeiro,Operations
+Latin America,Brazil,Rio de Janeiro,Finance
+Latin America,Argentina,Buenos Aires,Engineering
+Latin America,Argentina,Buenos Aires,Sales
+Latin America,Colombia,Bogota,Engineering
+Latin America,Colombia,Bogota,Marketing
+Latin America,Chile,Santiago,Engineering
+Latin America,Chile,Santiago,Finance
+Middle East & Africa,United Arab Emirates,Dubai,Sales
+Middle East & Africa,United Arab Emirates,Dubai,Engineering
+Middle East & Africa,United Arab Emirates,Abu Dhabi,Operations
+Middle East & Africa,Israel,Tel Aviv,Engineering
+Middle East & Africa,Israel,Tel Aviv,Data Science
+Middle East & Africa,South Africa,Cape Town,Engineering
+Middle East & Africa,South Africa,Johannesburg,Sales
+Middle East & Africa,Nigeria,Lagos,Sales
+Middle East & Africa,Nigeria,Lagos,Operations
+Middle East & Africa,Kenya,Nairobi,Engineering

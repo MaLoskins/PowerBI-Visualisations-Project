@@ -4,6 +4,8 @@
  */
 "use strict";
 
+import { SegmentLabelContent } from "../types";
+
 /** Format a number as a percentage string (e.g., 0.456 → "45.6%") */
 export function formatPercent(fraction: number, decimals: number = 1): string {
     return (fraction * 100).toFixed(decimals) + "%";
@@ -32,7 +34,7 @@ export function formatCompact(value: number): string {
  * fraction is 0–1, value is the raw data value.
  */
 export function buildSegmentLabelText(
-    content: "name" | "percent" | "value" | "nameAndPercent",
+    content: SegmentLabelContent,
     segmentName: string,
     fraction: number,
     value: number,

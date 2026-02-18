@@ -5,6 +5,54 @@
 
 ---
 
+## 0. Build & Packaging Invariants (Hard Gates)
+
+These rules are **non-negotiable**. If any rule is violated, the visual will likely fail `pbiviz package`.
+
+### 0.1 Required `pbiviz.json` metadata (packaging WILL fail if missing)
+
+Every visual's `pbiviz.json` MUST contain non-empty values for:
+
+- `visual.description`
+- `visual.supportUrl`
+- `author.name`
+- `author.email`
+
+Do not leave placeholders blank. If you don't have a real URL yet, use a stable placeholder like `https://example.com/support`.
+
+### 0.2 API version pinning (avoid forced reinstall + type drift)
+
+Repository-wide rule:
+
+- `pbiviz.json` → `apiVersion` MUST EXACTLY match `package.json` → `dependencies.powerbi-visuals-api`
+- Pin a single repo-wide version and reuse it in every visual (do not “float” versions).
+
+If these don’t match, `pbiviz` will reinstall the API during packaging and can introduce inconsistent types between visuals.
+
+### 0.3 Dependencies MUST match features used (no implicit deps)
+
+If the code uses any of the following, the dependency MUST exist in `package.json`:
+
+- Uses `host.applyJsonFilter(...)` and/or Power BI filter objects (e.g., `BasicFilter`, `AdvancedFilter`)
+  - MUST include: `powerbi-models`
+- Uses D3 transitions (`selection.transition()`)
+  - MUST include: `d3-transition` (and import it — see Section 9)
+
+No “it works on my machine” assumptions: if a module is imported or a feature requires a package, add it explicitly.
+
+### 0.4 TypeScript strictness gates (compile must succeed on strict settings)
+
+Assume strict TS rules are ON.
+
+- All class fields MUST either:
+  - be initialized where declared, OR
+  - be assigned in the constructor, OR
+  - use definite assignment (`private host!: IVisualHost;`) when safe.
+- All DataView reads MUST be null-guarded (never assume `table.rows` exists):
+  - `const rows = table.rows ?? [];`
+  - if `dataView?.table` is missing, render an empty state and exit cleanly.
+
+
 ## 1. Repository Layout
 
 ```
@@ -252,9 +300,25 @@ All Power BI SDK interaction must occur in visual.ts or interactions/ modules on
 
 ### Formatting Model
 
+
 Settings use the `powerbi-visuals-utils-formattingmodel` package with `SimpleCard` classes. Each card corresponds to one `objects` entry in `capabilities.json`.
 
 **Critical:** The `name` property on each Card class **must exactly match** the key in `capabilities.json` --> `objects`.
+
+#### Formatting Model Hard Rules (prevents recurring TS errors)
+
+1) Dropdown values MUST be strings.
+- `formattingSettings.Dropdown` expects string values.
+- If your "enum" is numeric (0/1/2), encode as `"0" | "1" | "2"` in the dropdown values and convert to number inside `buildRenderConfig()`.
+
+2) Do not invent validator shapes.
+- Only use validators if you are copying an existing, known-good pattern from the reference visual.
+- If uncertain, omit validators entirely (prefer runtime clamping in `buildRenderConfig()`).
+
+3) All settings conversion happens in `buildRenderConfig()`.
+- Treat formatting values as untrusted input.
+- Clamp numeric ranges and normalize strings there (never scatter conversions throughout render code).
+
 
 ### Slice Factories
 
@@ -402,6 +466,17 @@ Every visual must define a primary domain interface (e.g., `GanttTask`, `GaugeSe
 
 ## 9. Rendering Conventions
 
+#### D3 transitions (must be explicit)
+
+If you call `selection.transition()` anywhere:
+
+- Add `d3-transition` to `package.json`.
+- Add a side-effect import once in the module that uses transitions:
+
+```ts
+import "d3-transition";
+```
+
 ### SVG Rendering (d3)
 
 - Use `d3-selection` for SVG element creation and attribute setting.
@@ -491,6 +566,24 @@ container.style.setProperty("--sb-width", cfg.scrollbarWidth + "px");
 2. Dims unselected bars (`opacity: 0.25`) and grid rows (`opacity: 0.35`).
 3. Adds stroke highlight to selected bars.
 4. Toggles a `.gantt-grid-row-selected` class on grid rows.
+
+### Cross-filtering (report interactions)
+
+When the visual must filter other visuals / the report:
+
+- Use `host.applyJsonFilter(...)` (do not rely on selection manager for cross-filtering).
+- Implement filtering using a **single-column** filter strategy:
+  - choose one leaf-level identity column (e.g., `id`, `categoryKey`, `taskId`)
+  - always filter on that column only
+
+Dependency requirement:
+- If you construct filter objects (e.g., `BasicFilter`, `AdvancedFilter`) you MUST include `powerbi-models` in `package.json`.
+
+Rules:
+- Keep filter construction in `interactions/` (e.g., `src/interactions/filter.ts`).
+- `visual.ts` should call a single helper like `applyFilter(host, parsedData, selection)`.
+- Filtering must be deterministic and reversible (clear filter on background click / clear selection).
+
 
 ### Tooltips
 
@@ -650,9 +743,13 @@ Use short alphanumeric tags (e.g., `G1`, `G2`, `F2`, `H1`) to cross-reference de
 - `package.json` version and `pbiviz.json` visual version must always match.
 - Use the `sync-version` script to verify:
 
+- `pbiviz.json.apiVersion` MUST match `package.json.dependencies["powerbi-visuals-api"]`.
+- Add and run a `sync-api` script to fail fast when this drifts:
+
 ```json
-"sync-version": "node -e \"const p=require('./package.json');const v=require('./pbiviz.json');if(p.version!==v.visual.version){console.error('Version mismatch');process.exit(1)}\""
+"sync-api": "node -e \"const p=require('./package.json');const v=require('./pbiviz.json');const dep=p.dependencies&&p.dependencies['powerbi-visuals-api'];const api=v.apiVersion; if(!dep||!api||dep.replace('^','').replace('~','')!==api){console.error('API mismatch: package.json powerbi-visuals-api vs pbiviz.json apiVersion');process.exit(1)}\""
 ```
+
 
 ---
 

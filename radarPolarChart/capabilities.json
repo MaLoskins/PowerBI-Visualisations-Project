@@ -1,79 +1,173 @@
 {
     "dataRoles": [
         {
-            "displayName": "Category Data",
-            "name": "category",
-            "kind": "Grouping"
+            "displayName": "Axis",
+            "name": "axis",
+            "kind": "Grouping",
+            "description": "Radial spokes (e.g., Speed, Power, Agility)"
         },
         {
-            "displayName": "Measure Data",
-            "name": "measure",
-            "kind": "Measure"
+            "displayName": "Value",
+            "name": "value",
+            "kind": "Measure",
+            "description": "Distance along the spoke"
+        },
+        {
+            "displayName": "Series",
+            "name": "series",
+            "kind": "Grouping",
+            "description": "Multiple overlaid polygons (optional)"
+        },
+        {
+            "displayName": "Tooltip Fields",
+            "name": "tooltipFields",
+            "kind": "GroupingOrMeasure",
+            "description": "Additional tooltip information"
         }
     ],
     "objects": {
-        "dataPoint": {
+        "chartSettings": {
             "properties": {
-                "defaultColor": {
-                    "type": {
-                        "fill": {
-                            "solid": {
-                                "color": true
-                            }
-                        }
-                    }
+                "startAngle": {
+                    "type": { "numeric": true }
                 },
-                "showAllDataPoints": {
-                    "type": {
-                        "bool": true
-                    }
+                "fillOpacity": {
+                    "type": { "numeric": true }
                 },
-                "fill": {
-                    "type": {
-                        "fill": {
-                            "solid": {
-                                "color": true
-                            }
-                        }
-                    }
+                "strokeWidth": {
+                    "type": { "numeric": true }
                 },
-                "fillRule": {
-                    "type": {
-                        "fill": {}
-                    }
+                "dotRadius": {
+                    "type": { "numeric": true }
                 },
-                 "fontSize": {
-                    "type": {
-                        "formatting": {
-                            "fontSize": true
-                        }
-                    }
+                "showDots": {
+                    "type": { "bool": true }
+                },
+                "smoothCurve": {
+                    "type": { "bool": true }
+                }
+            }
+        },
+        "gridSettings": {
+            "properties": {
+                "gridLevels": {
+                    "type": { "numeric": true }
+                },
+                "gridShape": {
+                    "type": { "enumeration": [] }
+                },
+                "gridColor": {
+                    "type": { "fill": { "solid": { "color": true } } }
+                },
+                "gridWidth": {
+                    "type": { "numeric": true }
+                },
+                "gridOpacity": {
+                    "type": { "numeric": true }
+                },
+                "spokeColor": {
+                    "type": { "fill": { "solid": { "color": true } } }
+                },
+                "spokeWidth": {
+                    "type": { "numeric": true }
+                },
+                "showGridLabels": {
+                    "type": { "bool": true }
+                },
+                "gridLabelFontSize": {
+                    "type": { "numeric": true }
+                },
+                "gridLabelFontColor": {
+                    "type": { "fill": { "solid": { "color": true } } }
+                }
+            }
+        },
+        "axisLabelSettings": {
+            "properties": {
+                "showAxisLabels": {
+                    "type": { "bool": true }
+                },
+                "axisFontSize": {
+                    "type": { "numeric": true }
+                },
+                "axisFontColor": {
+                    "type": { "fill": { "solid": { "color": true } } }
+                },
+                "labelPadding": {
+                    "type": { "numeric": true }
+                }
+            }
+        },
+        "scaleSettings": {
+            "properties": {
+                "scaleMin": {
+                    "type": { "numeric": true }
+                },
+                "scaleMax": {
+                    "type": { "numeric": true }
+                },
+                "scaleType": {
+                    "type": { "enumeration": [] }
+                }
+            }
+        },
+        "colorSettings": {
+            "properties": {
+                "colorPalette": {
+                    "type": { "enumeration": [] }
+                },
+                "selectedColor": {
+                    "type": { "fill": { "solid": { "color": true } } }
+                }
+            }
+        },
+        "legendSettings": {
+            "properties": {
+                "showLegend": {
+                    "type": { "bool": true }
+                },
+                "legendPosition": {
+                    "type": { "enumeration": [] }
+                },
+                "legendFontSize": {
+                    "type": { "numeric": true }
+                },
+                "legendFontColor": {
+                    "type": { "fill": { "solid": { "color": true } } }
                 }
             }
         }
     },
     "dataViewMappings": [
         {
+            "conditions": [
+                {
+                    "axis": { "max": 1 },
+                    "value": { "max": 1 },
+                    "series": { "max": 1 }
+                }
+            ],
             "categorical": {
                 "categories": {
-                    "for": {
-                        "in": "category"
-                    },
+                    "for": { "in": "axis" },
                     "dataReductionAlgorithm": {
-                        "top": {}
+                        "top": { "count": 10000 }
                     }
                 },
                 "values": {
-                    "select": [
-                        {
-                            "bind": {
-                                "to": "measure"
-                            }
-                        }
-                    ]
+                    "group": {
+                        "by": "series",
+                        "select": [
+                            { "bind": { "to": "value" } }
+                        ]
+                    }
                 }
             }
         }
     ],
+    "tooltips": {
+        "supportedTypes": { "default": true, "canvas": true },
+        "roles": ["tooltipFields"]
+    },
     "privileges": []
 }

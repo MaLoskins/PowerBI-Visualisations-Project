@@ -18,11 +18,11 @@ export function resetCategoryColors(): void {
 /** Get or assign a colour for a category string. */
 export function getCategoryColor(category: string): string {
     const existing = categoryColorMap.get(category);
-    if (existing) return existing;
+    if (existing !== undefined) return existing;
     const idx = categoryColorMap.size % RESOURCE_COLORS.length;
-    const color = RESOURCE_COLORS[idx];
-    categoryColorMap.set(category, color);
-    return color;
+    const assignedColor = RESOURCE_COLORS[idx];
+    categoryColorMap.set(category, assignedColor);
+    return assignedColor;
 }
 
 /** Validate a hex colour string. Returns the string or a fallback. */

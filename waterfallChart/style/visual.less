@@ -1,9 +1,109 @@
-p {
-    font-size: 20px;
-    font-weight: bold;
-    em {
-        background: yellow;
-        padding: 5px;
-        
-    }
+/* ═══════════════════════════════════════════════
+   WaterfallChart - Power BI Custom Visual Styles
+   H1: Reduced nesting, reusable classes
+   H2: CSS variables for dynamic styling
+   ═══════════════════════════════════════════════ */
+
+.waterfall-container {
+    box-sizing: border-box;
+    width: 100%;
+    height: 100%;
+    overflow: hidden;
+    position: relative;
+    font-family: "Segoe UI", "wf_segoe-ui_normal", "Helvetica Neue", Helvetica, Arial, sans-serif;
+    font-size: 11px;
+}
+
+.waterfall-container *,
+.waterfall-container *::before,
+.waterfall-container *::after {
+    box-sizing: border-box;
+}
+
+/* ── SVG root ── */
+
+.waterfall-svg {
+    display: block;
+    width: 100%;
+}
+
+/* ── Bars ── */
+
+.waterfall-bar {
+    transition: opacity 0.1s ease;
+}
+
+.waterfall-bar:hover {
+    filter: brightness(1.08);
+}
+
+/* ── Connector lines ── */
+
+.waterfall-connector {
+    pointer-events: none;
+}
+
+/* ── Gridlines ── */
+
+.waterfall-gridline {
+    pointer-events: none;
+}
+
+/* ── Baseline ── */
+
+.waterfall-baseline {
+    pointer-events: none;
+}
+
+/* ── Value labels ── */
+
+.waterfall-value-label {
+    pointer-events: none;
+    user-select: none;
+}
+
+.waterfall-running-label {
+    pointer-events: none;
+    user-select: none;
+}
+
+/* ── Axis ticks ── */
+
+.waterfall-x-tick text,
+.waterfall-y-tick text {
+    user-select: none;
+}
+
+/* ── Legend ── */
+
+.waterfall-legend-top,
+.waterfall-legend-bottom {
+    width: 100%;
+    min-height: 0;
+}
+
+.waterfall-legend-item {
+    white-space: nowrap;
+    user-select: none;
+}
+
+/* ── Error overlay ── */
+
+.waterfall-error {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    color: #64748B;
+    font-size: 13px;
+    line-height: 1.5;
+    padding: 20px;
+    white-space: pre-line;
+    background: #FFFFFF;
+    z-index: 10;
 }

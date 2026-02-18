@@ -8,6 +8,13 @@
         "outDir": "./.tmp/build/",
         "moduleResolution": "node",
         "declaration": true,
+        "strictBindCallApply": true,
+        "strictFunctionTypes": true,
+
+        "noImplicitAny": true,
+        "noImplicitThis": true,
+        "alwaysStrict": true,
+        "skipLibCheck": true,
         "lib": [
             "es2022",
             "dom"
@@ -15,5 +22,8 @@
     },
     "files": [
         "./src/visual.ts"
+    ],
+    "include": [
+        "./src/**/*.ts"
     ]
 }

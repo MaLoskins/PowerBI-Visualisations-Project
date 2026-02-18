@@ -19,6 +19,12 @@ import type {
     TitleAlignment,
     XLabelRotation,
 } from "./types";
+import {
+    CHART_TYPES,
+    COLOR_PALETTES,
+    TITLE_ALIGNMENTS,
+    X_LABEL_ROTATIONS,
+} from "./types";
 
 /* ═══════════════════════════════════════════════
    Slice Factories
@@ -255,7 +261,7 @@ export class VisualFormattingSettingsModel extends FormattingSettingsModel {
    Percent → fraction conversions happen here.
    ═══════════════════════════════════════════════ */
 
-/** Type-safe enum sanitiser */
+/** Type-safe enum sanitiser — resolves a raw dropdown value to a union type */
 function safeEnum<T extends string>(
     val: string | number | undefined | null,
     allowed: readonly T[],
@@ -265,12 +271,6 @@ function safeEnum<T extends string>(
     if (s && (allowed as readonly string[]).includes(s)) return s as T;
     return fallback;
 }
-
-/** Chart type literals at runtime (duplicated to avoid importing constants) */
-const CHART_TYPE_VALS = ["bar", "line", "area", "lollipop"] as const;
-const PALETTE_VALS = ["default", "pastel", "vivid"] as const;
-const ALIGN_VALS = ["left", "center"] as const;
-const ROTATION_VALS = ["0", "45", "90"] as const;
 
 export function buildRenderConfig(
     model: VisualFormattingSettingsModel,
@@ -294,7 +294,7 @@ export function buildRenderConfig(
             panelMinHeight: lc.panelMinHeight.value,
         },
         chart: {
-            chartType: safeEnum(cc.chartType.value?.value, CHART_TYPE_VALS, "bar"),
+            chartType: safeEnum<ChartType>(cc.chartType.value?.value, CHART_TYPES, "bar"),
             barCornerRadius: cc.barCornerRadius.value,
             lineWidth: cc.lineWidth.value,
             lineSmoothing: cc.lineSmoothing.value,
@@ -310,17 +310,17 @@ export function buildRenderConfig(
             axisFontSize: ac.axisFontSize.value,
             axisFontColor: ac.axisFontColor.value.value,
             gridlineColor: ac.gridlineColor.value.value,
-            xLabelRotation: safeEnum(ac.xLabelRotation.value?.value, ROTATION_VALS, "0"),
+            xLabelRotation: safeEnum<XLabelRotation>(ac.xLabelRotation.value?.value, X_LABEL_ROTATIONS, "0"),
         },
         title: {
             showPanelTitles: tc.showPanelTitles.value,
             titleFontSize: tc.titleFontSize.value,
             titleFontColor: tc.titleFontColor.value.value,
-            titleAlignment: safeEnum(tc.titleAlignment.value?.value, ALIGN_VALS, "left"),
+            titleAlignment: safeEnum<TitleAlignment>(tc.titleAlignment.value?.value, TITLE_ALIGNMENTS, "left"),
             titleBackground: tc.titleBackground.value.value,
         },
         colors: {
-            colorPalette: safeEnum(oc.colorPalette.value?.value, PALETTE_VALS, "default"),
+            colorPalette: safeEnum<ColorPalette>(oc.colorPalette.value?.value, COLOR_PALETTES, "default"),
             defaultBarColor: oc.defaultBarColor.value.value,
             selectedBarColor: oc.selectedBarColor.value.value,
         },

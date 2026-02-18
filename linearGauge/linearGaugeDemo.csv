@@ -1,0 +1,13 @@
+Category,Value,Target,Target2,MinValue,MaxValue,Range1Max,Range2Max,Region,Status
+Revenue,84000,75000,100000,0,120000,50000,90000,North America,On Track
+Profit Margin,62,70,85,0,100,40,70,North America,At Risk
+Customer Satisfaction,4.3,4.0,4.8,1,5,3,4,North America,On Track
+New Customers,312,300,500,0,600,200,400,EMEA,On Track
+Churn Rate,8.5,5,3,0,15,5,10,EMEA,At Risk
+Employee NPS,71,65,80,0,100,50,75,EMEA,On Track
+Uptime %,99.2,99.5,99.9,95,100,98,99.5,APAC,At Risk
+Avg Response Time,2.4,3,1.5,0,5,1.5,3,APAC,On Track
+Pipeline Value,1450000,1200000,2000000,0,2500000,800000,1600000,APAC,On Track
+Cost Reduction,18,25,30,0,40,15,25,LATAM,At Risk
+Feature Delivery,87,80,95,0,100,60,85,LATAM,On Track
+Bug Resolution,145,120,90,0,200,90,150,LATAM,On Track

@@ -8,6 +8,8 @@
         "outDir": "./.tmp/build/",
         "moduleResolution": "node",
         "declaration": true,
+        "strict": false,
+        "strictNullChecks": false,
         "lib": [
             "es2022",
             "dom"

@@ -1,79 +1,218 @@
 {
     "dataRoles": [
         {
-            "displayName": "Category Data",
+            "displayName": "Category",
             "name": "category",
-            "kind": "Grouping"
+            "kind": "Grouping",
+            "description": "Labels for each waterfall step"
         },
         {
-            "displayName": "Measure Data",
-            "name": "measure",
-            "kind": "Measure"
+            "displayName": "Value",
+            "name": "value",
+            "kind": "Measure",
+            "description": "Incremental value for each step (positive = increase, negative = decrease)"
+        },
+        {
+            "displayName": "Is Total",
+            "name": "isTotal",
+            "kind": "GroupingOrMeasure",
+            "description": "Boolean or text flag marking bars as running-total columns"
+        },
+        {
+            "displayName": "Tooltip Fields",
+            "name": "tooltipFields",
+            "kind": "GroupingOrMeasure",
+            "description": "Additional fields shown in tooltips"
         }
     ],
     "objects": {
-        "dataPoint": {
+        "chartSettings": {
             "properties": {
-                "defaultColor": {
+                "orientation": {
                     "type": {
-                        "fill": {
-                            "solid": {
-                                "color": true
-                            }
-                        }
+                        "enumeration": [
+                            { "displayName": "Vertical", "value": "vertical" },
+                            { "displayName": "Horizontal", "value": "horizontal" }
+                        ]
                     }
                 },
-                "showAllDataPoints": {
+                "barWidth": {
+                    "type": { "numeric": true }
+                },
+                "barCornerRadius": {
+                    "type": { "numeric": true }
+                },
+                "showConnectorLines": {
+                    "type": { "bool": true }
+                },
+                "connectorLineColor": {
+                    "type": { "fill": { "solid": { "color": true } } }
+                },
+                "connectorLineWidth": {
+                    "type": { "numeric": true }
+                },
+                "connectorLineStyle": {
                     "type": {
-                        "bool": true
+                        "enumeration": [
+                            { "displayName": "Solid", "value": "solid" },
+                            { "displayName": "Dashed", "value": "dashed" }
+                        ]
+                    }
+                }
+            }
+        },
+        "colorSettings": {
+            "properties": {
+                "increaseColor": {
+                    "type": { "fill": { "solid": { "color": true } } }
+                },
+                "decreaseColor": {
+                    "type": { "fill": { "solid": { "color": true } } }
+                },
+                "totalColor": {
+                    "type": { "fill": { "solid": { "color": true } } }
+                },
+                "startColor": {
+                    "type": { "fill": { "solid": { "color": true } } }
+                },
+                "selectedColor": {
+                    "type": { "fill": { "solid": { "color": true } } }
+                }
+            }
+        },
+        "axisSettings": {
+            "properties": {
+                "showXAxis": {
+                    "type": { "bool": true }
+                },
+                "showYAxis": {
+                    "type": { "bool": true }
+                },
+                "axisFontSize": {
+                    "type": { "numeric": true }
+                },
+                "axisFontColor": {
+                    "type": { "fill": { "solid": { "color": true } } }
+                },
+                "showGridlines": {
+                    "type": { "bool": true }
+                },
+                "gridlineColor": {
+                    "type": { "fill": { "solid": { "color": true } } }
+                },
+                "xLabelRotation": {
+                    "type": {
+                        "enumeration": [
+                            { "displayName": "0°", "value": "0" },
+                            { "displayName": "45°", "value": "45" },
+                            { "displayName": "90°", "value": "90" }
+                        ]
                     }
                 },
-                "fill": {
+                "showBaselineLine": {
+                    "type": { "bool": true }
+                },
+                "baselineColor": {
+                    "type": { "fill": { "solid": { "color": true } } }
+                }
+            }
+        },
+        "labelSettings": {
+            "properties": {
+                "showValueLabels": {
+                    "type": { "bool": true }
+                },
+                "labelPosition": {
                     "type": {
-                        "fill": {
-                            "solid": {
-                                "color": true
-                            }
-                        }
+                        "enumeration": [
+                            { "displayName": "Above", "value": "above" },
+                            { "displayName": "Inside", "value": "inside" },
+                            { "displayName": "Auto", "value": "auto" }
+                        ]
                     }
                 },
-                "fillRule": {
+                "labelFontSize": {
+                    "type": { "numeric": true }
+                },
+                "labelFontColor": {
+                    "type": { "fill": { "solid": { "color": true } } }
+                },
+                "showRunningTotal": {
+                    "type": { "bool": true }
+                },
+                "showPlusMinus": {
+                    "type": { "bool": true }
+                },
+                "valueFormat": {
                     "type": {
-                        "fill": {}
+                        "enumeration": [
+                            { "displayName": "Auto", "value": "auto" },
+                            { "displayName": "Number", "value": "number" },
+                            { "displayName": "Currency", "value": "currency" },
+                            { "displayName": "Compact", "value": "compact" }
+                        ]
+                    }
+                }
+            }
+        },
+        "legendSettings": {
+            "properties": {
+                "showLegend": {
+                    "type": { "bool": true }
+                },
+                "legendPosition": {
+                    "type": {
+                        "enumeration": [
+                            { "displayName": "Top", "value": "top" },
+                            { "displayName": "Bottom", "value": "bottom" }
+                        ]
                     }
                 },
-                 "fontSize": {
-                    "type": {
-                        "formatting": {
-                            "fontSize": true
-                        }
-                    }
+                "legendFontSize": {
+                    "type": { "numeric": true }
+                },
+                "legendFontColor": {
+                    "type": { "fill": { "solid": { "color": true } } }
+                }
+            }
+        },
+        "summarySettings": {
+            "properties": {
+                "autoStartTotal": {
+                    "type": { "bool": true }
+                },
+                "autoEndTotal": {
+                    "type": { "bool": true }
+                },
+                "endTotalLabel": {
+                    "type": { "text": true }
                 }
             }
         }
     },
     "dataViewMappings": [
         {
-            "categorical": {
-                "categories": {
-                    "for": {
-                        "in": "category"
-                    },
-                    "dataReductionAlgorithm": {
-                        "top": {}
-                    }
-                },
-                "values": {
+            "table": {
+                "rows": {
                     "select": [
-                        {
-                            "bind": {
-                                "to": "measure"
-                            }
-                        }
-                    ]
+                        { "for": { "in": "category" } },
+                        { "for": { "in": "value" } },
+                        { "for": { "in": "isTotal" } },
+                        { "for": { "in": "tooltipFields" } }
+                    ],
+                    "dataReductionAlgorithm": {
+                        "top": { "count": 10000 }
+                    }
                 }
             }
         }
     ],
+    "tooltips": {
+        "supportedTypes": {
+            "default": true,
+            "canvas": true
+        },
+        "roles": ["tooltipFields"]
+    },
     "privileges": []
 }

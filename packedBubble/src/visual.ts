@@ -1,76 +1,371 @@
-/*
-*  Power BI Visual CLI
-*
-*  Copyright (c) Microsoft Corporation
-*  All rights reserved.
-*  MIT License
-*
-*  Permission is hereby granted, free of charge, to any person obtaining a copy
-*  of this software and associated documentation files (the ""Software""), to deal
-*  in the Software without restriction, including without limitation the rights
-*  to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
-*  copies of the Software, and to permit persons to whom the Software is
-*  furnished to do so, subject to the following conditions:
-*
-*  The above copyright notice and this permission notice shall be included in
-*  all copies or substantial portions of the Software.
-*
-*  THE SOFTWARE IS PROVIDED *AS IS*, WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
-*  IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-*  FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
-*  AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
-*  LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
-*  OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
-*  THE SOFTWARE.
-*/
+/* ═══════════════════════════════════════════════
+   Packed Bubble Chart – Visual Orchestrator
+   Entry point. All DOM created in constructor.
+   ═══════════════════════════════════════════════ */
+
 "use strict";
 
 import powerbi from "powerbi-visuals-api";
 import { FormattingSettingsService } from "powerbi-visuals-utils-formattingmodel";
+import { select, Selection } from "d3-selection";
 import "./../style/visual.less";
 
 import VisualConstructorOptions = powerbi.extensibility.visual.VisualConstructorOptions;
 import VisualUpdateOptions = powerbi.extensibility.visual.VisualUpdateOptions;
 import IVisual = powerbi.extensibility.visual.IVisual;
+import IVisualHost = powerbi.extensibility.visual.IVisualHost;
+import ISelectionManager = powerbi.extensibility.ISelectionManager;
+import ITooltipService = powerbi.extensibility.ITooltipService;
+import VisualTooltipDataItem = powerbi.extensibility.VisualTooltipDataItem;
 
-import { VisualFormattingSettingsModel } from "./settings";
+import { VisualFormattingSettingsModel, buildRenderConfig } from "./settings";
+import { RenderConfig, BubbleNode, ChartCallbacks, ParseResult } from "./types";
+import { CSS_PREFIX, MISSING_FIELDS_MSG, FONT_STACK } from "./constants";
+import { resolveColumns, hasRequiredColumns } from "./model/columns";
+import { parseRows } from "./model/parser";
+import {
+    SimNode,
+    SimulationContext,
+    computeRadii,
+    createSimulation,
+    restartSimulation,
+    stopSimulation,
+} from "./layout/simulation";
+import {
+    scaffoldSVG,
+    renderBubbles,
+    tickBubbles,
+    bindBackgroundClick,
+    resizeSVG,
+} from "./render/chart";
+import { renderBubbleLabels, renderGroupLabels } from "./render/labels";
+import { renderLegend, LegendDimensions } from "./render/legend";
+import {
+    handleBubbleClick,
+    handleBackgroundClick,
+    applySelectionStyles,
+} from "./interactions/selection";
+import { el } from "./utils/dom";
+import { formatFull } from "./utils/format";
+
+type SVGSel = Selection<SVGSVGElement, unknown, null, undefined>;
 
 export class Visual implements IVisual {
-    private target: HTMLElement;
-    private updateCount: number;
-    private textNode: Text;
-    private formattingSettings: VisualFormattingSettingsModel;
+    /* ── Power BI handles ── */
+    private host: IVisualHost;
+    private selectionManager: ISelectionManager;
+    private tooltipService: ITooltipService;
     private formattingSettingsService: FormattingSettingsService;
+    private formattingSettings: VisualFormattingSettingsModel;
 
+    /* ── DOM skeleton (created once) ── */
+    private container: HTMLDivElement;
+    private errorOverlay: HTMLDivElement;
+    private legendContainer: HTMLDivElement;
+    private svgEl: SVGSVGElement;
+    private svg: SVGSel;
+
+    /* ── State ── */
+    private cfg: RenderConfig;
+    private parseResult: ParseResult | null = null;
+    private simCtx: SimulationContext | null = null;
+    private hasRenderedOnce = false;
+
+    /* ═══════════════════════════════════════════════
+       Constructor — build all DOM once
+       ═══════════════════════════════════════════════ */
     constructor(options: VisualConstructorOptions) {
-        console.log('Visual constructor', options);
+        this.host = options.host;
+        this.selectionManager = this.host.createSelectionManager();
+        this.tooltipService = this.host.tooltipService;
         this.formattingSettingsService = new FormattingSettingsService();
-        this.target = options.element;
-        this.updateCount = 0;
-        if (document) {
-            const new_p: HTMLElement = document.createElement("p");
-            new_p.appendChild(document.createTextNode("Update count:"));
-            const new_em: HTMLElement = document.createElement("em");
-            this.textNode = document.createTextNode(this.updateCount.toString());
-            new_em.appendChild(this.textNode);
-            new_p.appendChild(new_em);
-            this.target.appendChild(new_p);
+
+        /* Root container */
+        this.container = el("div", "container");
+        this.container.style.width = "100%";
+        this.container.style.height = "100%";
+        this.container.style.display = "flex";
+        this.container.style.flexDirection = "column";
+        this.container.style.overflow = "hidden";
+        this.container.style.fontFamily = FONT_STACK;
+        options.element.appendChild(this.container);
+
+        /* Error overlay (hidden by default) */
+        this.errorOverlay = el("div", "error");
+        this.errorOverlay.style.display = "none";
+        this.container.appendChild(this.errorOverlay);
+
+        /* Legend (top by default) */
+        this.legendContainer = el("div", "legend");
+        this.legendContainer.style.display = "none";
+        this.container.appendChild(this.legendContainer);
+
+        /* SVG */
+        this.svgEl = document.createElementNS("http://www.w3.org/2000/svg", "svg");
+        this.svgEl.classList.add(`${CSS_PREFIX}-svg`);
+        this.svgEl.style.flex = "1";
+        this.container.appendChild(this.svgEl);
+
+        this.svg = scaffoldSVG(this.svgEl, 0, 0);
+
+        /* Default config */
+        this.formattingSettings = new VisualFormattingSettingsModel();
+        this.cfg = buildRenderConfig(this.formattingSettings);
+
+        /* Register selection callback so Power BI can notify us */
+        this.selectionManager.registerOnSelectCallback(() => {
+            applySelectionStyles(this.svg, this.selectionManager, this.cfg.bubble.opacity);
+        });
+    }
+
+    /* ═══════════════════════════════════════════════
+       Update — gate on VisualUpdateType
+       ═══════════════════════════════════════════════ */
+    public update(options: VisualUpdateOptions): void {
+        try {
+            const updateType = (options.type as number) ?? 0;
+            const hasData = (updateType & 2) !== 0;
+            const isResizeOnly = !hasData && (updateType & (4 | 16)) !== 0;
+
+            /* Always refresh config */
+            const dv = options.dataViews?.[0];
+            if (dv) {
+                this.formattingSettings = this.formattingSettingsService
+                    .populateFormattingSettingsModel(VisualFormattingSettingsModel, dv);
+            }
+            this.cfg = buildRenderConfig(this.formattingSettings);
+
+            /* Resize-only path */
+            if (isResizeOnly && this.hasRenderedOnce) {
+                this.layoutAndRender(false);
+                return;
+            }
+
+            /* Full data pipeline */
+            if (!dv || !dv.table) {
+                this.showError(MISSING_FIELDS_MSG);
+                return;
+            }
+
+            const table = dv.table;
+            const cols = resolveColumns(table);
+
+            if (!hasRequiredColumns(cols)) {
+                this.showError(MISSING_FIELDS_MSG);
+                return;
+            }
+
+            this.hideError();
+
+            this.parseResult = parseRows(
+                table,
+                cols,
+                this.host,
+                this.cfg.color.colorByGroup,
+                this.cfg.color.defaultBubbleColor,
+            );
+
+            if (this.parseResult.nodes.length === 0) {
+                this.showError("No data to display.\nEnsure values are positive numbers.");
+                return;
+            }
+
+            this.layoutAndRender(true);
+            this.hasRenderedOnce = true;
+
+        } catch (err) {
+            // Never throw from update (E1)
+            console.error("packedBubble update error:", err);
+            this.showError("An unexpected error occurred.");
         }
     }
 
-    public update(options: VisualUpdateOptions) {
-        this.formattingSettings = this.formattingSettingsService.populateFormattingSettingsModel(VisualFormattingSettingsModel, options.dataViews[0]);
+    /* ═══════════════════════════════════════════════
+       Layout & Render
+       ═══════════════════════════════════════════════ */
+    private layoutAndRender(isDataChange: boolean): void {
+        if (!this.parseResult) return;
+        const pr = this.parseResult;
+        const cfg = this.cfg;
 
-        console.log('Visual update', options);
-        if (this.textNode) {
-            this.textNode.textContent = (this.updateCount++).toString();
+        /* ── Legend ── */
+        this.positionLegend(cfg);
+        const legendDims = renderLegend(this.legendContainer, pr.groups, cfg);
+
+        /* ── Compute available chart area ── */
+        const containerRect = this.container.getBoundingClientRect();
+        let chartWidth = containerRect.width;
+        let chartHeight = containerRect.height;
+
+        if (cfg.legend.showLegend && pr.groups.length > 0) {
+            if (cfg.legend.position === "right") {
+                chartWidth -= legendDims.size;
+            } else {
+                chartHeight -= legendDims.size;
+            }
+        }
+        chartWidth = Math.max(chartWidth, 50);
+        chartHeight = Math.max(chartHeight, 50);
+
+        /* ── Compute radii ── */
+        computeRadii(pr.nodes, pr.minValue, pr.maxValue, cfg.bubble.minRadius, cfg.bubble.maxRadius);
+
+        /* ── SVG scaffold ── */
+        if (isDataChange) {
+            this.svg = scaffoldSVG(this.svgEl, chartWidth, chartHeight);
+            bindBackgroundClick(this.svg, () => {
+                handleBackgroundClick(this.selectionManager);
+                applySelectionStyles(this.svg, this.selectionManager, cfg.bubble.opacity);
+            });
+        } else {
+            resizeSVG(this.svg, chartWidth, chartHeight);
+        }
+
+        /* ── Callbacks ── */
+        const callbacks: ChartCallbacks = {
+            onClick: (node, event) => {
+                handleBubbleClick(node, event, this.selectionManager);
+                applySelectionStyles(this.svg, this.selectionManager, cfg.bubble.opacity);
+            },
+            onBackgroundClick: () => {
+                handleBackgroundClick(this.selectionManager);
+                applySelectionStyles(this.svg, this.selectionManager, cfg.bubble.opacity);
+            },
+            onMouseOver: (node, event) => this.showTooltip(node, event),
+            onMouseMove: (node, event) => this.moveTooltip(node, event),
+            onMouseOut: () => this.hideTooltip(),
+        };
+
+        /* ── Force Simulation ── */
+        const simNodes = pr.nodes as SimNode[];
+
+        if (isDataChange) {
+            stopSimulation(this.simCtx);
+
+            /* Render initial bubbles */
+            renderBubbles(this.svg, simNodes, cfg, callbacks);
+
+            this.simCtx = createSimulation(
+                simNodes,
+                pr.groups,
+                chartWidth,
+                chartHeight,
+                cfg,
+                () => this.onSimTick(),
+            );
+        } else {
+            /* Resize: update forces and restart */
+            if (this.simCtx) {
+                renderBubbles(this.svg, simNodes, cfg, callbacks);
+                restartSimulation(this.simCtx, chartWidth, chartHeight, cfg, pr.groups);
+            }
         }
     }
 
-    /**
-     * Returns properties pane formatting model content hierarchies, properties and latest formatting values, Then populate properties pane.
-     * This method is called once every time we open properties pane or when the user edit any format property. 
-     */
+    /** Called on every simulation tick to update positions */
+    private onSimTick(): void {
+        tickBubbles(this.svg);
+        if (this.parseResult && this.simCtx) {
+            renderBubbleLabels(this.svg, this.simCtx.nodes, this.cfg);
+            renderGroupLabels(this.svg, this.simCtx, this.parseResult.groups, this.cfg);
+        }
+    }
+
+    /* ── Legend Positioning ── */
+    private positionLegend(cfg: RenderConfig): void {
+        const c = this.container;
+        const l = this.legendContainer;
+
+        /* Remove and re-insert to match position */
+        if (l.parentElement) l.parentElement.removeChild(l);
+
+        if (cfg.legend.position === "right") {
+            c.style.flexDirection = "row";
+            c.appendChild(this.svgEl);
+            c.appendChild(l);
+        } else if (cfg.legend.position === "bottom") {
+            c.style.flexDirection = "column";
+            c.appendChild(this.svgEl);
+            c.appendChild(l);
+        } else {
+            /* top (default) */
+            c.style.flexDirection = "column";
+            /* Legend before SVG */
+            c.insertBefore(l, this.svgEl);
+        }
+
+        /* Re-append error overlay at the start */
+        if (this.errorOverlay.parentElement !== c) {
+            c.insertBefore(this.errorOverlay, c.firstChild);
+        }
+    }
+
+    /* ═══════════════════════════════════════════════
+       Tooltips
+       ═══════════════════════════════════════════════ */
+    private showTooltip(node: BubbleNode, event: MouseEvent): void {
+        const items: VisualTooltipDataItem[] = [
+            { displayName: "Category", value: node.category },
+            { displayName: "Value", value: formatFull(node.value) },
+        ];
+        if (node.group) {
+            items.push({ displayName: "Group", value: node.group });
+        }
+        for (const tf of node.tooltipFields) {
+            items.push({ displayName: tf.displayName, value: tf.value });
+        }
+
+        this.tooltipService.show({
+            dataItems: items,
+            identities: [node.selectionId],
+            coordinates: [event.clientX, event.clientY],
+            isTouchEvent: false,
+        });
+    }
+
+    private moveTooltip(node: BubbleNode, event: MouseEvent): void {
+        this.tooltipService.move({
+            dataItems: [],
+            identities: [],
+            coordinates: [event.clientX, event.clientY],
+            isTouchEvent: false,
+        });
+    }
+
+    private hideTooltip(): void {
+        this.tooltipService.hide({
+            immediately: true,
+            isTouchEvent: false,
+        });
+    }
+
+    /* ═══════════════════════════════════════════════
+       Error Overlay
+       ═══════════════════════════════════════════════ */
+    private showError(msg: string): void {
+        stopSimulation(this.simCtx);
+        this.simCtx = null;
+        this.svgEl.style.display = "none";
+        this.legendContainer.style.display = "none";
+        this.errorOverlay.style.display = "flex";
+        this.errorOverlay.textContent = "";
+
+        const lines = msg.split("\n");
+        for (const line of lines) {
+            const p = document.createElement("p");
+            p.textContent = line;
+            this.errorOverlay.appendChild(p);
+        }
+    }
+
+    private hideError(): void {
+        this.errorOverlay.style.display = "none";
+        this.svgEl.style.display = "";
+    }
+
+    /* ═══════════════════════════════════════════════
+       Formatting Model
+       ═══════════════════════════════════════════════ */
     public getFormattingModel(): powerbi.visuals.FormattingModel {
         return this.formattingSettingsService.buildFormattingModel(this.formattingSettings);
     }

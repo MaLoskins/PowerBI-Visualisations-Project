@@ -6,8 +6,7 @@
 "use strict";
 
 import type { TrellisPanel, RenderConfig, PanelCallbacks } from "../types";
-import { TITLE_BAR_HEIGHT } from "../constants";
-import { clearChildren } from "../utils/dom";
+import { TITLE_BAR_HEIGHT, TITLE_PADDING_H } from "../constants";
 import { renderChart } from "./chart";
 
 /**
@@ -28,10 +27,10 @@ export function updatePanel(
     callbacks: PanelCallbacks,
 ): void {
     /* ── Panel container styling ── */
-    panelDiv.style.width = panelWidth + "px";
-    panelDiv.style.height = panelHeight + "px";
+    panelDiv.style.width = `${panelWidth}px`;
+    panelDiv.style.height = `${panelHeight}px`;
     panelDiv.style.background = cfg.layout.panelBackground;
-    panelDiv.style.borderRadius = cfg.layout.panelCornerRadius + "px";
+    panelDiv.style.borderRadius = `${cfg.layout.panelCornerRadius}px`;
     panelDiv.style.border = `${cfg.layout.panelBorderWidth}px solid ${cfg.layout.panelBorderColor}`;
     panelDiv.style.overflow = "hidden";
 
@@ -47,10 +46,10 @@ export function updatePanel(
 
     if (showTitle) {
         titleDiv.style.display = "block";
-        titleDiv.style.height = titleHeight + "px";
-        titleDiv.style.lineHeight = titleHeight + "px";
-        titleDiv.style.padding = "0 8px";
-        titleDiv.style.fontSize = cfg.title.titleFontSize + "px";
+        titleDiv.style.height = `${titleHeight}px`;
+        titleDiv.style.lineHeight = `${titleHeight}px`;
+        titleDiv.style.padding = `0 ${TITLE_PADDING_H}px`;
+        titleDiv.style.fontSize = `${cfg.title.titleFontSize}px`;
         titleDiv.style.color = cfg.title.titleFontColor;
         titleDiv.style.background = cfg.title.titleBackground;
         titleDiv.style.textAlign = cfg.title.titleAlignment;
