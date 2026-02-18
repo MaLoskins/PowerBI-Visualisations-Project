@@ -1,1 +1,26 @@
-{"visual":{"name":"advancedGauge","displayName":"AdvancedGauge","guid":"advancedGaugeD03F3871F39B45FA82FFE681727823B1","visualClassName":"Visual","version":"1.0.0.0","description":"","supportUrl":"","gitHubUrl":""},"apiVersion":"5.3.0","author":{"name":"","email":""},"assets":{"icon":"assets/icon.png"},"externalJS":null,"style":"style/visual.less","capabilities":"capabilities.json","dependencies":null,"stringResources":[],"version":"1.0.0.0"}
+{
+    "visual": {
+        "name": "advancedGauge",
+        "displayName": "AdvancedGauge",
+        "guid": "advancedGaugeD03F3871F39B45FA82FFE681727823B1",
+        "visualClassName": "Visual",
+        "version": "1.0.0.0",
+        "description": "A highly configurable radial gauge for Power BI displaying a single KPI value with qualitative ranges, animated needle, target marker, and rich data labels.",
+        "supportUrl": "https://github.com",
+        "gitHubUrl": ""
+    },
+    "apiVersion": "5.3.0",
+    "author": {
+        "name": "Matthew Haskins",
+        "email": "matthew.haskins.mh@gmail.com"
+    },
+    "assets": {
+        "icon": "assets/icon.png"
+    },
+    "externalJS": null,
+    "style": "style/visual.less",
+    "capabilities": "capabilities.json",
+    "dependencies": null,
+    "stringResources": [],
+    "version": "1.0.0.0"
+}

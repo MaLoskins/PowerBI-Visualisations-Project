@@ -1,9 +1,153 @@
-p {
-    font-size: 20px;
-    font-weight: bold;
-    em {
-        background: yellow;
-        padding: 5px;
-        
-    }
+/* ═══════════════════════════════════════════════
+   Advanced Trellis – Power BI Custom Visual Styles
+   H1: Flat selectors, reusable classes
+   H2: CSS variables for dynamic styling
+   ═══════════════════════════════════════════════ */
+
+/* ── Global Reset ── */
+
+.trellis-container,
+.trellis-container * {
+    box-sizing: border-box;
+}
+
+.trellis-container {
+    font-family: "Segoe UI", "wf_segoe-ui_normal", "Helvetica Neue", Helvetica, Arial, sans-serif;
+    font-size: 11px;
+    position: relative;
+    width: 100%;
+    height: 100%;
+    overflow: hidden;
+}
+
+/* ── Error Overlay ── */
+
+.trellis-error {
+    display: none;
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    color: #64748B;
+    font-size: 13px;
+    white-space: pre-line;
+    z-index: 10;
+    background: #FFFFFF;
+}
+
+/* ── Scroll Container ── */
+
+.trellis-scroll {
+    width: 100%;
+    height: 100%;
+    overflow-y: auto;
+    overflow-x: hidden;
+}
+
+/* ── Grid Container ── */
+
+.trellis-grid {
+    display: flex;
+    flex-wrap: wrap;
+    align-content: flex-start;
+}
+
+/* ── Panel ── */
+
+.trellis-panel {
+    display: block;
+    overflow: hidden;
+    flex-shrink: 0;
+}
+
+/* ── Panel Title ── */
+
+.trellis-panel-title {
+    font-weight: 600;
+    user-select: none;
+    pointer-events: none;
+}
+
+/* ── Panel SVG ── */
+
+.trellis-panel-svg {
+    display: block;
+}
+
+/* ── Chart Elements ── */
+
+.trellis-bar {
+    transition: opacity 0.1s;
+}
+
+.trellis-line {
+    fill: none;
+    pointer-events: none;
+}
+
+.trellis-dot {
+    transition: r 0.1s;
+}
+
+.trellis-lollipop-stem {
+    pointer-events: none;
+}
+
+.trellis-lollipop-dot {
+    transition: r 0.1s;
+}
+
+.trellis-area {
+    pointer-events: none;
+}
+
+.trellis-area-line {
+    pointer-events: none;
+}
+
+.trellis-data-label {
+    pointer-events: none;
+    user-select: none;
+}
+
+.trellis-no-data {
+    pointer-events: none;
+    user-select: none;
+}
+
+/* ── Axis Elements ── */
+
+.trellis-x-axis text,
+.trellis-y-axis text {
+    user-select: none;
+    pointer-events: none;
+}
+
+.trellis-ygrid,
+.trellis-xgrid {
+    pointer-events: none;
+    shape-rendering: crispEdges;
+}
+
+/* ── Scrollbar Styling ── */
+
+.trellis-scroll::-webkit-scrollbar {
+    width: 8px;
+}
+
+.trellis-scroll::-webkit-scrollbar-track {
+    background: #F1F5F9;
+}
+
+.trellis-scroll::-webkit-scrollbar-thumb {
+    background: #CBD5E1;
+    border-radius: 4px;
+}
+
+.trellis-scroll::-webkit-scrollbar-thumb:hover {
+    background: #94A3B8;
 }

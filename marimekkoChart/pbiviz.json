@@ -1,1 +1,26 @@
-{"visual":{"name":"marimekkoChart","displayName":"MarimekkoChart","guid":"marimekkoChart7A3F91001F214FA7811A3C4A7419C035","visualClassName":"Visual","version":"1.0.0.0","description":"","supportUrl":"","gitHubUrl":""},"apiVersion":"5.3.0","author":{"name":"","email":""},"assets":{"icon":"assets/icon.png"},"externalJS":null,"style":"style/visual.less","capabilities":"capabilities.json","dependencies":null,"stringResources":[],"version":"1.0.0.0"}
+{
+    "visual": {
+        "name": "marimekkoChart",
+        "displayName": "Marimekko Chart",
+        "guid": "marimekkoChartA1B2C3D4E5F6789012345678",
+        "visualClassName": "Visual",
+        "version": "1.0.0.0",
+        "description": "A Marimekko (Mekko) chart where column width and segment height both encode data. Shows market share and product mix simultaneously.",
+        "supportUrl": "https://github.com",
+        "gitHubUrl": ""
+    },
+    "apiVersion": "5.3.0",
+    "author": {
+        "name": "Matthew Haskins",
+        "email": "matthew.haskins.mh@gmail.com"
+    },
+    "assets": {
+        "icon": "assets/icon.png"
+    },
+    "externalJS": null,
+    "style": "style/visual.less",
+    "capabilities": "capabilities.json",
+    "dependencies": null,
+    "stringResources": [],
+    "version": "1.0.0.0"
+}

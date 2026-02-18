@@ -1,9 +1,134 @@
-p {
-    font-size: 20px;
-    font-weight: bold;
-    em {
-        background: yellow;
-        padding: 5px;
-        
-    }
+/* ═══════════════════════════════════════════════
+   Advanced Gauge – Power BI Custom Visual Styles
+   H1: Reduced nesting, reusable classes
+   H2: CSS variables for dynamic styling
+   ═══════════════════════════════════════════════ */
+
+/* ── Global Reset ── */
+
+.agauge-container,
+.agauge-container * {
+    box-sizing: border-box;
+}
+
+/* ── Container ── */
+
+.agauge-container {
+    width: 100%;
+    height: 100%;
+    position: relative;
+    overflow: hidden;
+    font-family: "Segoe UI", "wf_segoe-ui_normal", "Helvetica Neue", Helvetica, Arial, sans-serif;
+    font-size: 11px;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+}
+
+/* ── SVG Root ── */
+
+.agauge-svg {
+    display: block;
+    width: 100%;
+    height: 100%;
+}
+
+/* ── Arc Segments ── */
+
+.agauge-bg-arc,
+.agauge-value-arc,
+.agauge-range-arc {
+    pointer-events: none;
+}
+
+/* ── Hit Area (transparent overlay for interaction) ── */
+
+.agauge-hit-area {
+    cursor: pointer;
+}
+
+/* ── Needle ── */
+
+.agauge-needle {
+    pointer-events: none;
+}
+
+.agauge-needle-pivot {
+    pointer-events: none;
+}
+
+.agauge-needle-group {
+    transition-property: none; /* d3 handles animation via transition() */
+}
+
+/* ── Target Marker ── */
+
+.agauge-target-marker {
+    pointer-events: none;
+}
+
+.agauge-target-label {
+    pointer-events: none;
+    user-select: none;
+}
+
+/* ── Ticks ── */
+
+.agauge-tick {
+    pointer-events: none;
+}
+
+.agauge-tick-label {
+    pointer-events: none;
+    user-select: none;
+    font-family: "Segoe UI", "wf_segoe-ui_normal", "Helvetica Neue", Helvetica, Arial, sans-serif;
+}
+
+/* ── Labels ── */
+
+.agauge-value-label {
+    pointer-events: none;
+    user-select: none;
+    font-family: "Segoe UI", "wf_segoe-ui_normal", "Helvetica Neue", Helvetica, Arial, sans-serif;
+}
+
+.agauge-min-label,
+.agauge-max-label {
+    pointer-events: none;
+    user-select: none;
+    font-family: "Segoe UI", "wf_segoe-ui_normal", "Helvetica Neue", Helvetica, Arial, sans-serif;
+}
+
+.agauge-title {
+    pointer-events: none;
+    user-select: none;
+    font-family: "Segoe UI", "wf_segoe-ui_normal", "Helvetica Neue", Helvetica, Arial, sans-serif;
+}
+
+/* ── Error Overlay ── */
+
+.agauge-error {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 16px;
+    background: #FFFFFF;
+    z-index: 10;
+}
+
+.agauge-error-msg {
+    text-align: center;
+    color: #64748B;
+    font-size: 13px;
+    line-height: 1.5;
+    white-space: pre-line;
+    margin: 0;
+}
+
+/* ── Hover Feedback ── */
+
+.agauge-hit-area:hover ~ .agauge-needle-group .agauge-needle-pivot {
+    filter: brightness(1.1);
+    transition: filter 0.1s ease;
 }

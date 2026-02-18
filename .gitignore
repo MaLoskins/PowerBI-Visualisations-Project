@@ -4,6 +4,7 @@ node_modules/
 # Build artifacts
 dist/
 .tmp/
+*.html
 
 # Webpack reports
 webpack.statistics.*.html

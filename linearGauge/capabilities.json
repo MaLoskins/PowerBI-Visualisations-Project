@@ -1,79 +1,250 @@
 {
     "dataRoles": [
         {
-            "displayName": "Category Data",
+            "displayName": "Category",
             "name": "category",
-            "kind": "Grouping"
+            "kind": "Grouping",
+            "displayNameKey": "Role_Category"
         },
         {
-            "displayName": "Measure Data",
-            "name": "measure",
-            "kind": "Measure"
+            "displayName": "Value",
+            "name": "value",
+            "kind": "Measure",
+            "displayNameKey": "Role_Value",
+            "requiredTypes": [{ "numeric": true }]
+        },
+        {
+            "displayName": "Target",
+            "name": "target",
+            "kind": "Measure",
+            "displayNameKey": "Role_Target",
+            "requiredTypes": [{ "numeric": true }]
+        },
+        {
+            "displayName": "Target 2",
+            "name": "target2",
+            "kind": "Measure",
+            "displayNameKey": "Role_Target2",
+            "requiredTypes": [{ "numeric": true }]
+        },
+        {
+            "displayName": "Min Value",
+            "name": "minValue",
+            "kind": "Measure",
+            "displayNameKey": "Role_MinValue",
+            "requiredTypes": [{ "numeric": true }]
+        },
+        {
+            "displayName": "Max Value",
+            "name": "maxValue",
+            "kind": "Measure",
+            "displayNameKey": "Role_MaxValue",
+            "requiredTypes": [{ "numeric": true }]
+        },
+        {
+            "displayName": "Range 1 Max",
+            "name": "range1Max",
+            "kind": "Measure",
+            "displayNameKey": "Role_Range1Max",
+            "requiredTypes": [{ "numeric": true }]
+        },
+        {
+            "displayName": "Range 2 Max",
+            "name": "range2Max",
+            "kind": "Measure",
+            "displayNameKey": "Role_Range2Max",
+            "requiredTypes": [{ "numeric": true }]
+        },
+        {
+            "displayName": "Tooltip Fields",
+            "name": "tooltipFields",
+            "kind": "GroupingOrMeasure",
+            "displayNameKey": "Role_TooltipFields"
         }
     ],
     "objects": {
-        "dataPoint": {
+        "layoutSettings": {
             "properties": {
-                "defaultColor": {
+                "orientation": {
                     "type": {
-                        "fill": {
-                            "solid": {
-                                "color": true
-                            }
-                        }
+                        "enumeration": [
+                            { "displayName": "Horizontal", "value": "horizontal" },
+                            { "displayName": "Vertical", "value": "vertical" }
+                        ]
                     }
                 },
-                "showAllDataPoints": {
+                "gaugeHeight": {
+                    "type": { "numeric": true }
+                },
+                "gaugeSpacing": {
+                    "type": { "numeric": true }
+                },
+                "gaugeCornerRadius": {
+                    "type": { "numeric": true }
+                },
+                "categoryWidth": {
+                    "type": { "numeric": true }
+                },
+                "categoryFontSize": {
+                    "type": { "numeric": true }
+                },
+                "categoryFontColor": {
+                    "type": { "fill": { "solid": { "color": true } } }
+                },
+                "showCategoryLabels": {
+                    "type": { "bool": true }
+                }
+            }
+        },
+        "barSettings": {
+            "properties": {
+                "barColor": {
+                    "type": { "fill": { "solid": { "color": true } } }
+                },
+                "barOpacity": {
+                    "type": { "numeric": true }
+                },
+                "trackColor": {
+                    "type": { "fill": { "solid": { "color": true } } }
+                },
+                "trackBorderColor": {
+                    "type": { "fill": { "solid": { "color": true } } }
+                },
+                "trackBorderWidth": {
+                    "type": { "numeric": true }
+                }
+            }
+        },
+        "rangeSettings": {
+            "properties": {
+                "showRanges": {
+                    "type": { "bool": true }
+                },
+                "range1Color": {
+                    "type": { "fill": { "solid": { "color": true } } }
+                },
+                "range2Color": {
+                    "type": { "fill": { "solid": { "color": true } } }
+                },
+                "rangeBeyondColor": {
+                    "type": { "fill": { "solid": { "color": true } } }
+                }
+            }
+        },
+        "targetSettings": {
+            "properties": {
+                "showTarget": {
+                    "type": { "bool": true }
+                },
+                "targetColor": {
+                    "type": { "fill": { "solid": { "color": true } } }
+                },
+                "targetWidth": {
+                    "type": { "numeric": true }
+                },
+                "targetHeight": {
+                    "type": { "numeric": true }
+                },
+                "target2Color": {
+                    "type": { "fill": { "solid": { "color": true } } }
+                },
+                "target2Width": {
+                    "type": { "numeric": true }
+                },
+                "target2Style": {
                     "type": {
-                        "bool": true
+                        "enumeration": [
+                            { "displayName": "Solid", "value": "solid" },
+                            { "displayName": "Dashed", "value": "dashed" }
+                        ]
+                    }
+                }
+            }
+        },
+        "labelSettings": {
+            "properties": {
+                "showValueLabel": {
+                    "type": { "bool": true }
+                },
+                "valueLabelPosition": {
+                    "type": {
+                        "enumeration": [
+                            { "displayName": "Inside", "value": "inside" },
+                            { "displayName": "Right", "value": "right" },
+                            { "displayName": "Left", "value": "left" },
+                            { "displayName": "Above", "value": "above" }
+                        ]
                     }
                 },
-                "fill": {
+                "valueFontSize": {
+                    "type": { "numeric": true }
+                },
+                "valueFontColor": {
+                    "type": { "fill": { "solid": { "color": true } } }
+                },
+                "valueFormat": {
                     "type": {
-                        "fill": {
-                            "solid": {
-                                "color": true
-                            }
-                        }
+                        "enumeration": [
+                            { "displayName": "Auto", "value": "auto" },
+                            { "displayName": "Number", "value": "number" },
+                            { "displayName": "Percent", "value": "percent" },
+                            { "displayName": "Currency", "value": "currency" }
+                        ]
                     }
                 },
-                "fillRule": {
-                    "type": {
-                        "fill": {}
-                    }
+                "showTargetLabel": {
+                    "type": { "bool": true }
                 },
-                 "fontSize": {
-                    "type": {
-                        "formatting": {
-                            "fontSize": true
-                        }
-                    }
+                "showMinMax": {
+                    "type": { "bool": true }
+                }
+            }
+        },
+        "colorSettings": {
+            "properties": {
+                "colorByCategory": {
+                    "type": { "bool": true }
+                },
+                "conditionalColoring": {
+                    "type": { "bool": true }
+                },
+                "aboveTargetColor": {
+                    "type": { "fill": { "solid": { "color": true } } }
+                },
+                "belowTargetColor": {
+                    "type": { "fill": { "solid": { "color": true } } }
+                },
+                "selectedColor": {
+                    "type": { "fill": { "solid": { "color": true } } }
                 }
             }
         }
     },
     "dataViewMappings": [
         {
-            "categorical": {
-                "categories": {
-                    "for": {
-                        "in": "category"
-                    },
-                    "dataReductionAlgorithm": {
-                        "top": {}
-                    }
-                },
-                "values": {
+            "table": {
+                "rows": {
                     "select": [
-                        {
-                            "bind": {
-                                "to": "measure"
-                            }
-                        }
+                        { "for": { "in": "category" } },
+                        { "for": { "in": "value" } },
+                        { "for": { "in": "target" } },
+                        { "for": { "in": "target2" } },
+                        { "for": { "in": "minValue" } },
+                        { "for": { "in": "maxValue" } },
+                        { "for": { "in": "range1Max" } },
+                        { "for": { "in": "range2Max" } },
+                        { "for": { "in": "tooltipFields" } }
                     ]
+                },
+                "dataReductionAlgorithm": {
+                    "top": { "count": 10000 }
                 }
             }
         }
     ],
+    "tooltips": {
+        "supportedTypes": { "default": true, "canvas": true },
+        "roles": ["tooltipFields"]
+    },
     "privileges": []
 }

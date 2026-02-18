@@ -1,9 +1,166 @@
-p {
-    font-size: 20px;
-    font-weight: bold;
-    em {
-        background: yellow;
-        padding: 5px;
-        
-    }
+/* ═══════════════════════════════════════════════
+   Bubble Scatter Chart – Power BI Custom Visual Styles
+   H1: Reduced nesting, reusable classes
+   H2: CSS variables for dynamic styling
+   Prefix: bscatter-
+   ═══════════════════════════════════════════════ */
+
+/* ── Reset ── */
+
+.bscatter-container,
+.bscatter-container * {
+    box-sizing: border-box;
+}
+
+.bscatter-container {
+    width: 100%;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+    position: relative;
+    font-family: "Segoe UI", "wf_segoe-ui_normal", "Helvetica Neue", Helvetica, Arial, sans-serif;
+    font-size: 11px;
+    color: #334155;
+}
+
+/* ── SVG ── */
+
+.bscatter-svg {
+    flex: 1;
+    display: block;
+    overflow: hidden;
+}
+
+/* ── Error Overlay ── */
+
+.bscatter-error {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    width: 100%;
+    height: 100%;
+    color: #64748B;
+    font-size: 12px;
+    white-space: pre-line;
+    padding: 16px;
+    position: absolute;
+    top: 0;
+    left: 0;
+    z-index: 10;
+    background: #FFFFFF;
+}
+
+/* ── Legend ── */
+
+.bscatter-legend {
+    flex-shrink: 0;
+}
+
+.bscatter-legend-item {
+    cursor: default;
+    user-select: none;
+}
+
+.bscatter-legend-swatch {
+    border: 1px solid rgba(0, 0, 0, 0.1);
+}
+
+/* ── Bubbles ── */
+
+.bscatter-bubble {
+    transition: opacity 0.15s ease;
+}
+
+.bscatter-bubble:hover {
+    filter: brightness(1.1);
+}
+
+/* ── Axis ── */
+
+.bscatter-axis-label {
+    font-weight: 500;
+}
+
+/* ── Trend Line ── */
+
+.bscatter-trend-line {
+    opacity: 0.85;
+}
+
+/* ── Data Labels ── */
+
+.bscatter-data-label {
+    pointer-events: none;
+    user-select: none;
+}
+
+/* ── Play Controls ── */
+
+.bscatter-play-controls {
+    flex-shrink: 0;
+    border-top: 1px solid #E2E8F0;
+    background: #F8FAFC;
+}
+
+.bscatter-play-btn {
+    width: 32px;
+    height: 28px;
+    border: 1px solid #CBD5E1;
+    border-radius: 4px;
+    background: #FFFFFF;
+    cursor: pointer;
+    font-size: 12px;
+    line-height: 1;
+    color: #334155;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: background 0.1s ease;
+}
+
+.bscatter-play-btn:hover {
+    background: #F1F5F9;
+}
+
+.bscatter-play-slider {
+    height: 4px;
+    cursor: pointer;
+    accent-color: #3B82F6;
+}
+
+.bscatter-play-label {
+    font-size: 11px;
+    color: #64748B;
+    white-space: nowrap;
+}
+
+/* ── Reset Zoom Button ── */
+
+.bscatter-reset-btn {
+    position: absolute;
+    top: 8px;
+    right: 8px;
+    z-index: 5;
+    padding: 4px 10px;
+    font-size: 10px;
+    font-family: inherit;
+    color: #334155;
+    background: #FFFFFF;
+    border: 1px solid #CBD5E1;
+    border-radius: 4px;
+    cursor: pointer;
+    transition: background 0.1s ease;
+}
+
+.bscatter-reset-btn:hover {
+    background: #F1F5F9;
+}
+
+/* ── Quadrant Labels ── */
+
+.bscatter-quadrant-label {
+    user-select: none;
+    font-style: italic;
 }

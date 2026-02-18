@@ -1,79 +1,215 @@
 {
     "dataRoles": [
         {
-            "displayName": "Category Data",
+            "displayName": "Category",
             "name": "category",
-            "kind": "Grouping"
+            "kind": "Grouping",
+            "displayNameKey": "Role_Category"
         },
         {
-            "displayName": "Measure Data",
-            "name": "measure",
-            "kind": "Measure"
+            "displayName": "Actual",
+            "name": "actual",
+            "kind": "Measure",
+            "displayNameKey": "Role_Actual"
+        },
+        {
+            "displayName": "Target",
+            "name": "target",
+            "kind": "Measure",
+            "displayNameKey": "Role_Target"
+        },
+        {
+            "displayName": "Range 1 (Bad)",
+            "name": "range1",
+            "kind": "Measure",
+            "displayNameKey": "Role_Range1"
+        },
+        {
+            "displayName": "Range 2 (Satisfactory)",
+            "name": "range2",
+            "kind": "Measure",
+            "displayNameKey": "Role_Range2"
+        },
+        {
+            "displayName": "Range 3 (Good)",
+            "name": "range3",
+            "kind": "Measure",
+            "displayNameKey": "Role_Range3"
+        },
+        {
+            "displayName": "Max Value",
+            "name": "maxValue",
+            "kind": "Measure",
+            "displayNameKey": "Role_MaxValue"
+        },
+        {
+            "displayName": "Tooltips",
+            "name": "tooltipFields",
+            "kind": "GroupingOrMeasure",
+            "displayNameKey": "Role_TooltipFields"
         }
     ],
     "objects": {
-        "dataPoint": {
+        "layoutSettings": {
             "properties": {
-                "defaultColor": {
+                "orientation": {
                     "type": {
-                        "fill": {
-                            "solid": {
-                                "color": true
-                            }
-                        }
+                        "enumeration": [
+                            { "displayName": "Horizontal", "value": "horizontal" },
+                            { "displayName": "Vertical", "value": "vertical" }
+                        ]
                     }
                 },
-                "showAllDataPoints": {
+                "bulletHeight": {
+                    "type": { "numeric": true }
+                },
+                "bulletSpacing": {
+                    "type": { "numeric": true }
+                },
+                "categoryWidth": {
+                    "type": { "numeric": true }
+                },
+                "showCategoryLabels": {
+                    "type": { "bool": true }
+                },
+                "categoryFontSize": {
+                    "type": { "numeric": true }
+                },
+                "categoryFontColor": {
+                    "type": { "fill": { "solid": { "color": true } } }
+                }
+            }
+        },
+        "barSettings": {
+            "properties": {
+                "actualBarHeightPct": {
+                    "type": { "numeric": true }
+                },
+                "actualBarColor": {
+                    "type": { "fill": { "solid": { "color": true } } }
+                },
+                "actualBarCornerRadius": {
+                    "type": { "numeric": true }
+                }
+            }
+        },
+        "targetSettings": {
+            "properties": {
+                "showTarget": {
+                    "type": { "bool": true }
+                },
+                "targetColor": {
+                    "type": { "fill": { "solid": { "color": true } } }
+                },
+                "targetWidth": {
+                    "type": { "numeric": true }
+                },
+                "targetHeightPct": {
+                    "type": { "numeric": true }
+                }
+            }
+        },
+        "rangeSettings": {
+            "properties": {
+                "range1Color": {
+                    "type": { "fill": { "solid": { "color": true } } }
+                },
+                "range2Color": {
+                    "type": { "fill": { "solid": { "color": true } } }
+                },
+                "range3Color": {
+                    "type": { "fill": { "solid": { "color": true } } }
+                },
+                "rangeCornerRadius": {
+                    "type": { "numeric": true }
+                }
+            }
+        },
+        "axisSettings": {
+            "properties": {
+                "showAxis": {
+                    "type": { "bool": true }
+                },
+                "axisFontSize": {
+                    "type": { "numeric": true }
+                },
+                "axisFontColor": {
+                    "type": { "fill": { "solid": { "color": true } } }
+                },
+                "showGridlines": {
+                    "type": { "bool": true }
+                },
+                "gridlineColor": {
+                    "type": { "fill": { "solid": { "color": true } } }
+                }
+            }
+        },
+        "labelSettings": {
+            "properties": {
+                "showValueLabel": {
+                    "type": { "bool": true }
+                },
+                "valueLabelPosition": {
                     "type": {
-                        "bool": true
+                        "enumeration": [
+                            { "displayName": "Inside", "value": "inside" },
+                            { "displayName": "Right", "value": "right" },
+                            { "displayName": "Left", "value": "left" }
+                        ]
                     }
                 },
-                "fill": {
-                    "type": {
-                        "fill": {
-                            "solid": {
-                                "color": true
-                            }
-                        }
-                    }
+                "valueFontSize": {
+                    "type": { "numeric": true }
                 },
-                "fillRule": {
-                    "type": {
-                        "fill": {}
-                    }
+                "valueFontColor": {
+                    "type": { "fill": { "solid": { "color": true } } }
                 },
-                 "fontSize": {
-                    "type": {
-                        "formatting": {
-                            "fontSize": true
-                        }
-                    }
+                "showTargetLabel": {
+                    "type": { "bool": true }
+                }
+            }
+        },
+        "colorSettings": {
+            "properties": {
+                "selectedBarColor": {
+                    "type": { "fill": { "solid": { "color": true } } }
+                },
+                "conditionalColoring": {
+                    "type": { "bool": true }
+                },
+                "aboveTargetColor": {
+                    "type": { "fill": { "solid": { "color": true } } }
+                },
+                "belowTargetColor": {
+                    "type": { "fill": { "solid": { "color": true } } }
                 }
             }
         }
     },
     "dataViewMappings": [
         {
-            "categorical": {
-                "categories": {
-                    "for": {
-                        "in": "category"
-                    },
-                    "dataReductionAlgorithm": {
-                        "top": {}
-                    }
-                },
-                "values": {
+            "table": {
+                "rows": {
                     "select": [
-                        {
-                            "bind": {
-                                "to": "measure"
-                            }
-                        }
-                    ]
+                        { "for": { "in": "category" } },
+                        { "for": { "in": "actual" } },
+                        { "for": { "in": "target" } },
+                        { "for": { "in": "range1" } },
+                        { "for": { "in": "range2" } },
+                        { "for": { "in": "range3" } },
+                        { "for": { "in": "maxValue" } },
+                        { "for": { "in": "tooltipFields" } }
+                    ],
+                    "dataReductionAlgorithm": {
+                        "top": { "count": 10000 }
+                    }
                 }
             }
         }
     ],
+    "tooltips": {
+        "supportedTypes": { "default": true, "canvas": true },
+        "roles": ["tooltipFields"]
+    },
     "privileges": []
 }

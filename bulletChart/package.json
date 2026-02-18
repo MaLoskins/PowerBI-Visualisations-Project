@@ -1,28 +1,30 @@
 {
-  "name": "visual",
-  "description": "default_template_value",
-  "version": "1.0.0.0",
-  "repository": {
-    "type": "default_template_value",
-    "url": "default_template_value"
-  },
-  "license": "MIT",
-  "scripts": {
-    "pbiviz": "pbiviz",
-    "start": "pbiviz start",
-    "package": "pbiviz package",
-    "lint": "npx eslint ."
-  },
-  "dependencies": {
-    "@types/d3": "7.4.3",
-    "d3": "7.9.0",
-    "powerbi-visuals-api": "5.11.0",
-    "powerbi-visuals-utils-formattingmodel": "6.0.4"
-  },
-  "devDependencies": {
-    "@typescript-eslint/eslint-plugin": "^8.8.0",
-    "eslint": "^9.11.1",
-    "eslint-plugin-powerbi-visuals": "^1.0.0",
-    "typescript": "5.5.4"
-  }
+    "name": "bullet-chart",
+    "description": "Bullet Chart – Stephen Few design. Shows actual bar, target marker, and qualitative ranges.",
+    "version": "1.0.0.0",
+    "repository": {
+        "type": "git",
+        "url": ""
+    },
+    "license": "MIT",
+    "scripts": {
+        "start": "pbiviz start --project tsconfig.dev.json",
+        "package": "pbiviz package",
+        "lint": "npx eslint .",
+        "sync-version": "node -e \"const p=require('./package.json');const v=require('./pbiviz.json');if(p.version!==v.visual.version){console.error('Version mismatch');process.exit(1)}\""
+    },
+    "dependencies": {
+        "d3-scale": "^4.0.2",
+        "d3-selection": "^3.0.0",
+        "powerbi-visuals-api": "~5.3.0",
+        "powerbi-visuals-utils-formattingmodel": "6.0.4"
+    },
+    "devDependencies": {
+        "@types/d3-scale": "^4.0.8",
+        "@types/d3-selection": "^3.0.10",
+        "@typescript-eslint/eslint-plugin": "8.8.0",
+        "eslint": "9.11.1",
+        "eslint-plugin-powerbi-visuals": "1.0.0",
+        "typescript": "5.5.4"
+    }
 }

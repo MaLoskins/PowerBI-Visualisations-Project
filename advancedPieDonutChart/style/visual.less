@@ -1,9 +1,129 @@
-p {
-    font-size: 20px;
-    font-weight: bold;
-    em {
-        background: yellow;
-        padding: 5px;
-        
-    }
+/* ═══════════════════════════════════════════════
+   Advanced Pie / Donut Chart – Power BI Custom Visual Styles
+   H1: Flat selectors, apie- prefix
+   H2: CSS variables for dynamic styling
+   ═══════════════════════════════════════════════ */
+
+.apie-container {
+    box-sizing: border-box;
+    width: 100%;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+    font-family: "Segoe UI", "wf_segoe-ui_normal", "Helvetica Neue", Helvetica, Arial, sans-serif;
+    font-size: 11px;
+}
+
+.apie-container *,
+.apie-container *::before,
+.apie-container *::after {
+    box-sizing: border-box;
+}
+
+/* ── Layout ── */
+
+.apie-middle {
+    display: flex;
+    flex: 1 1 auto;
+    overflow: hidden;
+    min-height: 0;
+}
+
+.apie-chart-wrapper {
+    flex: 1 1 auto;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    overflow: hidden;
+    min-width: 0;
+    min-height: 0;
+}
+
+.apie-svg {
+    display: block;
+}
+
+/* ── Legend ── */
+
+.apie-legend {
+    flex: 0 0 auto;
+    overflow: hidden;
+}
+
+.apie-legend-top,
+.apie-legend-bottom {
+    width: 100%;
+}
+
+.apie-legend-left,
+.apie-legend-right {
+    max-width: 140px;
+}
+
+.apie-legend-item {
+    transition: opacity 0.15s ease;
+    user-select: none;
+}
+
+.apie-legend-item:hover {
+    opacity: 0.8;
+}
+
+/* ── Slices ── */
+
+.apie-slice {
+    transition: opacity 0.15s ease;
+    transform-origin: center center;
+}
+
+.apie-outer-slice {
+    transition: opacity 0.15s ease;
+}
+
+/* ── Labels ── */
+
+.apie-label-outside,
+.apie-label-inside {
+    pointer-events: none;
+    user-select: none;
+}
+
+.apie-leader-line {
+    pointer-events: none;
+}
+
+/* ── Centre Label ── */
+
+.apie-centre-main,
+.apie-centre-sub {
+    pointer-events: none;
+    user-select: none;
+}
+
+/* ── Error Overlay ── */
+
+.apie-error {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    padding: 24px;
+    color: #64748B;
+    font-size: 13px;
+    line-height: 1.5;
+    white-space: pre-line;
+    background: rgba(255, 255, 255, 0.95);
+    z-index: 10;
+}
+
+/* ── Background ── */
+
+.apie-bg {
+    cursor: default;
 }

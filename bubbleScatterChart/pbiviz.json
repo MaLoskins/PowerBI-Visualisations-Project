@@ -1,1 +1,26 @@
-{"visual":{"name":"bubbleScatterChart","displayName":"BubbleScatterChart","guid":"bubbleScatterChartEADC342B8BB444569C65FCDCC26CF48A","visualClassName":"Visual","version":"1.0.0.0","description":"","supportUrl":"","gitHubUrl":""},"apiVersion":"5.3.0","author":{"name":"","email":""},"assets":{"icon":"assets/icon.png"},"externalJS":null,"style":"style/visual.less","capabilities":"capabilities.json","dependencies":null,"stringResources":[],"version":"1.0.0.0"}
+{
+    "visual": {
+        "name": "bubbleScatterChart",
+        "displayName": "BubbleScatterChart",
+        "guid": "bubbleScatterChartA1B2C3D4E5F6789012345678",
+        "visualClassName": "Visual",
+        "version": "1.0.0.0",
+        "description": "A scatter plot with bubble sizing, quadrants, trend lines, zoom/pan, play axis, and lasso selection.",
+        "supportUrl": "https://github.com",
+        "gitHubUrl": ""
+    },
+    "apiVersion": "5.3.0",
+    "author": {
+        "name": "Matthew Haskins",
+        "email": "matthew.haskins.mh@gmail.com"
+    },
+    "assets": {
+        "icon": "assets/icon.png"
+    },
+    "externalJS": null,
+    "style": "style/visual.less",
+    "capabilities": "capabilities.json",
+    "dependencies": null,
+    "stringResources": [],
+    "version": "1.0.0.0"
+}

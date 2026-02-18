@@ -1,79 +1,293 @@
 {
     "dataRoles": [
         {
-            "displayName": "Category Data",
-            "name": "category",
-            "kind": "Grouping"
+            "displayName": "X Value",
+            "name": "xValue",
+            "kind": "Measure",
+            "description": "Numeric measure for X-axis position"
         },
         {
-            "displayName": "Measure Data",
-            "name": "measure",
-            "kind": "Measure"
+            "displayName": "Y Value",
+            "name": "yValue",
+            "kind": "Measure",
+            "description": "Numeric measure for Y-axis position"
+        },
+        {
+            "displayName": "Size",
+            "name": "size",
+            "kind": "Measure",
+            "description": "Optional measure controlling bubble radius"
+        },
+        {
+            "displayName": "Category",
+            "name": "category",
+            "kind": "Grouping",
+            "description": "Categorical field identifying each data point"
+        },
+        {
+            "displayName": "Series",
+            "name": "series",
+            "kind": "Grouping",
+            "description": "Optional grouping for colour legend entries"
+        },
+        {
+            "displayName": "Play Axis",
+            "name": "playAxis",
+            "kind": "Grouping",
+            "description": "Optional time/ordinal field for animation"
+        },
+        {
+            "displayName": "Tooltip Fields",
+            "name": "tooltipFields",
+            "kind": "GroupingOrMeasure",
+            "description": "Extra fields shown in tooltip"
         }
     ],
     "objects": {
-        "dataPoint": {
+        "chartSettings": {
             "properties": {
-                "defaultColor": {
-                    "type": {
-                        "fill": {
-                            "solid": {
-                                "color": true
-                            }
-                        }
-                    }
+                "minBubbleRadius": {
+                    "type": { "numeric": true }
                 },
-                "showAllDataPoints": {
-                    "type": {
-                        "bool": true
-                    }
+                "maxBubbleRadius": {
+                    "type": { "numeric": true }
                 },
-                "fill": {
-                    "type": {
-                        "fill": {
-                            "solid": {
-                                "color": true
-                            }
-                        }
-                    }
+                "bubbleOpacity": {
+                    "type": { "numeric": true }
                 },
-                "fillRule": {
-                    "type": {
-                        "fill": {}
-                    }
+                "bubbleBorderWidth": {
+                    "type": { "numeric": true }
                 },
-                 "fontSize": {
-                    "type": {
-                        "formatting": {
-                            "fontSize": true
-                        }
-                    }
+                "bubbleBorderColor": {
+                    "type": { "fill": { "solid": { "color": true } } }
+                }
+            }
+        },
+        "axisSettings": {
+            "properties": {
+                "xAxisLabel": {
+                    "type": { "text": true }
+                },
+                "yAxisLabel": {
+                    "type": { "text": true }
+                },
+                "xAxisScale": {
+                    "type": { "enumeration": [
+                        { "value": "linear", "displayName": "Linear" },
+                        { "value": "log", "displayName": "Logarithmic" }
+                    ]}
+                },
+                "yAxisScale": {
+                    "type": { "enumeration": [
+                        { "value": "linear", "displayName": "Linear" },
+                        { "value": "log", "displayName": "Logarithmic" }
+                    ]}
+                },
+                "xAxisMin": {
+                    "type": { "numeric": true }
+                },
+                "xAxisMax": {
+                    "type": { "numeric": true }
+                },
+                "yAxisMin": {
+                    "type": { "numeric": true }
+                },
+                "yAxisMax": {
+                    "type": { "numeric": true }
+                },
+                "axisFontSize": {
+                    "type": { "numeric": true }
+                },
+                "axisFontColor": {
+                    "type": { "fill": { "solid": { "color": true } } }
+                },
+                "showGridlines": {
+                    "type": { "bool": true }
+                },
+                "gridlineColor": {
+                    "type": { "fill": { "solid": { "color": true } } }
+                },
+                "axisLineColor": {
+                    "type": { "fill": { "solid": { "color": true } } }
+                }
+            }
+        },
+        "quadrantSettings": {
+            "properties": {
+                "showQuadrants": {
+                    "type": { "bool": true }
+                },
+                "quadrantXValue": {
+                    "type": { "numeric": true }
+                },
+                "quadrantYValue": {
+                    "type": { "numeric": true }
+                },
+                "quadrantLineColor": {
+                    "type": { "fill": { "solid": { "color": true } } }
+                },
+                "quadrantLineWidth": {
+                    "type": { "numeric": true }
+                },
+                "quadrantLineStyle": {
+                    "type": { "enumeration": [
+                        { "value": "solid", "displayName": "Solid" },
+                        { "value": "dashed", "displayName": "Dashed" },
+                        { "value": "dotted", "displayName": "Dotted" }
+                    ]}
+                },
+                "showQuadrantLabels": {
+                    "type": { "bool": true }
+                },
+                "q1Label": {
+                    "type": { "text": true }
+                },
+                "q2Label": {
+                    "type": { "text": true }
+                },
+                "q3Label": {
+                    "type": { "text": true }
+                },
+                "q4Label": {
+                    "type": { "text": true }
+                }
+            }
+        },
+        "trendSettings": {
+            "properties": {
+                "showTrendLine": {
+                    "type": { "bool": true }
+                },
+                "trendLineType": {
+                    "type": { "enumeration": [
+                        { "value": "linear", "displayName": "Linear" },
+                        { "value": "polynomial", "displayName": "Polynomial (degree 2)" },
+                        { "value": "exponential", "displayName": "Exponential" }
+                    ]}
+                },
+                "trendLineColor": {
+                    "type": { "fill": { "solid": { "color": true } } }
+                },
+                "trendLineWidth": {
+                    "type": { "numeric": true }
+                },
+                "trendLineStyle": {
+                    "type": { "enumeration": [
+                        { "value": "solid", "displayName": "Solid" },
+                        { "value": "dashed", "displayName": "Dashed" }
+                    ]}
+                }
+            }
+        },
+        "labelSettings": {
+            "properties": {
+                "showDataLabels": {
+                    "type": { "bool": true }
+                },
+                "labelContent": {
+                    "type": { "enumeration": [
+                        { "value": "category", "displayName": "Category" },
+                        { "value": "value", "displayName": "Value" },
+                        { "value": "both", "displayName": "Both" }
+                    ]}
+                },
+                "labelFontSize": {
+                    "type": { "numeric": true }
+                },
+                "labelFontColor": {
+                    "type": { "fill": { "solid": { "color": true } } }
+                }
+            }
+        },
+        "colorSettings": {
+            "properties": {
+                "defaultBubbleColor": {
+                    "type": { "fill": { "solid": { "color": true } } }
+                },
+                "selectedBubbleColor": {
+                    "type": { "fill": { "solid": { "color": true } } }
+                },
+                "colorByCategory": {
+                    "type": { "bool": true }
+                }
+            }
+        },
+        "legendSettings": {
+            "properties": {
+                "showLegend": {
+                    "type": { "bool": true }
+                },
+                "legendPosition": {
+                    "type": { "enumeration": [
+                        { "value": "top", "displayName": "Top" },
+                        { "value": "bottom", "displayName": "Bottom" },
+                        { "value": "left", "displayName": "Left" },
+                        { "value": "right", "displayName": "Right" }
+                    ]}
+                },
+                "legendFontSize": {
+                    "type": { "numeric": true }
+                },
+                "legendFontColor": {
+                    "type": { "fill": { "solid": { "color": true } } }
+                }
+            }
+        },
+        "zoomSettings": {
+            "properties": {
+                "enableZoom": {
+                    "type": { "bool": true }
+                },
+                "enablePan": {
+                    "type": { "bool": true }
+                },
+                "showResetButton": {
+                    "type": { "bool": true }
+                }
+            }
+        },
+        "playSettings": {
+            "properties": {
+                "playSpeed": {
+                    "type": { "numeric": true }
+                },
+                "showPlayControls": {
+                    "type": { "bool": true }
+                },
+                "trailOpacity": {
+                    "type": { "numeric": true }
                 }
             }
         }
     },
     "dataViewMappings": [
         {
-            "categorical": {
-                "categories": {
-                    "for": {
-                        "in": "category"
-                    },
-                    "dataReductionAlgorithm": {
-                        "top": {}
-                    }
-                },
-                "values": {
+            "table": {
+                "rows": {
                     "select": [
-                        {
-                            "bind": {
-                                "to": "measure"
-                            }
+                        { "for": { "in": "xValue" } },
+                        { "for": { "in": "yValue" } },
+                        { "for": { "in": "size" } },
+                        { "for": { "in": "category" } },
+                        { "for": { "in": "series" } },
+                        { "for": { "in": "playAxis" } },
+                        { "for": { "in": "tooltipFields" } }
+                    ],
+                    "dataReductionAlgorithm": {
+                        "top": {
+                            "count": 10000
                         }
-                    ]
+                    }
                 }
             }
         }
     ],
+    "tooltips": {
+        "supportedTypes": {
+            "default": true,
+            "canvas": true
+        },
+        "roles": ["tooltipFields"]
+    },
     "privileges": []
 }

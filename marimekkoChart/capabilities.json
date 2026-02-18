@@ -1,52 +1,167 @@
 {
     "dataRoles": [
         {
-            "displayName": "Category Data",
-            "name": "category",
-            "kind": "Grouping"
+            "displayName": "Column Category",
+            "name": "xCategory",
+            "kind": "Grouping",
+            "description": "Category for columns (e.g., Region)"
         },
         {
-            "displayName": "Measure Data",
-            "name": "measure",
-            "kind": "Measure"
+            "displayName": "Segment Category",
+            "name": "segmentCategory",
+            "kind": "Grouping",
+            "description": "Category for stacked segments (e.g., Product)"
+        },
+        {
+            "displayName": "Value",
+            "name": "value",
+            "kind": "Measure",
+            "description": "Size measure for column width and segment height"
+        },
+        {
+            "displayName": "Tooltip Fields",
+            "name": "tooltipFields",
+            "kind": "GroupingOrMeasure",
+            "description": "Additional fields for tooltips"
         }
     ],
     "objects": {
-        "dataPoint": {
+        "chartSettings": {
             "properties": {
-                "defaultColor": {
+                "columnGap": {
+                    "type": { "numeric": true }
+                },
+                "segmentGap": {
+                    "type": { "numeric": true }
+                },
+                "cornerRadius": {
+                    "type": { "numeric": true }
+                },
+                "showPercentages": {
+                    "type": { "bool": true }
+                },
+                "percentThreshold": {
+                    "type": { "numeric": true }
+                }
+            }
+        },
+        "axisSettings": {
+            "properties": {
+                "showXAxis": {
+                    "type": { "bool": true }
+                },
+                "xAxisFontSize": {
+                    "type": { "numeric": true }
+                },
+                "xAxisFontColor": {
                     "type": {
-                        "fill": {
-                            "solid": {
-                                "color": true
-                            }
-                        }
+                        "fill": { "solid": { "color": true } }
                     }
                 },
-                "showAllDataPoints": {
+                "xLabelRotation": {
                     "type": {
-                        "bool": true
+                        "enumeration": [
+                            { "displayName": "0°", "value": "0" },
+                            { "displayName": "45°", "value": "45" },
+                            { "displayName": "90°", "value": "90" }
+                        ]
                     }
                 },
-                "fill": {
+                "showYAxis": {
+                    "type": { "bool": true }
+                },
+                "yAxisFontSize": {
+                    "type": { "numeric": true }
+                },
+                "yAxisFontColor": {
                     "type": {
-                        "fill": {
-                            "solid": {
-                                "color": true
-                            }
-                        }
+                        "fill": { "solid": { "color": true } }
                     }
                 },
-                "fillRule": {
+                "showGridlines": {
+                    "type": { "bool": true }
+                },
+                "gridlineColor": {
                     "type": {
-                        "fill": {}
+                        "fill": { "solid": { "color": true } }
                     }
                 },
-                 "fontSize": {
+                "showWidthLabels": {
+                    "type": { "bool": true }
+                }
+            }
+        },
+        "colorSettings": {
+            "properties": {
+                "colorPalette": {
                     "type": {
-                        "formatting": {
-                            "fontSize": true
-                        }
+                        "enumeration": [
+                            { "displayName": "Default", "value": "default" },
+                            { "displayName": "Pastel", "value": "pastel" },
+                            { "displayName": "Vivid", "value": "vivid" }
+                        ]
+                    }
+                },
+                "selectedColor": {
+                    "type": {
+                        "fill": { "solid": { "color": true } }
+                    }
+                },
+                "segmentBorderColor": {
+                    "type": {
+                        "fill": { "solid": { "color": true } }
+                    }
+                },
+                "segmentBorderWidth": {
+                    "type": { "numeric": true }
+                }
+            }
+        },
+        "labelSettings": {
+            "properties": {
+                "showSegmentLabels": {
+                    "type": { "bool": true }
+                },
+                "segmentLabelContent": {
+                    "type": {
+                        "enumeration": [
+                            { "displayName": "Name", "value": "name" },
+                            { "displayName": "Percent", "value": "percent" },
+                            { "displayName": "Value", "value": "value" },
+                            { "displayName": "Name & Percent", "value": "nameAndPercent" }
+                        ]
+                    }
+                },
+                "segmentLabelFontSize": {
+                    "type": { "numeric": true }
+                },
+                "segmentLabelFontColor": {
+                    "type": {
+                        "fill": { "solid": { "color": true } }
+                    }
+                }
+            }
+        },
+        "legendSettings": {
+            "properties": {
+                "showLegend": {
+                    "type": { "bool": true }
+                },
+                "legendPosition": {
+                    "type": {
+                        "enumeration": [
+                            { "displayName": "Top", "value": "top" },
+                            { "displayName": "Bottom", "value": "bottom" },
+                            { "displayName": "Right", "value": "right" }
+                        ]
+                    }
+                },
+                "legendFontSize": {
+                    "type": { "numeric": true }
+                },
+                "legendFontColor": {
+                    "type": {
+                        "fill": { "solid": { "color": true } }
                     }
                 }
             }
@@ -54,26 +169,24 @@
     },
     "dataViewMappings": [
         {
-            "categorical": {
-                "categories": {
-                    "for": {
-                        "in": "category"
-                    },
-                    "dataReductionAlgorithm": {
-                        "top": {}
-                    }
-                },
-                "values": {
+            "table": {
+                "rows": {
                     "select": [
-                        {
-                            "bind": {
-                                "to": "measure"
-                            }
-                        }
-                    ]
+                        { "for": { "in": "xCategory" } },
+                        { "for": { "in": "segmentCategory" } },
+                        { "for": { "in": "value" } },
+                        { "for": { "in": "tooltipFields" } }
+                    ],
+                    "dataReductionAlgorithm": {
+                        "top": { "count": 10000 }
+                    }
                 }
             }
         }
     ],
+    "tooltips": {
+        "supportedTypes": { "default": true, "canvas": true },
+        "roles": ["tooltipFields"]
+    },
     "privileges": []
 }

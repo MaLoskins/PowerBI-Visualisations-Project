@@ -1,79 +1,233 @@
 {
     "dataRoles": [
         {
-            "displayName": "Category Data",
+            "displayName": "Category",
             "name": "category",
-            "kind": "Grouping"
+            "kind": "Grouping",
+            "displayNameKey": "Role_Category"
         },
         {
-            "displayName": "Measure Data",
-            "name": "measure",
-            "kind": "Measure"
+            "displayName": "Value",
+            "name": "value",
+            "kind": "Measure",
+            "displayNameKey": "Role_Value",
+            "requiredTypes": [
+                { "numeric": true }
+            ]
+        },
+        {
+            "displayName": "Outer Category",
+            "name": "outerCategory",
+            "kind": "Grouping",
+            "displayNameKey": "Role_OuterCategory"
+        },
+        {
+            "displayName": "Tooltip Fields",
+            "name": "tooltipFields",
+            "kind": "GroupingOrMeasure",
+            "displayNameKey": "Role_TooltipFields"
         }
     ],
     "objects": {
-        "dataPoint": {
+        "chartSettings": {
             "properties": {
-                "defaultColor": {
-                    "type": {
-                        "fill": {
-                            "solid": {
-                                "color": true
-                            }
-                        }
-                    }
+                "chartType": {
+                    "type": { "enumeration": [
+                        { "value": "pie", "displayName": "Pie" },
+                        { "value": "donut", "displayName": "Donut" }
+                    ] }
                 },
-                "showAllDataPoints": {
-                    "type": {
-                        "bool": true
-                    }
+                "innerRadiusPercent": {
+                    "type": { "numeric": true }
                 },
-                "fill": {
-                    "type": {
-                        "fill": {
-                            "solid": {
-                                "color": true
-                            }
-                        }
-                    }
+                "padAngle": {
+                    "type": { "numeric": true }
                 },
-                "fillRule": {
-                    "type": {
-                        "fill": {}
-                    }
+                "cornerRadius": {
+                    "type": { "numeric": true }
                 },
-                 "fontSize": {
-                    "type": {
-                        "formatting": {
-                            "fontSize": true
-                        }
-                    }
+                "startAngle": {
+                    "type": { "numeric": true }
+                },
+                "sortSlices": {
+                    "type": { "enumeration": [
+                        { "value": "none", "displayName": "None" },
+                        { "value": "valueAsc", "displayName": "Value Ascending" },
+                        { "value": "valueDesc", "displayName": "Value Descending" },
+                        { "value": "nameAsc", "displayName": "Name A→Z" },
+                        { "value": "nameDesc", "displayName": "Name Z→A" }
+                    ] }
+                },
+                "showOuterRing": {
+                    "type": { "bool": true }
+                },
+                "outerRingThickness": {
+                    "type": { "numeric": true }
+                }
+            }
+        },
+        "colorSettings": {
+            "properties": {
+                "colorPalette": {
+                    "type": { "enumeration": [
+                        { "value": "default", "displayName": "Default" },
+                        { "value": "pastel", "displayName": "Pastel" },
+                        { "value": "vivid", "displayName": "Vivid" },
+                        { "value": "monochrome", "displayName": "Monochrome" }
+                    ] }
+                },
+                "monochromeBase": {
+                    "type": { "fill": { "solid": { "color": true } } }
+                },
+                "selectedSliceColor": {
+                    "type": { "fill": { "solid": { "color": true } } }
+                },
+                "selectedSliceScale": {
+                    "type": { "numeric": true }
+                }
+            }
+        },
+        "labelSettings": {
+            "properties": {
+                "showLabels": {
+                    "type": { "bool": true }
+                },
+                "labelContent": {
+                    "type": { "enumeration": [
+                        { "value": "name", "displayName": "Name" },
+                        { "value": "value", "displayName": "Value" },
+                        { "value": "percent", "displayName": "Percent" },
+                        { "value": "nameAndPercent", "displayName": "Name & Percent" },
+                        { "value": "nameAndValue", "displayName": "Name & Value" }
+                    ] }
+                },
+                "labelPosition": {
+                    "type": { "enumeration": [
+                        { "value": "outside", "displayName": "Outside" },
+                        { "value": "inside", "displayName": "Inside" },
+                        { "value": "auto", "displayName": "Auto" }
+                    ] }
+                },
+                "labelFontSize": {
+                    "type": { "numeric": true }
+                },
+                "labelFontColor": {
+                    "type": { "fill": { "solid": { "color": true } } }
+                },
+                "showLeaderLines": {
+                    "type": { "bool": true }
+                },
+                "leaderLineColor": {
+                    "type": { "fill": { "solid": { "color": true } } }
+                },
+                "minSlicePercentForLabel": {
+                    "type": { "numeric": true }
+                }
+            }
+        },
+        "centreLabelSettings": {
+            "properties": {
+                "showCentreLabel": {
+                    "type": { "bool": true }
+                },
+                "centreContent": {
+                    "type": { "enumeration": [
+                        { "value": "total", "displayName": "Total" },
+                        { "value": "customText", "displayName": "Custom Text" },
+                        { "value": "measure", "displayName": "Measure" }
+                    ] }
+                },
+                "centreCustomText": {
+                    "type": { "text": true }
+                },
+                "centreFontSize": {
+                    "type": { "numeric": true }
+                },
+                "centreFontColor": {
+                    "type": { "fill": { "solid": { "color": true } } }
+                },
+                "centreSubText": {
+                    "type": { "text": true }
+                },
+                "centreSubFontSize": {
+                    "type": { "numeric": true }
+                },
+                "centreSubFontColor": {
+                    "type": { "fill": { "solid": { "color": true } } }
+                }
+            }
+        },
+        "legendSettings": {
+            "properties": {
+                "showLegend": {
+                    "type": { "bool": true }
+                },
+                "legendPosition": {
+                    "type": { "enumeration": [
+                        { "value": "top", "displayName": "Top" },
+                        { "value": "bottom", "displayName": "Bottom" },
+                        { "value": "left", "displayName": "Left" },
+                        { "value": "right", "displayName": "Right" }
+                    ] }
+                },
+                "legendFontSize": {
+                    "type": { "numeric": true }
+                },
+                "legendFontColor": {
+                    "type": { "fill": { "solid": { "color": true } } }
+                }
+            }
+        },
+        "otherSettings": {
+            "properties": {
+                "groupSmallSlices": {
+                    "type": { "bool": true }
+                },
+                "otherThresholdPercent": {
+                    "type": { "numeric": true }
+                },
+                "otherColor": {
+                    "type": { "fill": { "solid": { "color": true } } }
+                },
+                "otherLabel": {
+                    "type": { "text": true }
+                }
+            }
+        },
+        "animationSettings": {
+            "properties": {
+                "enableAnimation": {
+                    "type": { "bool": true }
+                },
+                "animationDuration": {
+                    "type": { "numeric": true }
                 }
             }
         }
     },
     "dataViewMappings": [
         {
-            "categorical": {
-                "categories": {
-                    "for": {
-                        "in": "category"
-                    },
-                    "dataReductionAlgorithm": {
-                        "top": {}
-                    }
-                },
-                "values": {
+            "table": {
+                "rows": {
                     "select": [
-                        {
-                            "bind": {
-                                "to": "measure"
-                            }
-                        }
-                    ]
+                        { "for": { "in": "category" } },
+                        { "for": { "in": "value" } },
+                        { "for": { "in": "outerCategory" } },
+                        { "for": { "in": "tooltipFields" } }
+                    ],
+                    "dataReductionAlgorithm": {
+                        "top": { "count": 10000 }
+                    }
                 }
             }
         }
     ],
+    "tooltips": {
+        "supportedTypes": {
+            "default": true,
+            "canvas": true
+        },
+        "roles": ["tooltipFields"]
+    },
     "privileges": []
 }

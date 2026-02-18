@@ -1,76 +1,136 @@
 {
     "dataRoles": [
         {
-            "displayName": "Category Data",
+            "displayName": "Hierarchy Levels",
             "name": "category",
             "kind": "Grouping"
-        },
-        {
-            "displayName": "Measure Data",
-            "name": "measure",
-            "kind": "Measure"
         }
     ],
     "objects": {
-        "dataPoint": {
+        "treeSettings": {
             "properties": {
-                "defaultColor": {
-                    "type": {
-                        "fill": {
-                            "solid": {
-                                "color": true
-                            }
-                        }
-                    }
+                "indentSize": {
+                    "type": { "numeric": true }
                 },
-                "showAllDataPoints": {
-                    "type": {
-                        "bool": true
-                    }
+                "rowHeight": {
+                    "type": { "numeric": true }
                 },
-                "fill": {
-                    "type": {
-                        "fill": {
-                            "solid": {
-                                "color": true
-                            }
-                        }
-                    }
+                "fontSize": {
+                    "type": { "formatting": { "fontSize": true } }
                 },
-                "fillRule": {
-                    "type": {
-                        "fill": {}
-                    }
+                "fontColor": {
+                    "type": { "fill": { "solid": { "color": true } } }
                 },
-                 "fontSize": {
-                    "type": {
-                        "formatting": {
-                            "fontSize": true
-                        }
-                    }
+                "fontFamily": {
+                    "type": { "text": true }
+                },
+                "selectedFontWeight": {
+                    "type": { "text": true }
+                },
+                "showIcons": {
+                    "type": { "bool": true }
+                },
+                "iconSize": {
+                    "type": { "numeric": true }
+                }
+            }
+        },
+        "checkboxSettings": {
+            "properties": {
+                "checkboxSize": {
+                    "type": { "numeric": true }
+                },
+                "checkedColor": {
+                    "type": { "fill": { "solid": { "color": true } } }
+                },
+                "uncheckedBorder": {
+                    "type": { "fill": { "solid": { "color": true } } }
+                },
+                "indeterminateColor": {
+                    "type": { "fill": { "solid": { "color": true } } }
+                },
+                "checkboxRadius": {
+                    "type": { "numeric": true }
+                }
+            }
+        },
+        "searchSettings": {
+            "properties": {
+                "showSearchBox": {
+                    "type": { "bool": true }
+                },
+                "searchPlaceholder": {
+                    "type": { "text": true }
+                },
+                "highlightMatches": {
+                    "type": { "bool": true }
+                }
+            }
+        },
+        "headerSettings": {
+            "properties": {
+                "showHeader": {
+                    "type": { "bool": true }
+                },
+                "showSelectAll": {
+                    "type": { "bool": true }
+                },
+                "showExpandCollapse": {
+                    "type": { "bool": true }
+                },
+                "headerBackground": {
+                    "type": { "fill": { "solid": { "color": true } } }
+                },
+                "headerFontColor": {
+                    "type": { "fill": { "solid": { "color": true } } }
+                },
+                "headerFontSize": {
+                    "type": { "formatting": { "fontSize": true } }
+                },
+                "headerBorderColor": {
+                    "type": { "fill": { "solid": { "color": true } } }
+                }
+            }
+        },
+        "containerSettings": {
+            "properties": {
+                "background": {
+                    "type": { "fill": { "solid": { "color": true } } }
+                },
+                "borderWidth": {
+                    "type": { "numeric": true }
+                },
+                "borderColor": {
+                    "type": { "fill": { "solid": { "color": true } } }
+                },
+                "borderRadius": {
+                    "type": { "numeric": true }
+                },
+                "scrollbarWidth": {
+                    "type": { "numeric": true }
+                },
+                "scrollbarThumbColor": {
+                    "type": { "fill": { "solid": { "color": true } } }
+                },
+                "scrollbarTrackColor": {
+                    "type": { "fill": { "solid": { "color": true } } }
                 }
             }
         }
     },
     "dataViewMappings": [
         {
+            "conditions": [
+                {
+                    "category": { "max": 6 }
+                }
+            ],
             "categorical": {
                 "categories": {
-                    "for": {
-                        "in": "category"
-                    },
+                    "for": { "in": "category" },
                     "dataReductionAlgorithm": {
-                        "top": {}
+                        "top": { "count": 30000 }
                     }
-                },
-                "values": {
-                    "select": [
-                        {
-                            "bind": {
-                                "to": "measure"
-                            }
-                        }
-                    ]
                 }
             }
         }

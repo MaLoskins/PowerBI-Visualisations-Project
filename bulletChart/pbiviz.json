@@ -1,1 +1,26 @@
-{"visual":{"name":"bulletChart","displayName":"BulletChart","guid":"bulletChart3D0890C7255346EE8304AE6DCB9FB4BD","visualClassName":"Visual","version":"1.0.0.0","description":"","supportUrl":"","gitHubUrl":""},"apiVersion":"5.3.0","author":{"name":"","email":""},"assets":{"icon":"assets/icon.png"},"externalJS":null,"style":"style/visual.less","capabilities":"capabilities.json","dependencies":null,"stringResources":[],"version":"1.0.0.0"}
+{
+    "visual": {
+        "name": "bulletChart",
+        "displayName": "BulletChart",
+        "guid": "bulletChartA1B2C3D4E5F6789012345678ABCDEF01",
+        "visualClassName": "Visual",
+        "version": "1.0.0.0",
+        "description": "Bullet Chart – Stephen Few design with actual bar, target marker, and qualitative ranges.",
+        "supportUrl": "https://github.com",
+        "gitHubUrl": ""
+    },
+    "apiVersion": "5.3.0",
+    "author": {
+        "name": "Matthew Haskins",
+        "email": "matthew.haskins.mh@gmail.com"
+    },
+    "assets": {
+        "icon": "assets/icon.png"
+    },
+    "externalJS": null,
+    "style": "style/visual.less",
+    "capabilities": "capabilities.json",
+    "dependencies": null,
+    "stringResources": [],
+    "version": "1.0.0.0"
+}

@@ -1,79 +1,169 @@
 {
     "dataRoles": [
         {
-            "displayName": "Category Data",
+            "displayName": "Category",
             "name": "category",
-            "kind": "Grouping"
+            "kind": "Grouping",
+            "displayNameKey": "Role_Category"
         },
         {
-            "displayName": "Measure Data",
-            "name": "measure",
-            "kind": "Measure"
+            "displayName": "Actual",
+            "name": "actual",
+            "kind": "Measure",
+            "displayNameKey": "Role_Actual",
+            "requiredTypes": [{ "numeric": true }]
+        },
+        {
+            "displayName": "Budget",
+            "name": "budget",
+            "kind": "Measure",
+            "displayNameKey": "Role_Budget",
+            "requiredTypes": [{ "numeric": true }]
+        },
+        {
+            "displayName": "Tooltip Fields",
+            "name": "tooltipFields",
+            "kind": "GroupingOrMeasure",
+            "displayNameKey": "Role_Tooltip"
         }
     ],
     "objects": {
-        "dataPoint": {
+        "layoutSettings": {
             "properties": {
-                "defaultColor": {
+                "orientation": {
                     "type": {
-                        "fill": {
-                            "solid": {
-                                "color": true
-                            }
-                        }
+                        "enumeration": [
+                            { "displayName": "Top Down", "value": "topDown" },
+                            { "displayName": "Left to Right", "value": "leftRight" }
+                        ]
                     }
                 },
-                "showAllDataPoints": {
+                "nodeWidth": {
+                    "type": { "numeric": true }
+                },
+                "nodeHeight": {
+                    "type": { "numeric": true }
+                },
+                "levelSpacing": {
+                    "type": { "numeric": true }
+                },
+                "siblingSpacing": {
+                    "type": { "numeric": true }
+                },
+                "nodeCornerRadius": {
+                    "type": { "numeric": true }
+                }
+            }
+        },
+        "nodeSettings": {
+            "properties": {
+                "showVarianceBar": {
+                    "type": { "bool": true }
+                },
+                "barHeight": {
+                    "type": { "numeric": true }
+                },
+                "showPercentage": {
+                    "type": { "bool": true }
+                },
+                "showAbsoluteValue": {
+                    "type": { "bool": true }
+                },
+                "nodeFontSize": {
+                    "type": { "numeric": true }
+                },
+                "nodeFontColor": {
                     "type": {
-                        "bool": true
+                        "fill": { "solid": { "color": true } }
                     }
                 },
-                "fill": {
+                "valueFontSize": {
+                    "type": { "numeric": true }
+                },
+                "nodeBackground": {
                     "type": {
-                        "fill": {
-                            "solid": {
-                                "color": true
-                            }
-                        }
+                        "fill": { "solid": { "color": true } }
                     }
                 },
-                "fillRule": {
+                "nodeBorderColor": {
                     "type": {
-                        "fill": {}
+                        "fill": { "solid": { "color": true } }
                     }
                 },
-                 "fontSize": {
+                "nodeBorderWidth": {
+                    "type": { "numeric": true }
+                }
+            }
+        },
+        "colorSettings": {
+            "properties": {
+                "favourableColor": {
                     "type": {
-                        "formatting": {
-                            "fontSize": true
-                        }
+                        "fill": { "solid": { "color": true } }
                     }
+                },
+                "unfavourableColor": {
+                    "type": {
+                        "fill": { "solid": { "color": true } }
+                    }
+                },
+                "neutralColor": {
+                    "type": {
+                        "fill": { "solid": { "color": true } }
+                    }
+                },
+                "connectorColor": {
+                    "type": {
+                        "fill": { "solid": { "color": true } }
+                    }
+                },
+                "connectorWidth": {
+                    "type": { "numeric": true }
+                },
+                "selectedNodeBorder": {
+                    "type": {
+                        "fill": { "solid": { "color": true } }
+                    }
+                }
+            }
+        },
+        "interactionSettings": {
+            "properties": {
+                "startExpanded": {
+                    "type": {
+                        "enumeration": [
+                            { "displayName": "All", "value": "all" },
+                            { "displayName": "Root Only", "value": "rootOnly" },
+                            { "displayName": "None", "value": "none" }
+                        ]
+                    }
+                },
+                "animationDuration": {
+                    "type": { "numeric": true }
                 }
             }
         }
     },
     "dataViewMappings": [
         {
-            "categorical": {
-                "categories": {
-                    "for": {
-                        "in": "category"
-                    },
-                    "dataReductionAlgorithm": {
-                        "top": {}
-                    }
-                },
-                "values": {
+            "table": {
+                "rows": {
                     "select": [
-                        {
-                            "bind": {
-                                "to": "measure"
-                            }
-                        }
+                        { "for": { "in": "category" } },
+                        { "for": { "in": "actual" } },
+                        { "for": { "in": "budget" } },
+                        { "for": { "in": "tooltipFields" } }
                     ]
+                },
+                "dataReductionAlgorithm": {
+                    "top": { "count": 10000 }
                 }
             }
         }
     ],
+    "tooltips": {
+        "supportedTypes": { "default": true, "canvas": true },
+        "roles": ["tooltipFields"]
+    },
     "privileges": []
 }
