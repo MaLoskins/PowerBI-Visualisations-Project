@@ -6,7 +6,7 @@ import type { RenderConfig } from "../types";
  * The <style> tag for webkit overrides is created once and updated.
  */
 export class ScrollbarStyler {
-    private readonly styleTag: HTMLStyleElement;
+    private styleTag: HTMLStyleElement;
 
     constructor() {
         this.styleTag = document.createElement("style");
@@ -30,12 +30,5 @@ export class ScrollbarStyler {
 .gantt-timeline-body::-webkit-scrollbar-thumb:hover { background: ${cfg.scrollbarThumbHoverColor}; }
 .gantt-timeline-body::-webkit-scrollbar-corner { background: ${cfg.scrollbarTrackColor}; }
 .gantt-timeline-body { scrollbar-width: auto; scrollbar-color: ${cfg.scrollbarThumbColor} ${cfg.scrollbarTrackColor}; }`;
-    }
-
-    /** Remove the injected <style> tag from the document. Call when the visual is destroyed. */
-    destroy(): void {
-        if (this.styleTag.parentNode) {
-            this.styleTag.parentNode.removeChild(this.styleTag);
-        }
     }
 }

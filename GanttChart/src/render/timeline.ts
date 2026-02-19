@@ -1,23 +1,12 @@
+import powerbi from "powerbi-visuals-api";
 import { select } from "d3-selection";
 import type { Selection } from "d3-selection";
 import { timeMonth, timeYear, timeWeek, timeDay } from "d3-time";
 import type { TimeInterval } from "d3-time";
 import { timeFormat } from "d3-time-format";
 import type { ScaleTime } from "d3-scale";
-import type { GanttTask, RenderConfig, TaskPosition } from "../types";
-import {
-    MIN_BAR_WIDTH, MILESTONE_STYLES, STATUS_COLORS,
-    PPD_THRESHOLD_DAY, PPD_THRESHOLD_WEEK, PPD_THRESHOLD_MONTH,
-    PPD_THRESHOLD_TOP_DAY, PPD_THRESHOLD_WEEKEND,
-    HEADER_TOP_LABEL_Y_FRAC, HEADER_TOP_LABEL_MAX_Y, HEADER_AXIS_LINE_WIDTH,
-    PROGRESS_LABEL_MIN_BAR_WIDTH, BAR_LABEL_AUTO_INSIDE_WIDTH,
-    DEP_ORTHO_OFFSET_PX, DEP_ARROW_MARKER_ID,
-    GROUP_THIN_LINE_WIDTH, GROUP_THIN_CAP_WIDTH, GROUP_THIN_CAP_HALF,
-    GROUP_FLAT_HEIGHT_FRAC, GROUP_FLAT_OPACITY,
-    GROUP_BRACKET_H_FRAC, GROUP_BRACKET_MAX_CAP,
-    STRIPE_HEIGHT_FRAC, STRIPE_MIN_HEIGHT_PX, STRIPE_CORNER_RADIUS,
-    WEEK_HIGHLIGHT_OPACITY,
-} from "../constants";
+import type { GanttTask, RenderConfig, TaskPosition, DateFormat } from "../types";
+import { MIN_BAR_WIDTH, MILESTONE_STYLES, STATUS_COLORS } from "../constants";
 import { formatDateCustom, isWeekend } from "../utils/date";
 
 /* ═══════════════════════════════════════════════
@@ -44,8 +33,8 @@ export function renderTimelineHeader(
 
     let topFmt: (d: Date) => string;
     let topInterval: TimeInterval;
-    if (pxPerDay >= PPD_THRESHOLD_TOP_DAY) { topInterval = timeMonth; topFmt = timeFormat("%B %Y"); }
-    else if (pxPerDay >= PPD_THRESHOLD_MONTH) { topInterval = timeMonth; topFmt = timeFormat("%b %Y"); }
+    if (pxPerDay >= 15) { topInterval = timeMonth; topFmt = timeFormat("%B %Y"); }
+    else if (pxPerDay >= 2) { topInterval = timeMonth; topFmt = timeFormat("%b %Y"); }
     else { topInterval = timeYear; topFmt = timeFormat("%Y"); }
 
     const topTicks = topInterval.range(timeMin, timeMax);
@@ -53,7 +42,7 @@ export function renderTimelineHeader(
     topG.selectAll("text").data(topTicks).enter()
         .append("text")
         .attr("x", (d: Date) => scale(d) + 4)
-        .attr("y", Math.min(HEADER_TOP_LABEL_MAX_Y, h.headerHeight * HEADER_TOP_LABEL_Y_FRAC))
+        .attr("y", Math.min(16, h.headerHeight * 0.4))
         .style("font-size", h.headerFontSize + "px")
         .style("font-weight", "600")
         .style("fill", h.headerFontColor)
@@ -64,14 +53,14 @@ export function renderTimelineHeader(
             .append("line")
             .attr("x1", (d: Date) => scale(d)).attr("x2", (d: Date) => scale(d))
             .attr("y1", 0).attr("y2", h.headerHeight)
-            .style("stroke", h.axisLineColor).style("stroke-width", HEADER_AXIS_LINE_WIDTH);
+            .style("stroke", h.axisLineColor).style("stroke-width", 1);
     }
 
     let botFmt: (d: Date) => string;
     let botInterval: TimeInterval | null;
-    if (pxPerDay >= PPD_THRESHOLD_DAY) { botInterval = timeDay; botFmt = timeFormat("%d"); }
-    else if (pxPerDay >= PPD_THRESHOLD_WEEK) { botInterval = timeWeek; botFmt = timeFormat("%d %b"); }
-    else if (pxPerDay >= PPD_THRESHOLD_MONTH) { botInterval = timeMonth; botFmt = timeFormat("%b"); }
+    if (pxPerDay >= 30) { botInterval = timeDay; botFmt = timeFormat("%d"); }
+    else if (pxPerDay >= 8) { botInterval = timeWeek; botFmt = timeFormat("%d %b"); }
+    else if (pxPerDay >= 2) { botInterval = timeMonth; botFmt = timeFormat("%b"); }
     else {
         botInterval = timeMonth.every(3) as TimeInterval;
         botFmt = (d: Date) => `Q${Math.floor(d.getMonth() / 3) + 1} ${d.getFullYear()}`;
@@ -121,14 +110,7 @@ export function renderTimelineBody(
     d3svg.selectAll("*").remove();
     if (flatVisible.length === 0) return new Map();
 
-    /* Clip path so bars/rows cannot bleed outside the SVG bounds */
-    const clipId = "gantt-body-clip";
-    const defs = d3svg.append("defs");
-    defs.append("clipPath").attr("id", clipId)
-        .append("rect").attr("x", 0).attr("y", 0)
-        .attr("width", totalWidth).attr("height", totalHeight);
-
-    const bgG = d3svg.append("g").attr("class", "gantt-bg").attr("clip-path", `url(#${clipId})`);
+    const bgG = d3svg.append("g").attr("class", "gantt-bg");
 
     /* Row stripes – full dataset for background continuity */
     bgG.selectAll("rect.gantt-row-stripe")
@@ -142,7 +124,7 @@ export function renderTimelineBody(
         .style("stroke-width", 0.5);
 
     /* Weekend shading */
-    if (cfg.timeline.showWeekends && pxPerDay >= PPD_THRESHOLD_WEEKEND) {
+    if (cfg.timeline.showWeekends && pxPerDay >= 1.5) {
         const weekendDays = timeDay.range(timeMin, timeMax).filter((d: Date) => isWeekend(d));
         bgG.selectAll("rect.gantt-weekend").data(weekendDays).enter()
             .append("rect").attr("class", "gantt-weekend")
@@ -163,7 +145,7 @@ export function renderTimelineBody(
             bgG.append("rect").attr("x", x1).attr("y", 0)
                 .attr("width", x2 - x1).attr("height", totalHeight)
                 .style("fill", cfg.timeline.currentWeekColor)
-                .style("opacity", WEEK_HIGHLIGHT_OPACITY).style("pointer-events", "none");
+                .style("opacity", 0.3).style("pointer-events", "none");
         }
     }
 
@@ -177,7 +159,7 @@ export function renderTimelineBody(
 
     /* Vertical axis lines */
     if (cfg.header.showAxisLines) {
-        const vInterval = pxPerDay >= PPD_THRESHOLD_MONTH ? timeMonth : timeYear;
+        const vInterval = pxPerDay >= 2 ? timeMonth : timeYear;
         const vTicks = vInterval.range(timeMin, timeMax);
         bgG.selectAll("line.gantt-vline").data(vTicks).enter()
             .append("line").attr("class", "gantt-vline")
@@ -188,7 +170,7 @@ export function renderTimelineBody(
     }
 
     /* Task bars */
-    const barsG = d3svg.append("g").attr("class", "gantt-bars").attr("clip-path", `url(#${clipId})`);
+    const barsG = d3svg.append("g").attr("class", "gantt-bars");
     const taskPosMap = new Map<string, TaskPosition>();
 
     for (let i = 0; i < flatVisible.length; i++) {
@@ -235,7 +217,7 @@ export function renderTimelineBody(
         for (const ms of task.milestoneMarkers) {
             const msX = scale(ms.date);
             const style = MILESTONE_STYLES[ms.styleIndex % MILESTONE_STYLES.length];
-            renderMilestoneMarker(barsG, task, msX, i * rowH, rowH, style, cfg, cbs);
+            renderMilestoneMarker(barsG, task, msX, i * rowH, rowH, style, ms.label, cfg, cbs);
         }
 
         /* Bar labels */
@@ -246,7 +228,7 @@ export function renderTimelineBody(
 
     /* Dependencies – need positions for all visible tasks */
     if (cfg.dependencies.showDependencies) {
-        renderDependencies(d3svg, defs, flatVisible, taskPosMap, cfg);
+        renderDependencies(d3svg, flatVisible, taskPosMap, cfg);
     }
 
     /* Today line */
@@ -301,11 +283,11 @@ function renderTaskBar(
     if (cfg.task.showProgress && task.progress > 0) {
         const pOpacity = cfg.task.progressOpacity;
         if (cfg.task.progressStyle === "bottomStripe") {
-            const stripeH = Math.max(STRIPE_MIN_HEIGHT_PX, h * STRIPE_HEIGHT_FRAC);
+            const stripeH = Math.max(3, h * 0.2);
             barG.append("rect").attr("class", "gantt-progress")
                 .attr("x", x).attr("y", y + h - stripeH)
                 .attr("width", w * task.progress).attr("height", stripeH)
-                .attr("rx", STRIPE_CORNER_RADIUS).attr("ry", STRIPE_CORNER_RADIUS)
+                .attr("rx", 1).attr("ry", 1)
                 .style("fill", cfg.colors.progressColor);
         } else {
             barG.append("rect").attr("class", "gantt-progress")
@@ -318,7 +300,7 @@ function renderTaskBar(
     }
 
     /* Progress % label inside bar */
-    if (cfg.labels.showProgressLabels && w > PROGRESS_LABEL_MIN_BAR_WIDTH && task.progress > 0) {
+    if (cfg.labels.showProgressLabels && w > 35 && task.progress > 0) {
         barG.append("text").attr("class", "gantt-bar-progress-label")
             .attr("x", x + w / 2).attr("y", y + h / 2 + 1)
             .attr("text-anchor", "middle").attr("dominant-baseline", "middle")
@@ -327,7 +309,7 @@ function renderTaskBar(
             .text(Math.round(task.progress * 100) + "%");
     }
 
-    attachBarInteraction(barG, task, cbs);
+    attachBarInteraction(barG, task, cfg.grid.dateFormat, cbs);
 }
 
 function renderGroupBar(
@@ -343,23 +325,23 @@ function renderGroupBar(
     if (style === "thin") {
         const lineY = y + h / 2;
         barG.append("line").attr("x1", x).attr("x2", x + w).attr("y1", lineY).attr("y2", lineY)
-            .style("stroke", gc).style("stroke-width", GROUP_THIN_LINE_WIDTH);
-        barG.append("line").attr("x1", x).attr("x2", x).attr("y1", lineY - GROUP_THIN_CAP_HALF).attr("y2", lineY + GROUP_THIN_CAP_HALF)
-            .style("stroke", gc).style("stroke-width", GROUP_THIN_CAP_WIDTH);
-        barG.append("line").attr("x1", x + w).attr("x2", x + w).attr("y1", lineY - GROUP_THIN_CAP_HALF).attr("y2", lineY + GROUP_THIN_CAP_HALF)
-            .style("stroke", gc).style("stroke-width", GROUP_THIN_CAP_WIDTH);
+            .style("stroke", gc).style("stroke-width", 3);
+        barG.append("line").attr("x1", x).attr("x2", x).attr("y1", lineY - 4).attr("y2", lineY + 4)
+            .style("stroke", gc).style("stroke-width", 2);
+        barG.append("line").attr("x1", x + w).attr("x2", x + w).attr("y1", lineY - 4).attr("y2", lineY + 4)
+            .style("stroke", gc).style("stroke-width", 2);
     } else if (style === "flat") {
-        const groupH = Math.max(6, h * GROUP_FLAT_HEIGHT_FRAC);
+        const groupH = Math.max(6, h * 0.5);
         const groupY = y + (h - groupH) / 2;
         barG.append("rect").attr("x", x).attr("y", groupY).attr("width", w).attr("height", groupH)
             .attr("rx", 2).attr("ry", 2)
-            .style("fill", gc).style("opacity", GROUP_FLAT_OPACITY);
+            .style("fill", gc).style("opacity", 0.7);
     } else {
-        const groupH = Math.max(6, h * GROUP_BRACKET_H_FRAC);
+        const groupH = Math.max(6, h * 0.4);
         const groupY = y + (h - groupH) / 2;
         barG.append("rect").attr("x", x).attr("y", groupY).attr("width", w).attr("height", groupH)
             .style("fill", gc);
-        const capW = Math.min(GROUP_BRACKET_MAX_CAP, w / 4);
+        const capW = Math.min(6, w / 4);
         barG.append("polygon")
             .attr("points", `${x},${groupY} ${x + capW},${groupY} ${x},${groupY + groupH}`)
             .style("fill", gc);
@@ -368,7 +350,7 @@ function renderGroupBar(
             .style("fill", gc);
     }
 
-    attachBarInteraction(barG, task, cbs);
+    attachBarInteraction(barG, task, cfg.grid.dateFormat, cbs);
 }
 
 function renderMilestone(
@@ -387,13 +369,13 @@ function renderMilestone(
         .attr("points", `${cx},${cy - s} ${cx + s},${cy} ${cx},${cy + s} ${cx - s},${cy}`)
         .style("fill", fill);
 
-    attachBarInteraction(barG, task, cbs);
+    attachBarInteraction(barG, task, cfg.grid.dateFormat, cbs);
 }
 
 function renderMilestoneMarker(
     g: Selection<SVGGElement, unknown, null, undefined>,
     task: GanttTask, cx: number, rowTop: number, rowH: number,
-    style: { color: string; shape: string },
+    style: { color: string; shape: string }, label: string,
     cfg: RenderConfig, cbs: TimelineBodyCallbacks,
 ): void {
     const s = cfg.task.milestoneSize / 2;
@@ -453,7 +435,7 @@ function renderBarLabel(
     }
     if (!text) return;
 
-    const actualPosition = position === "auto" ? (w > BAR_LABEL_AUTO_INSIDE_WIDTH ? "inside" : "right") : position;
+    const actualPosition = position === "auto" ? (w > 80 ? "inside" : "right") : position;
     let tx: number, anchor: string, color: string;
     if (actualPosition === "inside") { tx = x + w / 2; anchor = "middle"; color = "#fff"; }
     else if (actualPosition === "left") { tx = x - 4; anchor = "end"; color = fontColor; }
@@ -468,7 +450,6 @@ function renderBarLabel(
 
 function renderDependencies(
     svg: Selection<SVGSVGElement, unknown, null, undefined>,
-    defs: Selection<SVGDefsElement, unknown, null, undefined>,
     flatVisible: GanttTask[],
     posMap: Map<string, TaskPosition>,
     cfg: RenderConfig,
@@ -479,14 +460,13 @@ function renderDependencies(
     if (d.dependencyLineStyle === "dashed") dashArray = "6 3";
     else if (d.dependencyLineStyle === "dotted") dashArray = "2 3";
 
-    /* Arrow marker lives in the shared defs already appended at the top of renderTimelineBody */
-    defs.append("marker").attr("id", DEP_ARROW_MARKER_ID)
+    const depG = svg.append("g").attr("class", "gantt-deps");
+    const defs = svg.append("defs");
+    defs.append("marker").attr("id", "gantt-arrow")
         .attr("viewBox", "0 0 10 10").attr("refX", 10).attr("refY", 5)
         .attr("markerWidth", d.dependencyArrowSize).attr("markerHeight", d.dependencyArrowSize)
         .attr("orient", "auto-start-reverse")
         .append("path").attr("d", "M 0 0 L 10 5 L 0 10 z").style("fill", lineColor);
-
-    const depG = svg.append("g").attr("class", "gantt-deps");
 
     for (const task of flatVisible) {
         if (task.dependencyIds.length === 0) continue;
@@ -498,19 +478,18 @@ function renderDependencies(
             const sx = source.x + source.w, sy = source.y;
             const tx = target.x, ty = target.y;
             let pathD: string;
-            if (d.dependencyRouting === "straight") {
-                pathD = `M ${sx} ${sy} L ${tx} ${ty}`;
-            } else if (d.dependencyRouting === "curved") {
+            if (d.dependencyRouting === "straight") { pathD = `M ${sx} ${sy} L ${tx} ${ty}`; }
+            else if (d.dependencyRouting === "curved") {
                 const midX = (sx + tx) / 2;
                 pathD = `M ${sx} ${sy} C ${midX} ${sy}, ${midX} ${ty}, ${tx} ${ty}`;
             } else {
-                const midX = sx + DEP_ORTHO_OFFSET_PX;
+                const midX = sx + 12;
                 pathD = `M ${sx} ${sy} L ${midX} ${sy} L ${midX} ${ty} L ${tx} ${ty}`;
             }
             depG.append("path").attr("class", "gantt-dep-line").attr("d", pathD)
                 .style("stroke", lineColor).style("stroke-width", d.dependencyLineWidth)
                 .style("fill", "none").style("stroke-dasharray", dashArray)
-                .attr("marker-end", `url(#${DEP_ARROW_MARKER_ID})`);
+                .attr("marker-end", "url(#gantt-arrow)");
         }
     }
 }
@@ -518,6 +497,7 @@ function renderDependencies(
 function attachBarInteraction(
     barG: Selection<SVGGElement, unknown, null, undefined>,
     task: GanttTask,
+    dateFmt: DateFormat,
     cbs: TimelineBodyCallbacks,
 ): void {
     const node = barG.node() as SVGGElement;

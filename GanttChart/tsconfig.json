@@ -1,17 +1,19 @@
 {
     "compilerOptions": {
-        "ignoreDeprecations": "6.0",
         "allowJs": false,
         "emitDecoratorMetadata": true,
         "experimentalDecorators": true,
         "target": "es2022",
-        "sourceMap": false,
-        "declaration": false,
-        "outDir": "./.tmp/build/",
-        "rootDir": "./src",
+        "sourceMap": true,
+        "outDir": ".tmp/build",
         "moduleResolution": "node",
-        "lib": ["es2022", "dom"]
+        "declaration": true,
+        "lib": [
+            "es2022",
+            "dom"
+        ]
     },
-    "files": ["./src/visual.ts"],
-    "include": ["src/**/*.ts"]
+    "files": [
+        "src/visual.ts"
+    ]
 }

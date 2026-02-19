@@ -13,24 +13,19 @@ export interface ToolbarCallbacks {
 /**
  * Toolbar – DOM is created once (G2).
  * Only visibility/style attributes are updated on subsequent calls.
- * Call destroy() to remove all registered event listeners.
  */
 export class Toolbar {
-    private readonly root: HTMLDivElement;
-    private readonly zoomGroup: HTMLDivElement;
-    private readonly expandGroup: HTMLDivElement;
-    private readonly todayGroup: HTMLDivElement;
-    private readonly searchGroup: HTMLDivElement;
-    private readonly searchInput: HTMLInputElement;
-    private readonly zoomButtons: HTMLButtonElement[] = [];
-    private readonly toolButtons: HTMLButtonElement[] = [];
-
-    /* Store abort controller so all listeners can be removed at once */
-    private readonly abortController = new AbortController();
+    private root: HTMLDivElement;
+    private zoomGroup: HTMLDivElement;
+    private expandGroup: HTMLDivElement;
+    private todayGroup: HTMLDivElement;
+    private searchGroup: HTMLDivElement;
+    private searchInput: HTMLInputElement;
+    private zoomButtons: HTMLButtonElement[] = [];
+    private toolButtons: HTMLButtonElement[] = [];
 
     constructor(parent: HTMLDivElement, cbs: ToolbarCallbacks) {
         this.root = parent;
-        const signal = this.abortController.signal;
 
         /* Zoom group */
         this.zoomGroup = el("div", "gantt-toolbar-group gantt-toolbar-zoom");
@@ -41,7 +36,7 @@ export class Toolbar {
         for (const key of ZOOM_LEVELS) {
             const btn = el("button", "gantt-zoom-btn", zoomLabels[key]);
             btn.dataset.zoom = key;
-            btn.addEventListener("click", () => cbs.onZoom(key), { signal });
+            btn.addEventListener("click", () => cbs.onZoom(key));
             this.zoomGroup.appendChild(btn);
             this.zoomButtons.push(btn);
         }
@@ -52,11 +47,11 @@ export class Toolbar {
         this.expandGroup = el("div", "gantt-toolbar-group gantt-toolbar-expand");
         const expandBtn = el("button", "gantt-tool-btn", "▾ Expand All");
         expandBtn.title = "Expand all groups";
-        expandBtn.addEventListener("click", () => cbs.onExpandAll(), { signal });
+        expandBtn.addEventListener("click", () => cbs.onExpandAll());
         this.expandGroup.appendChild(expandBtn);
         const collapseBtn = el("button", "gantt-tool-btn", "▸ Collapse");
         collapseBtn.title = "Collapse all groups";
-        collapseBtn.addEventListener("click", () => cbs.onCollapseAll(), { signal });
+        collapseBtn.addEventListener("click", () => cbs.onCollapseAll());
         this.expandGroup.appendChild(collapseBtn);
         this.toolButtons.push(expandBtn, collapseBtn);
         this.root.appendChild(this.expandGroup);
@@ -66,7 +61,7 @@ export class Toolbar {
         this.todayGroup = el("div", "gantt-toolbar-group gantt-toolbar-today");
         const todayBtn = el("button", "gantt-tool-btn", "⊙ Today");
         todayBtn.title = "Scroll to today";
-        todayBtn.addEventListener("click", () => cbs.onScrollToToday(), { signal });
+        todayBtn.addEventListener("click", () => cbs.onScrollToToday());
         this.todayGroup.appendChild(todayBtn);
         this.toolButtons.push(todayBtn);
         this.root.appendChild(this.todayGroup);
@@ -79,7 +74,7 @@ export class Toolbar {
         this.searchInput.placeholder = "Search tasks…";
         this.searchInput.addEventListener("input", () => {
             cbs.onSearch(this.searchInput.value.toLowerCase().trim());
-        }, { signal });
+        });
         this.searchGroup.appendChild(this.searchInput);
         this.root.appendChild(this.searchGroup);
     }
@@ -112,11 +107,6 @@ export class Toolbar {
         this.searchInput.style.background = tb.buttonBackground;
         this.searchInput.style.color = tb.buttonFontColor;
         this.searchInput.style.borderColor = tb.buttonBorderColor;
-    }
-
-    /** Remove all registered DOM event listeners. Call when the visual is destroyed. */
-    destroy(): void {
-        this.abortController.abort();
     }
 }
 

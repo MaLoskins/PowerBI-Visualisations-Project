@@ -1,5 +1,5 @@
 import type { GanttTask, SortField, SortDirection } from "../types";
-import { DAY_MS, MAX_HIERARCHY_DEPTH } from "../constants";
+import { DAY_MS } from "../constants";
 import { daysBetween } from "../utils/date";
 
 /* ─── Build hierarchy from multi-column task names ─── */
@@ -55,7 +55,7 @@ export function buildExplicitParentHierarchy(
     const rootTasks: GanttTask[] = [];
 
     for (const t of leafTasks) {
-        if (t.parentId && taskById.has(t.parentId) && t.parentId !== t.id) {
+        if (t.parentId && taskById.has(t.parentId)) {
             const par = taskById.get(t.parentId)!;
             par.children.push(t);
             par.isGroup = true;
@@ -63,9 +63,6 @@ export function buildExplicitParentHierarchy(
             rootTasks.push(t);
         }
     }
-
-    /* Detect and sever circular parent references before computing depth */
-    breakCircularRefs(rootTasks, new Set<string>());
 
     setDepth(rootTasks, 0);
     rollUpGroupDates(rootTasks);
@@ -260,25 +257,7 @@ function applyExpandState(tasks: GanttTask[], expandedSet: Set<string>): void {
 }
 
 function setDepth(tasks: GanttTask[], d: number): void {
-    if (d > MAX_HIERARCHY_DEPTH) return;
     for (const t of tasks) { t.depth = d; setDepth(t.children, d + 1); }
-}
-
-/**
- * Walk the tree and sever child links where a node has already been visited
- * (which indicates a circular reference). Operates in-place.
- */
-function breakCircularRefs(tasks: GanttTask[], visited: Set<string>): void {
-    for (const t of tasks) {
-        if (visited.has(t.id)) {
-            /* This node is already an ancestor — remove all its children to break the cycle */
-            t.children = [];
-            continue;
-        }
-        visited.add(t.id);
-        if (t.children.length > 0) breakCircularRefs(t.children, new Set(visited));
-        visited.delete(t.id);
-    }
 }
 
 function walkGroups(tasks: GanttTask[], fn: (t: GanttTask) => void): void {

@@ -1,5 +1,5 @@
 import powerbi from "powerbi-visuals-api";
-import type { GanttTask } from "../types";
+import type { GanttTask, RenderConfig } from "../types";
 
 /**
  * Apply selection highlight styles to SVG bar groups and grid rows.

@@ -1,6 +1,6 @@
 import powerbi from "powerbi-visuals-api";
 import { FormattingSettingsService } from "powerbi-visuals-utils-formattingmodel";
-import "./../style/visual.less";
+import "../style/visual.less";
 
 import VisualConstructorOptions = powerbi.extensibility.visual.VisualConstructorOptions;
 import VisualUpdateOptions = powerbi.extensibility.visual.VisualUpdateOptions;
@@ -25,10 +25,7 @@ import { Toolbar } from "./ui/toolbar";
 import { ScrollbarStyler } from "./ui/scrollbars";
 import { applySelectionStyles, handleTaskClick } from "./interactions/selection";
 import { el, clamp } from "./utils/dom";
-import { formatDateCustom } from "./utils/date";
-import {
-    GRID_RESIZE_MIN_PX, GRID_RESIZE_MAX_PX, SCROLL_TO_TODAY_FRAC,
-} from "./constants";
+import { formatDateCustom, daysBetween } from "./utils/date";
 
 /* ═══════════════════════════════════════════════
    Visual (orchestrator)
@@ -159,7 +156,7 @@ export class Visual implements IVisual {
 
         const onMouseMove = (ev: MouseEvent): void => {
             if (!this.isResizingGrid) return;
-            this.gridPane.style.width = clamp(startWidth + ev.clientX - startX, GRID_RESIZE_MIN_PX, GRID_RESIZE_MAX_PX) + "px";
+            this.gridPane.style.width = clamp(startWidth + ev.clientX - startX, 100, 800) + "px";
         };
         const onMouseUp = (): void => {
             this.isResizingGrid = false;
@@ -361,7 +358,7 @@ export class Visual implements IVisual {
         if (today < this.timeMin || today > this.timeMax) return;
         const scale = buildTimeScale(this.timeMin, this.timeMax, this.pxPerDay);
         const tx = scale(today);
-        this.timelineBodyWrap.scrollLeft = Math.max(0, tx - this.timelineBodyWrap.clientWidth * SCROLL_TO_TODAY_FRAC);
+        this.timelineBodyWrap.scrollLeft = Math.max(0, tx - this.timelineBodyWrap.clientWidth / 3);
     }
 
     private refreshVisibleAndRender(): void {
@@ -434,11 +431,5 @@ export class Visual implements IVisual {
        ═══════════════════════════════════════════════ */
     public getFormattingModel(): powerbi.visuals.FormattingModel {
         return this.fmtService.buildFormattingModel(this.fmtModel);
-    }
-
-    /** Clean up injected styles and DOM event listeners. */
-    public destroy(): void {
-        this.toolbar.destroy();
-        this.scrollbarStyler.destroy();
     }
 }

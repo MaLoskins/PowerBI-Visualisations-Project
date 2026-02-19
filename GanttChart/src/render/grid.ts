@@ -1,4 +1,4 @@
-import type { GanttTask, RenderConfig } from "../types";
+import type { GanttTask, RenderConfig, DateFormat } from "../types";
 import { STATUS_COLORS } from "../constants";
 import { formatDateCustom } from "../utils/date";
 import { el, clearChildren } from "../utils/dom";

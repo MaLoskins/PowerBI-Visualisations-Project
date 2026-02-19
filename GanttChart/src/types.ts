@@ -1,4 +1,5 @@
 import powerbi from "powerbi-visuals-api";
+import type ISelectionId from "powerbi-visuals-api";
 
 /* ═══════════════════════════════════════════════
    Enum-like literal unions (A2, F3)
@@ -41,9 +42,9 @@ export type DepRouting = (typeof DEP_ROUTINGS)[number];
    Domain model
    ═══════════════════════════════════════════════ */
 export interface MilestoneMarker {
-    readonly date: Date;
-    readonly label: string;
-    readonly styleIndex: number;
+    date: Date;
+    label: string;
+    styleIndex: number;
 }
 
 export interface GanttTask {
@@ -78,23 +79,23 @@ export interface GanttTask {
 }
 
 export interface ColumnIndex {
-    readonly taskNames: number[];
-    readonly startDate: number;
-    readonly endDate: number;
-    readonly taskId: number;
-    readonly parent: number;
-    readonly progress: number;
-    readonly progressBase: number;
-    readonly milestones: number[];
-    readonly resource: number;
-    readonly dependencies: number;
-    readonly priority: number;
-    readonly status: number;
-    readonly wbs: number;
-    readonly plannedStart: number;
-    readonly plannedEnd: number;
-    readonly colorField: number;
-    readonly tooltipFields: number[];
+    taskNames: number[];
+    startDate: number;
+    endDate: number;
+    taskId: number;
+    parent: number;
+    progress: number;
+    progressBase: number;
+    milestones: number[];
+    resource: number;
+    dependencies: number;
+    priority: number;
+    status: number;
+    wbs: number;
+    plannedStart: number;
+    plannedEnd: number;
+    colorField: number;
+    tooltipFields: number[];
 }
 
 /* ═══════════════════════════════════════════════
@@ -218,7 +219,7 @@ export interface RenderConfig {
 
 /** Position info for dependency routing */
 export interface TaskPosition {
-    readonly x: number;
-    readonly y: number;
-    readonly w: number;
+    x: number;
+    y: number;
+    w: number;
 }
