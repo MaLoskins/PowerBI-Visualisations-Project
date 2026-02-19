@@ -1,33 +1,15 @@
 source,destination,value,linkColor,tooltipFields,tooltipFields2
-Website,Leads,4200,,Marketing,Q1 2025
-Referrals,Leads,1800,,Sales,Q1 2025
-Social Media,Leads,2600,,Marketing,Q1 2025
-Email Campaign,Leads,1400,,Marketing,Q1 2025
-Trade Shows,Leads,900,,Sales,Q1 2025
-Leads,Qualified,3800,,Sales,Q1 2025
-Leads,Unqualified,2100,,Sales,Q1 2025
-Leads,Nurture Pipeline,5000,,Marketing,Q1 2025
-Qualified,Proposal Sent,2600,,Sales,Q2 2025
-Qualified,Lost - No Budget,700,,Finance,Q2 2025
-Qualified,Lost - Competitor,500,,Sales,Q2 2025
-Nurture Pipeline,Qualified,1800,,Marketing,Q2 2025
-Nurture Pipeline,Unsubscribed,600,,Marketing,Q2 2025
-Nurture Pipeline,Dormant,2600,,Marketing,Q2 2025
-Proposal Sent,Negotiation,2000,,Sales,Q2 2025
-Proposal Sent,Lost - No Response,500,,Sales,Q2 2025
-Proposal Sent,Lost - Timing,300,#EF4444,Sales,Q2 2025
-Negotiation,Closed Won,1400,#10B981,Sales,Q3 2025
-Negotiation,Closed Lost,400,#EF4444,Sales,Q3 2025
-Negotiation,Deferred,200,#F59E0B,Sales,Q3 2025
-Closed Won,Onboarding,1100,,Operations,Q3 2025
-Closed Won,Upsell Pipeline,300,,Sales,Q3 2025
-Onboarding,Active Customer,950,,Customer Success,Q4 2025
-Onboarding,Churned - Onboarding,150,#EF4444,Customer Success,Q4 2025
-Active Customer,Renewed,780,,Customer Success,Q4 2025
-Active Customer,Churned,170,#EF4444,Customer Success,Q4 2025
-Website,Leads,3900,,Marketing,Q2 2025
-Social Media,Leads,3100,,Marketing,Q2 2025
-Referrals,Leads,2200,,Sales,Q2 2025
-Deferred,Negotiation,150,,Sales,Q3 2025
-Upsell Pipeline,Proposal Sent,250,,Sales,Q3 2025
-Dormant,Leads,400,,Marketing,Q3 2025
+0_Website,1_New Leads,5200,,Acquisition,Q1 2025
+0_Social,1_New Leads,3100,,Acquisition,Q1 2025
+0_Paid Search,1_New Leads,2600,,Acquisition,Q1 2025
+0_Referrals,1_New Leads,1800,,Acquisition,Q1 2025
+0_Events,1_New Leads,900,,Acquisition,Q1 2025
+1_New Leads,2_Qualified,6800,,Stage,Q1 2025
+1_New Leads,2_Nurture,2300,#F59E0B,Stage,Q1 2025
+1_New Leads,2_Unqualified,1500,#EF4444,Stage,Q1 2025
+2_Qualified,3_Won,2400,#10B981,Outcome,Q1 2025
+2_Qualified,3_Lost,2000,#EF4444,Outcome,Q1 2025
+2_Qualified,3_In Progress,2400,,Outcome,Q1 2025
+2_Nurture,3_Requalified,900,,Re-entry,Q1 2025
+2_Nurture,3_Nurture Lost,600,#EF4444,Re-entry,Q1 2025
+2_Nurture,3_Still Nurturing,800,#F59E0B,Re-entry,Q1 2025

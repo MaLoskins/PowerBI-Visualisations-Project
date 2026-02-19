@@ -21,7 +21,7 @@
         {
             "displayName": "Link Color",
             "name": "linkColor",
-            "kind": "Measure",
+            "kind": "GroupingOrMeasure",
             "displayNameKey": "Role_LinkColor"
         },
         {
@@ -118,22 +118,6 @@
                 },
                 "selectedNodeColor": {
                     "type": { "fill": { "solid": { "color": true } } }
-                }
-            }
-        },
-        "groupingSettings": {
-            "properties": {
-                "enableGrouping": {
-                    "type": { "bool": true }
-                },
-                "maxDestinations": {
-                    "type": { "numeric": true }
-                },
-                "maxSources": {
-                    "type": { "numeric": true }
-                },
-                "minPctThreshold": {
-                    "type": { "numeric": true }
                 }
             }
         },

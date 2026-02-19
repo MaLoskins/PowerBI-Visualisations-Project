@@ -2,8 +2,8 @@
  *  Performance Flow — render/labels.ts
  *  Node label and value text rendering
  *
- *  FIX v2: "Other" bucket labels rendered in italic to
- *  visually distinguish them from real categories.
+ *  FIX: Uses D3 join instead of remove-all + re-append.
+ *       Provides updateLabelPositions() for drag.
  */
 "use strict";
 
@@ -11,7 +11,6 @@ import { select } from "d3-selection";
 import { SankeyNode, RenderConfig } from "../types";
 import { CSS_PREFIX } from "../constants";
 import { formatCompact } from "../utils/format";
-import { isOtherNode } from "../model/graphBuilder";
 
 /* ═══════════════════════════════════════════════
    Internal helpers
@@ -85,7 +84,6 @@ export function renderLabels(
             .attr("text-anchor", textAnchor)
             .attr("font-size", cfg.label.fontSize + "px")
             .attr("fill", cfg.label.fontColor)
-            .attr("font-style", isOtherNode(d.name) ? "italic" : "normal")
             .text(d.name);
     });
 

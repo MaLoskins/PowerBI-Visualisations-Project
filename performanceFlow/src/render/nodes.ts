@@ -2,10 +2,9 @@
  *  Performance Flow — render/nodes.ts
  *  SVG node rect rendering with optional drag support
  *
- *  Changes:
- *    - D3 join pattern (enter/update/exit)
- *    - "Other" bucket nodes get a dashed stroke to distinguish them
- *    - Lightweight position update for drag
+ *  FIX: Uses D3 join (enter/update/exit) instead of
+ *       selectAll("*").remove() + re-append on every render.
+ *       Drag only updates the single rect's y attribute.
  */
 "use strict";
 
@@ -28,16 +27,20 @@ export function renderNodes(
     const g = select(container);
     const className = CSS_PREFIX + "node";
 
+    /* D3 join pattern: enter + update + exit */
     const sel = g.selectAll<SVGRectElement, SankeyNode>(`.${className}`)
         .data(nodes, (d: SankeyNode) => d.id);
 
+    /* Exit: remove nodes no longer in data */
     sel.exit().remove();
 
+    /* Enter: create new rects */
     const enter = sel.enter()
         .append("rect")
         .attr("class", className)
         .style("cursor", "pointer");
 
+    /* Merge enter + update and set all attributes */
     const merged = enter.merge(sel)
         .attr("x", (d) => d.x0)
         .attr("y", (d) => d.y0)
@@ -47,10 +50,9 @@ export function renderNodes(
         .attr("ry", cfg.node.cornerRadius)
         .attr("fill", (d) => d.color)
         .attr("fill-opacity", cfg.node.opacity)
-        .attr("stroke", (d) => d.isOther ? d.color : "none")
-        .attr("stroke-width", (d) => d.isOther ? 1.5 : 0)
-        .attr("stroke-dasharray", (d) => d.isOther ? "4 2" : "none");
+        .attr("stroke", "none");
 
+    /* Re-bindall event handlers (safe to re-bind on update) */
     merged
         .on("click", function (_ev: MouseEvent, d: SankeyNode) {
             callbacks.onClick(d, _ev);
@@ -65,6 +67,7 @@ export function renderNodes(
             callbacks.onMouseOut();
         });
 
+    /* Drag behaviour for vertical repositioning */
     const dragBehavior = drag<SVGRectElement, SankeyNode>()
         .on("drag", function (event, d) {
             const dy = event.dy as number;
@@ -77,7 +80,7 @@ export function renderNodes(
     merged.call(dragBehavior);
 }
 
-/** Lightweight position-only update for drag */
+/** Lightweight position-only update for drag (no full re-render) */
 export function updateNodePositions(container: SVGGElement): void {
     select(container)
         .selectAll<SVGRectElement, SankeyNode>(`.${CSS_PREFIX}node`)
