@@ -4,7 +4,7 @@
  */
 "use strict";
 
-import { select, selectAll } from "d3-selection";
+import { select } from "d3-selection";
 import { SankeyNode, SankeyLink } from "../types";
 import { CSS_PREFIX, DIM_OPACITY, SELECTED_STROKE_WIDTH } from "../constants";
 
@@ -56,33 +56,48 @@ export function applySelectionStyles(
     defaultNodeOpacity: number,
     defaultLinkOpacity: number,
 ): void {
-    /* Power BI SDK workaround: cast to access internal hasSelection (any) */
     const hasSelection = (selectionManager as unknown as Record<string, unknown>)["hasSelection"]
         ? (selectionManager as unknown as { hasSelection: () => boolean }).hasSelection()
         : false;
 
     const svg = select(svgRoot);
 
+    if (!hasSelection) {
+        /* Fast path: no selection active, reset everything */
+        svg.selectAll<SVGRectElement, SankeyNode>(`.${CSS_PREFIX}node`)
+            .attr("fill-opacity", defaultNodeOpacity)
+            .attr("stroke", "none")
+            .attr("stroke-width", 0);
+
+        svg.selectAll<SVGPathElement, SankeyLink>(`.${CSS_PREFIX}link`)
+            .attr("stroke-opacity", defaultLinkOpacity);
+        return;
+    }
+
+    /* Build a set of selected IDs once for O(1) lookup */
+    const activeIds = selectionManager.getSelectionIds() as ISelectionId[];
+    const selectedNodeIds = new Set<string>();
+
+    /* Pre-compute which nodes are selected */
+    for (const node of nodes) {
+        if (isNodeInSelection(node, activeIds)) {
+            selectedNodeIds.add(node.id);
+        }
+    }
+
     /* ── Nodes ── */
     svg.selectAll<SVGRectElement, SankeyNode>(`.${CSS_PREFIX}node`)
-        .attr("fill-opacity", (d: SankeyNode) => {
-            if (!hasSelection) return defaultNodeOpacity;
-            return isNodeSelected(d, selectionManager) ? defaultNodeOpacity : DIM_OPACITY;
-        })
-        .attr("stroke", (d: SankeyNode) => {
-            if (!hasSelection) return "none";
-            return isNodeSelected(d, selectionManager) ? selectedNodeColor : "none";
-        })
-        .attr("stroke-width", (d: SankeyNode) => {
-            if (!hasSelection) return 0;
-            return isNodeSelected(d, selectionManager) ? SELECTED_STROKE_WIDTH : 0;
-        });
+        .attr("fill-opacity", (d) => selectedNodeIds.has(d.id) ? defaultNodeOpacity : DIM_OPACITY)
+        .attr("stroke", (d) => selectedNodeIds.has(d.id) ? selectedNodeColor : "none")
+        .attr("stroke-width", (d) => selectedNodeIds.has(d.id) ? SELECTED_STROKE_WIDTH : 0);
 
     /* ── Links ── */
     svg.selectAll<SVGPathElement, SankeyLink>(`.${CSS_PREFIX}link`)
-        .attr("stroke-opacity", (d: SankeyLink) => {
-            if (!hasSelection) return defaultLinkOpacity;
-            return isLinkSelected(d, selectionManager) ? defaultLinkOpacity : DIM_OPACITY;
+        .attr("stroke-opacity", (d) => {
+            if (isLinkInSelection(d, activeIds) || selectedNodeIds.has(d.source.id) || selectedNodeIds.has(d.target.id)) {
+                return defaultLinkOpacity;
+            }
+            return DIM_OPACITY;
         });
 }
 
@@ -113,12 +128,12 @@ export function applyHoverHighlight(
         for (const l of hoveredNode.targetLinks) connectedNodeIds.add(l.source.id);
 
         svg.selectAll<SVGRectElement, SankeyNode>(`.${CSS_PREFIX}node`)
-            .attr("fill-opacity", (d: SankeyNode) =>
+            .attr("fill-opacity", (d) =>
                 connectedNodeIds.has(d.id) ? defaultNodeOpacity : DIM_OPACITY,
             );
 
         svg.selectAll<SVGPathElement, SankeyLink>(`.${CSS_PREFIX}link`)
-            .attr("stroke-opacity", (d: SankeyLink) =>
+            .attr("stroke-opacity", (d) =>
                 d.source.id === hoveredNode.id || d.target.id === hoveredNode.id
                     ? hoverLinkOpacity
                     : DIM_OPACITY,
@@ -127,12 +142,12 @@ export function applyHoverHighlight(
 
     if (hoveredLink) {
         svg.selectAll<SVGPathElement, SankeyLink>(`.${CSS_PREFIX}link`)
-            .attr("stroke-opacity", (d: SankeyLink) =>
+            .attr("stroke-opacity", (d) =>
                 d === hoveredLink ? hoverLinkOpacity : DIM_OPACITY,
             );
 
         svg.selectAll<SVGRectElement, SankeyNode>(`.${CSS_PREFIX}node`)
-            .attr("fill-opacity", (d: SankeyNode) =>
+            .attr("fill-opacity", (d) =>
                 d.id === hoveredLink.source.id || d.id === hoveredLink.target.id
                     ? defaultNodeOpacity
                     : DIM_OPACITY,
@@ -144,24 +159,18 @@ export function applyHoverHighlight(
    Helpers
    ═══════════════════════════════════════════════ */
 
-function isNodeSelected(node: SankeyNode, sm: ISelectionManager): boolean {
-    /* Check if any of the node's selection IDs are in the active selection */
-    const sel = sm.getSelectionIds() as ISelectionId[];
-    if (!sel || sel.length === 0) return false;
+function isNodeInSelection(node: SankeyNode, activeIds: ISelectionId[]): boolean {
     for (const sid of node.selectionIds) {
-        for (const active of sel) {
+        for (const active of activeIds) {
             if (sid.equals(active)) return true;
         }
     }
     return false;
 }
 
-function isLinkSelected(link: SankeyLink, sm: ISelectionManager): boolean {
-    const sel = sm.getSelectionIds() as ISelectionId[];
-    if (!sel || sel.length === 0) return false;
-    for (const active of sel) {
+function isLinkInSelection(link: SankeyLink, activeIds: ISelectionId[]): boolean {
+    for (const active of activeIds) {
         if (link.selectionId.equals(active)) return true;
     }
-    /* Also selected if source or target node is selected */
-    return isNodeSelected(link.source, sm) || isNodeSelected(link.target, sm);
+    return false;
 }

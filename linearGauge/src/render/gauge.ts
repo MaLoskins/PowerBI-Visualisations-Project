@@ -31,13 +31,11 @@ export function renderGauges(
     const radius = cfg.layout.gaugeCornerRadius;
     const hasSelection = selectedIds.size > 0;
 
-    items.forEach((item, i) => {
-        const yOffset = isHorizontal
-            ? i * (gaugeH + spacing)
-            : 0;
-        const xOffset = isHorizontal
-            ? 0
-            : i * (gaugeH + spacing);
+    for (let i = 0; i < items.length; i++) {
+        const item = items[i];
+
+        const yOffset = isHorizontal ? i * (gaugeH + spacing) : 0;
+        const xOffset = isHorizontal ? 0 : i * (gaugeH + spacing);
 
         const gaugeDim = isHorizontal ? barAreaWidth : barAreaHeight;
         const scale = scaleLinear()
@@ -45,19 +43,20 @@ export function renderGauges(
             .range([0, gaugeDim])
             .clamp(true);
 
-        const group = svg.append("g")
-            .attr("class", "lgauge-row")
-            .attr("data-row", String(item.rowIndex))
-            .attr("transform", isHorizontal
-                ? `translate(0,${yOffset})`
-                : `translate(${xOffset},0)`);
-
-        /* ── Determine opacity for selection state ── */
+        /* ── Selection key ── */
         const idKey = getSelectionKey(item, i);
         const isSelected = hasSelection && selectedIds.has(idKey);
         const dimmed = hasSelection && !isSelected;
         const rowOpacity = dimmed ? UNSELECTED_OPACITY : 1;
-        group.attr("opacity", rowOpacity);
+
+        const group = svg.append("g")
+            .attr("class", "lgauge-row")
+            .attr("data-row", String(item.rowIndex))
+            .attr("data-sel-key", idKey)
+            .attr("transform", isHorizontal
+                ? `translate(0,${yOffset})`
+                : `translate(${xOffset},0)`)
+            .attr("opacity", rowOpacity);
 
         /* ── Determine bar colour ── */
         let barColor = cfg.bar.barColor;
@@ -78,7 +77,7 @@ export function renderGauges(
         } else {
             renderVerticalGauge(group, item, cfg, scale, barColor, gaugeH, gaugeDim, radius, callbacks);
         }
-    });
+    }
 }
 
 /* ── Selection key extraction helper ── */
@@ -108,20 +107,7 @@ function renderHorizontalGauge(
     radius: number,
     callbacks: GaugeCallbacks,
 ): void {
-    /* ── Track ── */
-    group.append("rect")
-        .attr("class", "lgauge-track")
-        .attr("x", 0)
-        .attr("y", 0)
-        .attr("width", gaugeDim)
-        .attr("height", gaugeH)
-        .attr("rx", radius)
-        .attr("ry", radius)
-        .attr("fill", cfg.bar.trackColor)
-        .attr("stroke", cfg.bar.trackBorderColor)
-        .attr("stroke-width", cfg.bar.trackBorderWidth);
-
-    /* ── Clip path for track shape (used by ranges and bar) ── */
+    /* ── Clip path for track shape ── */
     const clipId = `lgauge-clip-h-${item.rowIndex}`;
     const defs = group.append("defs");
     defs.append("clipPath")
@@ -131,6 +117,16 @@ function renderHorizontalGauge(
         .attr("width", gaugeDim).attr("height", gaugeH)
         .attr("rx", radius).attr("ry", radius);
 
+    /* ── Track ── */
+    group.append("rect")
+        .attr("class", "lgauge-track")
+        .attr("x", 0).attr("y", 0)
+        .attr("width", gaugeDim).attr("height", gaugeH)
+        .attr("rx", radius).attr("ry", radius)
+        .attr("fill", cfg.bar.trackColor)
+        .attr("stroke", cfg.bar.trackBorderColor)
+        .attr("stroke-width", cfg.bar.trackBorderWidth);
+
     /* ── Range bands (clipped to track shape) ── */
     if (cfg.range.showRanges) {
         renderHorizontalRangesClipped(group, item, cfg, scale, gaugeH, gaugeDim, clipId);
@@ -138,13 +134,10 @@ function renderHorizontalGauge(
 
     /* ── Bar fill ── */
     const barW = Math.max(0, scale(item.value));
-
     group.append("rect")
         .attr("class", "lgauge-bar")
-        .attr("x", 0)
-        .attr("y", 0)
-        .attr("width", barW)
-        .attr("height", gaugeH)
+        .attr("x", 0).attr("y", 0)
+        .attr("width", barW).attr("height", gaugeH)
         .attr("fill", barColor)
         .attr("opacity", cfg.bar.barOpacity)
         .attr("clip-path", `url(#${clipId})`);
@@ -190,16 +183,6 @@ function renderVerticalGauge(
         .range([0, gaugeDim])
         .clamp(true);
 
-    /* ── Track ── */
-    group.append("rect")
-        .attr("class", "lgauge-track")
-        .attr("x", 0).attr("y", 0)
-        .attr("width", gaugeW).attr("height", gaugeDim)
-        .attr("rx", radius).attr("ry", radius)
-        .attr("fill", cfg.bar.trackColor)
-        .attr("stroke", cfg.bar.trackBorderColor)
-        .attr("stroke-width", cfg.bar.trackBorderWidth);
-
     /* ── Clip path ── */
     const clipId = `lgauge-clip-v-${item.rowIndex}`;
     const defs = group.append("defs");
@@ -210,6 +193,16 @@ function renderVerticalGauge(
         .attr("width", gaugeW).attr("height", gaugeDim)
         .attr("rx", radius).attr("ry", radius);
 
+    /* ── Track ── */
+    group.append("rect")
+        .attr("class", "lgauge-track")
+        .attr("x", 0).attr("y", 0)
+        .attr("width", gaugeW).attr("height", gaugeDim)
+        .attr("rx", radius).attr("ry", radius)
+        .attr("fill", cfg.bar.trackColor)
+        .attr("stroke", cfg.bar.trackBorderColor)
+        .attr("stroke-width", cfg.bar.trackBorderWidth);
+
     /* ── Range bands (clipped) ── */
     if (cfg.range.showRanges) {
         renderVerticalRangesClipped(group, item, cfg, vScale, gaugeW, gaugeDim, clipId);
@@ -217,18 +210,16 @@ function renderVerticalGauge(
 
     /* ── Bar fill (from bottom) ── */
     const barH = Math.max(0, vScale(item.value));
-
     group.append("rect")
         .attr("class", "lgauge-bar")
         .attr("x", 0)
         .attr("y", gaugeDim - barH)
-        .attr("width", gaugeW)
-        .attr("height", barH)
+        .attr("width", gaugeW).attr("height", barH)
         .attr("fill", barColor)
         .attr("opacity", cfg.bar.barOpacity)
         .attr("clip-path", `url(#${clipId})`);
 
-    /* ── Vertical target lines (horizontal lines across the bar) ── */
+    /* ── Vertical target lines ── */
     if (cfg.target.showTarget && item.target != null) {
         const ty = gaugeDim - vScale(item.target);
         renderVerticalTargetLine(group, ty, gaugeW, cfg.target.targetColor,
@@ -319,8 +310,7 @@ function renderVerticalRangesClipped(
     if (r1H != null) {
         rangeGroup.append("rect")
             .attr("x", 0).attr("y", gaugeDim - r1H)
-            .attr("width", gaugeW)
-            .attr("height", r1H)
+            .attr("width", gaugeW).attr("height", r1H)
             .attr("fill", hexToRgba(cfg.range.range1Color, RANGE_BAND_OPACITY));
     }
 

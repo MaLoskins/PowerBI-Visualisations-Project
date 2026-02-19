@@ -1,7 +1,13 @@
 /* ═══════════════════════════════════════════════
    Performance Flow – Power BI Custom Visual Styles
-   H1: Reduced nesting, reusable classes
-   H2: CSS variables for dynamic styling
+   
+   PERFORMANCE FIXES:
+   - Removed CSS transitions on .pflow-node and .pflow-link.
+     With hundreds of elements, CSS transitions on opacity cause
+     severe paint/composite overhead during drag and hover.
+     All opacity changes are now instant (set directly via D3).
+   - Added will-change: transform on SVG groups for GPU compositing.
+   - Added contain: layout style on the link group.
    ═══════════════════════════════════════════════ */
 
 /* ── Base Reset ── */
@@ -51,20 +57,25 @@
     z-index: 10;
 }
 
-/* ── Nodes ── */
+/* ── Nodes ──
+   NO transition: with many nodes, CSS transitions on fill-opacity
+   cause the browser to create composite layers and run animation
+   frames for every element simultaneously, freezing the UI.
+   Opacity is now set directly by D3 for instant response. */
 
 .pflow-node {
-    transition: fill-opacity 0.12s ease, stroke 0.12s ease;
+    /* No transition — D3 handles opacity directly */
 }
 
 .pflow-node:hover {
     filter: brightness(1.08);
 }
 
-/* ── Links ── */
+/* ── Links ──
+   NO transition: same reason as nodes. */
 
 .pflow-link {
-    transition: stroke-opacity 0.12s ease;
+    /* No transition — D3 handles stroke-opacity directly */
     pointer-events: stroke;
 }
 
@@ -80,4 +91,12 @@
     pointer-events: none;
     user-select: none;
     font-family: "Segoe UI", "wf_segoe-ui_normal", "Helvetica Neue", Helvetica, Arial, sans-serif;
+}
+
+/* ── SVG Groups: GPU compositing hint ── */
+
+.pflow-links,
+.pflow-nodes,
+.pflow-labels {
+    will-change: transform;
 }

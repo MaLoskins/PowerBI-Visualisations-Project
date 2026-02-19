@@ -2,10 +2,13 @@
  *  Performance Flow (Sankey Diagram) — Power BI Custom Visual
  *  visual.ts — Entry point / orchestrator
  *
- *  Responsibilities:
- *    1. DOM scaffolding — build entire DOM skeleton in constructor
- *    2. Data pipeline — gate on VisualUpdateType flags
- *    3. Render orchestration — delegate to render/, layout/, interactions/
+ *  FIX v2:
+ *  - Calls preAggregateRows() before top-N grouping to collapse
+ *    any linkColor-induced row splits.
+ *  - Stores GroupingMeta; "Other" node tooltips list the bucketed
+ *    category names so the viewer knows what was collapsed.
+ *  - Drag uses RAF-batched lightweight updates (from v1 fix).
+ *  - Callbacks built once in constructor.
  */
 "use strict";
 
@@ -18,7 +21,6 @@ import VisualUpdateOptions = powerbi.extensibility.visual.VisualUpdateOptions;
 import IVisual = powerbi.extensibility.visual.IVisual;
 import IVisualHost = powerbi.extensibility.visual.IVisualHost;
 import ISelectionManager = powerbi.extensibility.ISelectionManager;
-import DataViewTable = powerbi.DataViewTable;
 
 import { VisualFormattingSettingsModel, buildRenderConfig } from "./settings";
 import {
@@ -34,21 +36,26 @@ import {
     CHART_MARGIN,
     MIN_CHART_WIDTH,
     MIN_CHART_HEIGHT,
-    CSS_PREFIX,
 } from "./constants";
 
 /* Model */
 import { resolveColumns } from "./model/columns";
-import { parseFlowRows, ParseResult } from "./model/parser";
-import { buildGraph } from "./model/graphBuilder";
+import { parseFlowRows } from "./model/parser";
+import {
+    buildGraph,
+    applyTopNGrouping,
+    preAggregateRows,
+    isOtherNode,
+    GroupingMeta,
+} from "./model/graphBuilder";
 
 /* Layout */
 import { computeSankeyLayout, SankeyLayoutOptions } from "./layout/sankey";
 
 /* Render */
 import { renderNodes } from "./render/nodes";
-import { renderLinks } from "./render/links";
-import { renderLabels } from "./render/labels";
+import { renderLinks, updateLinkPaths } from "./render/links";
+import { renderLabels, updateLabelPositions } from "./render/labels";
 
 /* Interactions */
 import {
@@ -61,7 +68,7 @@ import {
 
 /* Utils */
 import { el, pfx } from "./utils/dom";
-import { formatNumber, formatPercent, formatCompact } from "./utils/format";
+import { formatNumber, formatPercent } from "./utils/format";
 
 /* ═══════════════════════════════════════════════
    Visual Class
@@ -74,7 +81,7 @@ export class Visual implements IVisual {
     private formattingSettings!: VisualFormattingSettingsModel;
     private formattingSettingsService: FormattingSettingsService;
 
-    /* ── DOM skeleton (created once in constructor) ── */
+    /* ── DOM skeleton ── */
     private container: HTMLDivElement;
     private errorOverlay: HTMLDivElement;
     private svgRoot: SVGSVGElement;
@@ -85,11 +92,20 @@ export class Visual implements IVisual {
 
     /* ── State ── */
     private currentLayout: SankeyLayout | null = null;
+    private currentGraph: SankeyGraph | null = null;
     private renderConfig: RenderConfig | null = null;
     private hasRenderedOnce: boolean = false;
+    private groupingMeta: GroupingMeta = { groupedCategories: new Map() };
+
+    /* ── Drag RAF debounce ── */
+    private dragPending: boolean = false;
+
+    /* ── Cached callbacks ── */
+    private nodeCallbacks: NodeCallbacks;
+    private linkCallbacks: LinkCallbacks;
 
     /* ═══════════════════════════════════════════════
-       Constructor — DOM scaffolding (built once)
+       Constructor
        ═══════════════════════════════════════════════ */
 
     constructor(options: VisualConstructorOptions) {
@@ -101,7 +117,7 @@ export class Visual implements IVisual {
         this.container = el("div", pfx("container")) as HTMLDivElement;
         options.element.appendChild(this.container);
 
-        /* Error overlay (hidden by default) */
+        /* Error overlay */
         this.errorOverlay = el("div", pfx("error")) as HTMLDivElement;
         this.errorOverlay.style.display = "none";
         this.container.appendChild(this.errorOverlay);
@@ -112,11 +128,9 @@ export class Visual implements IVisual {
         this.svgRoot.setAttribute("class", pfx("svg"));
         this.container.appendChild(this.svgRoot);
 
-        /* SVG defs for gradients */
         this.defs = document.createElementNS(svgNS, "defs") as SVGDefsElement;
         this.svgRoot.appendChild(this.defs);
 
-        /* Render groups — order matters (links behind nodes behind labels) */
         this.linkGroup = document.createElementNS(svgNS, "g") as SVGGElement;
         this.linkGroup.setAttribute("class", pfx("links"));
         this.svgRoot.appendChild(this.linkGroup);
@@ -129,6 +143,10 @@ export class Visual implements IVisual {
         this.labelGroup.setAttribute("class", pfx("labels"));
         this.svgRoot.appendChild(this.labelGroup);
 
+        /* Build callbacks once */
+        this.nodeCallbacks = this.buildNodeCallbacks();
+        this.linkCallbacks = this.buildLinkCallbacks();
+
         /* Background click clears selection */
         this.svgRoot.addEventListener("click", (e: MouseEvent) => {
             if (e.target === this.svgRoot) {
@@ -137,29 +155,28 @@ export class Visual implements IVisual {
             }
         });
 
-        /* Selection manager callback for cross-visual filtering */
         this.selectionManager.registerOnSelectCallback(() => {
             this.applySelection();
         });
     }
 
     /* ═══════════════════════════════════════════════
-       Update — Data pipeline + render orchestration
+       Update
        ═══════════════════════════════════════════════ */
 
     public update(options: VisualUpdateOptions): void {
         try {
-            /* ── Update type gating ── */
             const updateType = options.type ?? 0;
             const hasData = (updateType & 2) !== 0;
             const isResizeOnly = !hasData && (updateType & (4 | 16)) !== 0;
 
-            /* Always rebuild render config */
-            this.formattingSettings = this.formattingSettingsService
-                .populateFormattingSettingsModel(VisualFormattingSettingsModel, options.dataViews[0]);
-            this.renderConfig = buildRenderConfig(this.formattingSettings);
+            const dataView = options.dataViews?.[0];
+            if (dataView) {
+                this.formattingSettings = this.formattingSettingsService
+                    .populateFormattingSettingsModel(VisualFormattingSettingsModel, dataView);
+                this.renderConfig = buildRenderConfig(this.formattingSettings);
+            }
 
-            /* Viewport sizing */
             const vw = options.viewport.width;
             const vh = options.viewport.height;
             this.svgRoot.setAttribute("width", String(vw));
@@ -170,14 +187,12 @@ export class Visual implements IVisual {
                 return;
             }
 
-            /* Resize-only: re-layout with existing data */
-            if (isResizeOnly && this.currentLayout && this.hasRenderedOnce) {
+            if (isResizeOnly && this.currentGraph && this.hasRenderedOnce) {
                 this.layoutAndRender(vw, vh);
                 return;
             }
 
             /* ── Data pipeline ── */
-            const dataView = options.dataViews?.[0];
             if (!dataView?.table) {
                 this.showError("Required fields missing.\nAdd Source, Destination, and Value fields.");
                 return;
@@ -196,14 +211,37 @@ export class Visual implements IVisual {
                 return;
             }
 
-            /* Build graph */
+            const cfg = this.renderConfig;
+            if (!cfg) return;
+
+            /*
+             * Step 1: Pre-aggregate by (source, destination).
+             * This collapses any row splits caused by linkColor
+             * having been a GroupingOrMeasure field, so that
+             * grouping and graph construction see the true
+             * aggregated values per flow path.
+             */
+            const aggregated = preAggregateRows(parsed.rows);
+
+            /*
+             * Step 2: Apply top-N grouping.
+             * Low-value leaf destinations/sources are replaced
+             * with "Other (N categories)" BEFORE graph construction,
+             * so the graph builder's aggregation map naturally
+             * merges all "Other" links per source.
+             */
+            const groupingResult = applyTopNGrouping(aggregated, cfg);
+            this.groupingMeta = groupingResult.meta;
+
+            /*
+             * Step 3: Build graph from grouped rows.
+             */
             const graph = buildGraph(
-                parsed.rows,
-                this.renderConfig.node.color,
-                this.renderConfig.color.colorByNode,
+                groupingResult.rows,
+                cfg.node.color,
+                cfg.color.colorByNode,
             );
 
-            /* Store for resize-only updates */
             this.currentGraph = graph;
             this.hideError();
             this.layoutAndRender(vw, vh);
@@ -213,9 +251,6 @@ export class Visual implements IVisual {
             console.error("PerformanceFlow error:", err);
         }
     }
-
-    /* ── Stored graph for re-layout on resize ── */
-    private currentGraph: SankeyGraph | null = null;
 
     /* ═══════════════════════════════════════════════
        Layout & Render
@@ -228,10 +263,8 @@ export class Visual implements IVisual {
         const m = CHART_MARGIN;
         const w = viewportWidth - m.left - m.right;
         const h = viewportHeight - m.top - m.bottom;
-
         if (w <= 0 || h <= 0) return;
 
-        /* Compute Sankey layout */
         const layoutOpts: SankeyLayoutOptions = {
             width: w,
             height: h,
@@ -245,30 +278,24 @@ export class Visual implements IVisual {
         const layout = computeSankeyLayout(this.currentGraph, layoutOpts);
         this.currentLayout = layout;
 
-        /* Offset groups by margin */
         const transform = `translate(${m.left},${m.top})`;
         this.linkGroup.setAttribute("transform", transform);
         this.nodeGroup.setAttribute("transform", transform);
         this.labelGroup.setAttribute("transform", transform);
 
-        /* ── Render ── */
         this.renderAll(layout, cfg, w);
         this.hasRenderedOnce = true;
     }
 
     private renderAll(layout: SankeyLayout, cfg: RenderConfig, chartWidth: number): void {
-        const nodeCallbacks = this.buildNodeCallbacks();
-        const linkCallbacks = this.buildLinkCallbacks();
-
-        renderLinks(this.linkGroup, this.defs, layout.links, cfg, linkCallbacks);
-        renderNodes(this.nodeGroup, layout.nodes, cfg, nodeCallbacks);
+        renderLinks(this.linkGroup, this.defs, layout.links, cfg, this.linkCallbacks);
+        renderNodes(this.nodeGroup, layout.nodes, cfg, this.nodeCallbacks);
         renderLabels(this.labelGroup, layout.nodes, cfg, chartWidth);
-
         this.applySelection();
     }
 
     /* ═══════════════════════════════════════════════
-       Interaction Callbacks (C1)
+       Callbacks (built once)
        ═══════════════════════════════════════════════ */
 
     private buildNodeCallbacks(): NodeCallbacks {
@@ -302,11 +329,8 @@ export class Visual implements IVisual {
                 }
                 this.host.tooltipService.hide({ immediately: true, isTouchEvent: false });
             },
-            onDrag: (node: SankeyNode, _dy: number) => {
-                /* Re-render after drag to update link paths and labels */
-                if (this.currentLayout && this.renderConfig) {
-                    this.reRenderAfterDrag();
-                }
+            onDrag: () => {
+                this.scheduleDragUpdate();
             },
         };
     }
@@ -346,6 +370,57 @@ export class Visual implements IVisual {
     }
 
     /* ═══════════════════════════════════════════════
+       Drag — RAF-batched lightweight updates
+       ═══════════════════════════════════════════════ */
+
+    private scheduleDragUpdate(): void {
+        if (this.dragPending) return;
+        this.dragPending = true;
+        requestAnimationFrame(() => {
+            this.dragPending = false;
+            this.performDragUpdate();
+        });
+    }
+
+    private performDragUpdate(): void {
+        if (!this.currentLayout || !this.renderConfig) return;
+        this.recomputeLinkYPositions(this.currentLayout.nodes);
+        updateLinkPaths(this.linkGroup, this.renderConfig.link.curvature);
+        updateLabelPositions(this.labelGroup, this.currentLayout.nodes, this.renderConfig);
+    }
+
+    private recomputeLinkYPositions(nodes: SankeyNode[]): void {
+        for (const node of nodes) {
+            node.sourceLinks.sort((a, b) => a.target.y0 - b.target.y0);
+            node.targetLinks.sort((a, b) => a.source.y0 - b.source.y0);
+        }
+        for (const node of nodes) {
+            const h = node.y1 - node.y0;
+            let tot = 0;
+            for (const l of node.sourceLinks) tot += l.value;
+            const s = tot > 0 ? h / tot : 0;
+            let y = node.y0;
+            for (const link of node.sourceLinks) {
+                link.width = link.value * s;
+                link.y0 = y + link.width / 2;
+                y += link.width;
+            }
+        }
+        for (const node of nodes) {
+            const h = node.y1 - node.y0;
+            let tot = 0;
+            for (const l of node.targetLinks) tot += l.value;
+            const s = tot > 0 ? h / tot : 0;
+            let y = node.y0;
+            for (const link of node.targetLinks) {
+                const w = link.value * s;
+                link.y1 = y + w / 2;
+                y += w;
+            }
+        }
+    }
+
+    /* ═══════════════════════════════════════════════
        Selection
        ═══════════════════════════════════════════════ */
 
@@ -368,8 +443,10 @@ export class Visual implements IVisual {
        ═══════════════════════════════════════════════ */
 
     private showTooltipForNode(node: SankeyNode, e: MouseEvent): void {
-        const totalIn = node.targetLinks.reduce((s, l) => s + l.value, 0);
-        const totalOut = node.sourceLinks.reduce((s, l) => s + l.value, 0);
+        let totalIn = 0;
+        let totalOut = 0;
+        for (const l of node.targetLinks) totalIn += l.value;
+        for (const l of node.sourceLinks) totalOut += l.value;
 
         const items: powerbi.extensibility.VisualTooltipDataItem[] = [
             { displayName: "Node", value: node.name },
@@ -377,28 +454,24 @@ export class Visual implements IVisual {
             { displayName: "Total Out", value: formatNumber(totalOut) },
         ];
 
-        this.host.tooltipService.show({
-            coordinates: [e.clientX, e.clientY],
-            isTouchEvent: false,
-            dataItems: items,
-            identities: [],
-        });
-    }
-
-    private showTooltipForLink(link: SankeyLink, e: MouseEvent): void {
-        const sourceTotal = link.source.sourceLinks.reduce((s, l) => s + l.value, 0);
-        const pctOfSource = sourceTotal > 0 ? link.value / sourceTotal : 0;
-
-        const items: powerbi.extensibility.VisualTooltipDataItem[] = [
-            { displayName: "Source", value: link.source.name },
-            { displayName: "Destination", value: link.target.name },
-            { displayName: "Value", value: formatNumber(link.value) },
-            { displayName: "% of Source", value: formatPercent(pctOfSource) },
-        ];
-
-        /* Append user-defined tooltip extras */
-        for (const extra of link.tooltipExtras) {
-            items.push(extra);
+        /*
+         * If this is an "Other" bucket, show the grouped categories
+         * so the viewer can see what was collapsed.
+         */
+        if (isOtherNode(node.name)) {
+            const cats = this.groupingMeta.groupedCategories.get(node.name);
+            if (cats && cats.length > 0) {
+                /* Show up to 8 names inline, then "…and N more" */
+                const MAX_SHOW = 8;
+                const shown = cats.slice(0, MAX_SHOW).join(", ");
+                const suffix = cats.length > MAX_SHOW
+                    ? ` …and ${cats.length - MAX_SHOW} more`
+                    : "";
+                items.push({
+                    displayName: "Includes",
+                    value: shown + suffix,
+                });
+            }
         }
 
         this.host.tooltipService.show({
@@ -409,20 +482,28 @@ export class Visual implements IVisual {
         });
     }
 
-    /* ═══════════════════════════════════════════════
-       Drag Re-render
-       ═══════════════════════════════════════════════ */
+    private showTooltipForLink(link: SankeyLink, e: MouseEvent): void {
+        let sourceTotal = 0;
+        for (const l of link.source.sourceLinks) sourceTotal += l.value;
+        const pctOfSource = sourceTotal > 0 ? link.value / sourceTotal : 0;
 
-    private reRenderAfterDrag(): void {
-        if (!this.currentLayout || !this.renderConfig) return;
-        const cfg = this.renderConfig;
-        const linkCallbacks = this.buildLinkCallbacks();
-        const chartWidth = parseFloat(this.svgRoot.getAttribute("width") || "0")
-            - CHART_MARGIN.left - CHART_MARGIN.right;
+        const items: powerbi.extensibility.VisualTooltipDataItem[] = [
+            { displayName: "Source", value: link.source.name },
+            { displayName: "Destination", value: link.target.name },
+            { displayName: "Value", value: formatNumber(link.value) },
+            { displayName: "% of Source", value: formatPercent(pctOfSource) },
+        ];
 
-        /* Re-render links and labels to follow dragged node positions */
-        renderLinks(this.linkGroup, this.defs, this.currentLayout.links, cfg, linkCallbacks);
-        renderLabels(this.labelGroup, this.currentLayout.nodes, cfg, chartWidth);
+        for (const extra of link.tooltipExtras) {
+            items.push(extra);
+        }
+
+        this.host.tooltipService.show({
+            coordinates: [e.clientX, e.clientY],
+            isTouchEvent: false,
+            dataItems: items,
+            identities: [],
+        });
     }
 
     /* ═══════════════════════════════════════════════

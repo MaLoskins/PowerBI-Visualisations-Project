@@ -46,7 +46,7 @@ import {
 import { handleGaugeClick, handleBackgroundClick, buildSelectedIdSet } from "./interactions/selection";
 
 /* ── Utils ── */
-import { el, clearChildren } from "./utils/dom";
+import { el } from "./utils/dom";
 
 export class Visual implements IVisual {
     private host: IVisualHost;
@@ -66,6 +66,13 @@ export class Visual implements IVisual {
     private items: GaugeItem[] = [];
     private renderConfig: RenderConfig | null = null;
     private hasRenderedOnce = false;
+    private lastViewport: powerbi.IViewport = { width: 0, height: 0 };
+
+    /* ── Cached callbacks (created once, not per-render) ── */
+    private callbacks: GaugeCallbacks;
+
+    /* ── Guard against re-entrant renders ── */
+    private isRendering = false;
 
     constructor(options: VisualConstructorOptions) {
         this.host = options.host;
@@ -97,11 +104,28 @@ export class Visual implements IVisual {
         this.svgContainer.appendChild(svgEl);
         this.svg = d3.select(svgEl);
 
+        /* ── Create callbacks ONCE ── */
+        this.callbacks = {
+            onClick: (item: GaugeItem, e: MouseEvent) => {
+                e.stopPropagation();
+                handleGaugeClick(item, e, this.selectionManager, () => this.applySelectionOnly());
+            },
+            onMouseOver: (item: GaugeItem, x: number, y: number) => {
+                this.showTooltip(item, x, y);
+            },
+            onMouseMove: (_item: GaugeItem, x: number, y: number) => {
+                this.moveTooltip(x, y);
+            },
+            onMouseOut: () => {
+                this.tooltipService.hide({ immediately: true, isTouchEvent: false });
+            },
+        };
+
         /* ── Background click clears selection ── */
         this.container.addEventListener("click", (e: MouseEvent) => {
-            const target = e.target as HTMLElement;
-            if (target === this.container || target === this.svgContainer || target.tagName === "svg") {
-                handleBackgroundClick(this.selectionManager, () => this.applySelection());
+            const clicked = e.target as HTMLElement;
+            if (clicked === this.container || clicked === this.svgContainer || clicked.tagName === "svg") {
+                handleBackgroundClick(this.selectionManager, () => this.applySelectionOnly());
             }
         });
     }
@@ -112,11 +136,6 @@ export class Visual implements IVisual {
 
     public update(options: VisualUpdateOptions): void {
         try {
-            /* ── Gate on update type (G1) ── */
-            const updateType = options.type ?? 0;
-            const hasData = (updateType & 2) !== 0;
-            const isResizeOnly = !hasData && (updateType & (4 | 16)) !== 0;
-
             /* ── Populate formatting model ── */
             const dv = options.dataViews?.[0];
             if (dv) {
@@ -127,7 +146,12 @@ export class Visual implements IVisual {
 
             if (!this.renderConfig) return;
 
-            /* ── Data pipeline (skip on resize-only) ── */
+            /* ── Determine what changed ── */
+            const updateType = options.type ?? 0;
+            const hasData = (updateType & 2) !== 0;
+            const isResizeOnly = !hasData && (updateType & (4 | 16)) !== 0;
+
+            /* ── Data pipeline (only when data actually changed) ── */
             if (hasData || !this.hasRenderedOnce) {
                 if (!dv?.table) {
                     this.showError(ERROR_NO_VALUE);
@@ -147,13 +171,11 @@ export class Visual implements IVisual {
                 this.items = result.items;
             }
 
-            if (isResizeOnly && this.hasRenderedOnce) {
-                // Just re-layout
-                this.layoutAndRender(options.viewport);
-                return;
-            }
+            /* ── Store viewport ── */
+            this.lastViewport = options.viewport;
 
-            this.layoutAndRender(options.viewport);
+            /* ── Render ── */
+            this.fullRender(options.viewport);
             this.hasRenderedOnce = true;
 
         } catch (err) {
@@ -163,32 +185,39 @@ export class Visual implements IVisual {
     }
 
     /* ═══════════════════════════════════════════════
-       Layout & Render
+       Full Render (layout + draw)
        ═══════════════════════════════════════════════ */
 
-    private layoutAndRender(viewport: powerbi.IViewport): void {
+    private fullRender(viewport: powerbi.IViewport): void {
         if (!this.renderConfig || this.items.length === 0) return;
+        if (this.isRendering) return; // Guard re-entrance
 
-        const cfg = this.renderConfig;
-        const isHorizontal = cfg.layout.orientation === "horizontal";
-        const vw = viewport.width;
-        const vh = viewport.height;
+        this.isRendering = true;
+        try {
+            const cfg = this.renderConfig;
+            const vw = viewport.width;
+            const vh = viewport.height;
 
-        this.container.style.width = vw + "px";
-        this.container.style.height = vh + "px";
+            this.container.style.width = vw + "px";
+            this.container.style.height = vh + "px";
 
-        if (isHorizontal) {
-            this.renderHorizontalLayout(vw, vh, cfg);
-        } else {
-            this.renderVerticalLayout(vw, vh, cfg);
+            const selectedIds = this.getSelectedIds();
+
+            if (cfg.layout.orientation === "horizontal") {
+                this.renderHorizontalLayout(vw, vh, cfg, selectedIds);
+            } else {
+                this.renderVerticalLayout(vw, vh, cfg, selectedIds);
+            }
+        } finally {
+            this.isRendering = false;
         }
-
-        this.applySelection();
     }
 
     /* ── Horizontal Layout ── */
 
-    private renderHorizontalLayout(vw: number, vh: number, cfg: RenderConfig): void {
+    private renderHorizontalLayout(
+        vw: number, vh: number, cfg: RenderConfig, selectedIds: Set<string>,
+    ): void {
         const items = this.items;
 
         /* ── Category column ── */
@@ -212,7 +241,6 @@ export class Visual implements IVisual {
         this.svgContainer.style.display = "block";
         this.svgContainer.style.overflow = "auto";
         this.svgContainer.style.height = vh + "px";
-
         this.container.style.flexDirection = "row";
 
         /* ── Size SVG ── */
@@ -229,7 +257,7 @@ export class Visual implements IVisual {
             .attr("height", totalGaugeHeight)
             .attr("overflow", "visible") as unknown as d3.Selection<SVGSVGElement, unknown, null, undefined>;
 
-        renderGauges(barSvg, items, cfg, barAreaWidth, 0, this.buildCallbacks(), this.getSelectedIds());
+        renderGauges(barSvg, items, cfg, barAreaWidth, 0, this.callbacks, selectedIds);
 
         /* ── Labels ── */
         const labelG = this.svg.append("g")
@@ -247,7 +275,9 @@ export class Visual implements IVisual {
 
     /* ── Vertical Layout ── */
 
-    private renderVerticalLayout(vw: number, vh: number, cfg: RenderConfig): void {
+    private renderVerticalLayout(
+        vw: number, vh: number, cfg: RenderConfig, selectedIds: Set<string>,
+    ): void {
         const items = this.items;
 
         this.categoryContainer.style.display = "none";
@@ -274,52 +304,42 @@ export class Visual implements IVisual {
             .attr("height", barAreaHeight)
             .attr("overflow", "visible") as unknown as d3.Selection<SVGSVGElement, unknown, null, undefined>;
 
-        renderGauges(barSvg, items, cfg, 0, barAreaHeight, this.buildCallbacks(), this.getSelectedIds());
+        renderGauges(barSvg, items, cfg, 0, barAreaHeight, this.callbacks, selectedIds);
         renderVerticalValueLabels(barSvg, items, cfg, barAreaHeight);
         renderVerticalCategoryLabels(barSvg, items, cfg, barAreaHeight);
     }
 
     /* ═══════════════════════════════════════════════
-       Callbacks & Interactions
+       Selection (lightweight — NO full re-render)
        ═══════════════════════════════════════════════ */
 
-    private buildCallbacks(): GaugeCallbacks {
-        return {
-            onClick: (item: GaugeItem, e: MouseEvent) => {
-                e.stopPropagation();
-                handleGaugeClick(item, e, this.selectionManager, () => this.applySelection());
-            },
-            onMouseOver: (item: GaugeItem, x: number, y: number) => {
-                this.showTooltip(item, x, y);
-            },
-            onMouseMove: (item: GaugeItem, x: number, y: number) => {
-                this.moveTooltip(item, x, y);
-            },
-            onMouseOut: () => {
-                this.tooltipService.hide({ immediately: true, isTouchEvent: false });
-            },
-        };
+    /**
+     * Called when selection changes. Updates opacity on existing
+     * gauge rows WITHOUT tearing down and rebuilding the SVG.
+     * This is the fix for the infinite-loop freeze.
+     */
+    private applySelectionOnly(): void {
+        if (!this.renderConfig || this.items.length === 0) return;
+
+        const selectedIds = this.getSelectedIds();
+        const hasSelection = selectedIds.size > 0;
+
+        /* ── Walk existing <g class="lgauge-row"> elements and adjust opacity ── */
+        this.svg.selectAll<SVGGElement, unknown>(".lgauge-row").each(function (this: SVGGElement) {
+            const g = d3.select(this);
+            const rowIdx = g.attr("data-row");
+            const idKey = g.attr("data-sel-key") || rowIdx;
+
+            if (!hasSelection) {
+                g.attr("opacity", 1);
+            } else {
+                g.attr("opacity", selectedIds.has(idKey) ? 1 : 0.25);
+            }
+        });
     }
 
     private getSelectedIds(): Set<string> {
         return buildSelectedIdSet(this.selectionManager);
-    }
-
-    private applySelection(): void {
-        if (!this.renderConfig) return;
-        // Re-render gauges with updated selection state
-        this.layoutAndRenderFromCache();
-    }
-
-    /** Re-render from cached items without re-parsing data */
-    private layoutAndRenderFromCache(): void {
-        if (!this.renderConfig || this.items.length === 0) return;
-        const container = this.container;
-        const vw = parseFloat(container.style.width) || 0;
-        const vh = parseFloat(container.style.height) || 0;
-        if (vw > 0 && vh > 0) {
-            this.layoutAndRender({ width: vw, height: vh });
-        }
     }
 
     /* ═══════════════════════════════════════════════
@@ -330,10 +350,10 @@ export class Visual implements IVisual {
         const cfg = this.renderConfig;
         if (!cfg) return;
 
-        const tooltipItems: powerbi.extensibility.VisualTooltipDataItem[] = [];
-
-        tooltipItems.push({ displayName: "Category", value: item.category });
-        tooltipItems.push({ displayName: "Value", value: String(item.value) });
+        const tooltipItems: powerbi.extensibility.VisualTooltipDataItem[] = [
+            { displayName: "Category", value: item.category },
+            { displayName: "Value", value: String(item.value) },
+        ];
 
         if (item.target != null) {
             tooltipItems.push({ displayName: "Target", value: String(item.target) });
@@ -345,8 +365,10 @@ export class Visual implements IVisual {
             tooltipItems.push({ displayName: "Target 2", value: String(item.target2) });
         }
 
-        tooltipItems.push({ displayName: "Min", value: String(item.minValue) });
-        tooltipItems.push({ displayName: "Max", value: String(item.maxValue) });
+        tooltipItems.push(
+            { displayName: "Min", value: String(item.minValue) },
+            { displayName: "Max", value: String(item.maxValue) },
+        );
 
         for (const extra of item.tooltipExtras) {
             tooltipItems.push({ displayName: extra.displayName, value: extra.value });
@@ -360,10 +382,10 @@ export class Visual implements IVisual {
         });
     }
 
-    private moveTooltip(item: GaugeItem, x: number, y: number): void {
+    private moveTooltip(x: number, y: number): void {
         this.tooltipService.move({
             dataItems: [],
-            identities: [item.selectionId],
+            identities: [],
             coordinates: [x, y],
             isTouchEvent: false,
         });

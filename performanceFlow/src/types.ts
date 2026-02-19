@@ -56,6 +56,7 @@ export interface SankeyNodeDatum {
     id: string;
     name: string;
     color: string;
+    isOther?: boolean;
     selectionIds: ISelectionId[];
 }
 
@@ -90,6 +91,7 @@ export interface SankeyNode {
     y1: number;
     value: number;
     color: string;
+    isOther?: boolean;
     sourceLinks: SankeyLink[];
     targetLinks: SankeyLink[];
     selectionIds: ISelectionId[];
@@ -125,12 +127,12 @@ export interface RenderConfig {
         padding: number;
         cornerRadius: number;
         color: string;
-        opacity: number;          // 0–1 fraction
+        opacity: number;
         align: NodeAlign;
     };
     link: {
-        opacity: number;          // 0–1 fraction
-        hoverOpacity: number;     // 0–1 fraction
+        opacity: number;
+        hoverOpacity: number;
         colorMode: ColorMode;
         fixedColor: string;
         curvature: number;
@@ -147,6 +149,12 @@ export interface RenderConfig {
         colorByNode: boolean;
         selectedLinkColor: string;
         selectedNodeColor: string;
+    };
+    grouping: {
+        enableGrouping: boolean;
+        maxDestinations: number;
+        maxSources: number;
+        minPctThreshold: number;  // 0–100 percentage
     };
     layout: {
         iterations: number;

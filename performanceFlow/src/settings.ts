@@ -114,7 +114,6 @@ function safeEnum<T extends string>(
    Formatting Cards
    ═══════════════════════════════════════════════ */
 
-/* ── Import powerbi for validator types ── */
 import powerbi from "powerbi-visuals-api";
 
 /** Node Settings Card */
@@ -180,6 +179,21 @@ class ColorSettingsCard extends FormattingSettingsCard {
     ];
 }
 
+/** Grouping Settings Card — top-N bucketing with "Other" */
+class GroupingSettingsCard extends FormattingSettingsCard {
+    enableGrouping = toggle("enableGrouping", "Group Small Categories", true);
+    maxDestinations = num("maxDestinations", "Max Destinations", 12, 3, 50);
+    maxSources = num("maxSources", "Max Sources", 15, 3, 50);
+    minPctThreshold = pct("minPctThreshold", "Min % Threshold", 1);
+
+    name: string = "groupingSettings";
+    displayName: string = "Grouping";
+    slices: FormattingSettingsSlice[] = [
+        this.enableGrouping, this.maxDestinations,
+        this.maxSources, this.minPctThreshold,
+    ];
+}
+
 /** Layout Settings Card */
 class LayoutSettingsCard extends FormattingSettingsCard {
     iterations = num("iterations", "Layout Iterations", 32, 6, 128);
@@ -201,6 +215,7 @@ export class VisualFormattingSettingsModel extends FormattingSettingsModel {
     linkSettingsCard = new LinkSettingsCard();
     labelSettingsCard = new LabelSettingsCard();
     colorSettingsCard = new ColorSettingsCard();
+    groupingSettingsCard = new GroupingSettingsCard();
     layoutSettingsCard = new LayoutSettingsCard();
 
     cards = [
@@ -208,6 +223,7 @@ export class VisualFormattingSettingsModel extends FormattingSettingsModel {
         this.linkSettingsCard,
         this.labelSettingsCard,
         this.colorSettingsCard,
+        this.groupingSettingsCard,
         this.layoutSettingsCard,
     ];
 }
@@ -216,12 +232,12 @@ export class VisualFormattingSettingsModel extends FormattingSettingsModel {
    buildRenderConfig() — settings → RenderConfig
    ═══════════════════════════════════════════════ */
 
-/** Convert formatting model to plain RenderConfig object. Percent → fraction. */
 export function buildRenderConfig(model: VisualFormattingSettingsModel): RenderConfig {
     const n = model.nodeSettingsCard;
     const l = model.linkSettingsCard;
     const lb = model.labelSettingsCard;
     const c = model.colorSettingsCard;
+    const g = model.groupingSettingsCard;
     const ly = model.layoutSettingsCard;
 
     return {
@@ -252,6 +268,12 @@ export function buildRenderConfig(model: VisualFormattingSettingsModel): RenderC
             colorByNode: c.colorByNode.value,
             selectedLinkColor: c.selectedLinkColor.value.value,
             selectedNodeColor: c.selectedNodeColor.value.value,
+        },
+        grouping: {
+            enableGrouping: g.enableGrouping.value,
+            maxDestinations: g.maxDestinations.value,
+            maxSources: g.maxSources.value,
+            minPctThreshold: g.minPctThreshold.value,
         },
         layout: {
             iterations: ly.iterations.value,

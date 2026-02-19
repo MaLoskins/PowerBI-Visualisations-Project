@@ -1,6 +1,9 @@
 /*
  *  Performance Flow — render/links.ts
  *  SVG link path rendering with gradient support
+ *
+ *  FIX: Uses D3 join (enter/update/exit) instead of destroy-all.
+ *       Provides updateLinkPaths() for lightweight drag updates.
  */
 "use strict";
 
@@ -21,31 +24,36 @@ export function renderLinks(
     callbacks: LinkCallbacks,
 ): void {
     const g = select(container);
-    g.selectAll("*").remove();
-
-    /* Build gradient defs if needed */
     const defs = select(defsEl);
-    defs.selectAll(`.${CSS_PREFIX}link-gradient`).remove();
+    const className = CSS_PREFIX + "link";
 
+    /* Rebuild gradients (these depend on node positions and link indices) */
+    defs.selectAll(`.${CSS_PREFIX}link-gradient`).remove();
     if (cfg.link.colorMode === "gradient") {
         buildGradients(defs, links);
     }
 
-    /* Render link paths */
-    const sel = g.selectAll<SVGPathElement, SankeyLink>(`.${CSS_PREFIX}link`)
-        .data(links)
-        .enter()
+    /* D3 join */
+    const sel = g.selectAll<SVGPathElement, SankeyLink>(`.${className}`)
+        .data(links);
+
+    sel.exit().remove();
+
+    const enter = sel.enter()
         .append("path")
-        .attr("class", CSS_PREFIX + "link")
-        .attr("d", (d) => linkPath(d, cfg.link.curvature))
-        .attr("stroke-width", (d) => Math.max(1, d.width))
-        .attr("stroke", (d) => resolveLinkColor(d, cfg))
-        .attr("stroke-opacity", cfg.link.opacity)
+        .attr("class", className)
         .attr("fill", "none")
         .style("cursor", "pointer");
 
+    const merged = enter.merge(sel)
+        .attr("d", (d) => linkPath(d, cfg.link.curvature))
+        .attr("stroke-width", (d) => Math.max(1, d.width))
+        .attr("stroke", (d) => resolveLinkColor(d, cfg))
+        .attr("stroke-opacity", cfg.link.opacity);
+
     /* Interaction handlers */
-    sel.on("click", function (_ev: MouseEvent, d: SankeyLink) {
+    merged
+        .on("click", function (_ev: MouseEvent, d: SankeyLink) {
             callbacks.onClick(d, _ev);
         })
         .on("mouseover", function (_ev: MouseEvent, d: SankeyLink) {
@@ -61,11 +69,20 @@ export function renderLinks(
         });
 }
 
+/** Lightweight path-only update for drag (no gradient rebuild, no event re-binding) */
+export function updateLinkPaths(
+    container: SVGGElement,
+    curvature: number,
+): void {
+    select(container)
+        .selectAll<SVGPathElement, SankeyLink>(`.${CSS_PREFIX}link`)
+        .attr("d", (d) => linkPath(d, curvature));
+}
+
 /* ═══════════════════════════════════════════════
    Link Path Generator (cubic Bezier)
    ═══════════════════════════════════════════════ */
 
-/** Generate cubic Bezier path between source and target node edges */
 function linkPath(link: SankeyLink, curvature: number): string {
     const sx = link.source.x1;
     const sy = link.y0;
@@ -124,7 +141,7 @@ function resolveLinkColor(link: SankeyLink, cfg: RenderConfig): string {
         case "destColor":
             return link.target.color;
         case "gradient":
-            return link.color || link.source.color; /* url(#grad) set above */
+            return link.color || link.source.color;
         case "fixed":
             return cfg.link.fixedColor;
         default:

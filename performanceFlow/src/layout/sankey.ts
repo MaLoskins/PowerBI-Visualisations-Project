@@ -2,13 +2,11 @@
  *  Performance Flow — layout/sankey.ts
  *  Custom Sankey layout algorithm (no d3-sankey dependency)
  *
- *  Produces positioned SankeyNode[] and SankeyLink[] from a SankeyGraph.
- *  Steps:
- *    1. Assign node depths (columns) via topological BFS
- *    2. Assign horizontal positions based on depth
- *    3. Initialize vertical positions
- *    4. Iteratively relax to minimise crossings
- *    5. Compute link positions (y0, y1, width)
+ *  FIX v2:
+ *  - "Other" bucket nodes always anchor to bottom of their column.
+ *  - assignDepths uses Kahn's algorithm O(V+E).
+ *  - Relaxation exits early on convergence.
+ *  - Columns built once and reused.
  */
 "use strict";
 
@@ -21,6 +19,7 @@ import {
     SortNodeOption,
 } from "../types";
 import { EPSILON } from "../constants";
+import { isOtherNode } from "../model/graphBuilder";
 
 /* ═══════════════════════════════════════════════
    Public API
@@ -45,35 +44,24 @@ export function computeSankeyLayout(
         return { nodes: [], links: [] };
     }
 
-    /* Step 1: Create positioned node shells */
     const nodes = createNodes(graph);
     const links = createLinks(graph, nodes);
 
-    /* Wire source/target link references */
     for (const link of links) {
         link.source.sourceLinks.push(link);
         link.target.targetLinks.push(link);
     }
 
-    /* Step 2: Compute node values (sum of connected links) */
     computeNodeValues(nodes);
+    assignDepths(nodes);
 
-    /* Step 3: Assign depths (columns) via BFS */
-    assignDepths(nodes, links);
-
-    /* Step 4: Align depths based on alignment mode */
     const maxDepth = alignDepths(nodes, opts.align);
-
-    /* Step 5: Assign x positions */
     assignXPositions(nodes, maxDepth, opts.width, opts.nodeWidth);
 
-    /* Step 6: Sort nodes within columns */
-    sortNodesInColumns(nodes, maxDepth, opts.sortNodes);
+    const columns = buildColumns(nodes, maxDepth);
+    sortNodesInColumns(columns, opts.sortNodes);
 
-    /* Step 7: Assign y positions with iterative relaxation */
-    assignYPositions(nodes, maxDepth, opts.height, opts.nodePadding, opts.iterations);
-
-    /* Step 8: Compute link y-positions and widths */
+    assignYPositions(columns, opts.height, opts.nodePadding, opts.iterations);
     computeLinkPositions(nodes);
 
     return { nodes, links };
@@ -88,14 +76,11 @@ function createNodes(graph: SankeyGraph): SankeyNode[] {
         id: nd.id,
         name: nd.name,
         depth: 0,
-        x0: 0,
-        x1: 0,
-        y0: 0,
-        y1: 0,
+        x0: 0, x1: 0, y0: 0, y1: 0,
         value: 0,
         color: nd.color,
-        sourceLinks: [] as SankeyLink[],
-        targetLinks: [] as SankeyLink[],
+        sourceLinks: [],
+        targetLinks: [],
         selectionIds: nd.selectionIds,
     }));
 }
@@ -108,9 +93,7 @@ function createLinks(graph: SankeyGraph, nodes: SankeyNode[]): SankeyLink[] {
         source: nodeById.get(ld.sourceId)!,
         target: nodeById.get(ld.targetId)!,
         value: ld.value,
-        width: 0,
-        y0: 0,
-        y1: 0,
+        width: 0, y0: 0, y1: 0,
         color: "",
         colorOverride: ld.colorOverride,
         selectionId: ld.selectionId,
@@ -124,43 +107,63 @@ function createLinks(graph: SankeyGraph, nodes: SankeyNode[]): SankeyLink[] {
 
 function computeNodeValues(nodes: SankeyNode[]): void {
     for (const node of nodes) {
-        const sumSource = node.sourceLinks.reduce((s, l) => s + l.value, 0);
-        const sumTarget = node.targetLinks.reduce((s, l) => s + l.value, 0);
+        let sumSource = 0;
+        let sumTarget = 0;
+        for (const l of node.sourceLinks) sumSource += l.value;
+        for (const l of node.targetLinks) sumTarget += l.value;
         node.value = Math.max(sumSource, sumTarget);
     }
 }
 
 /* ═══════════════════════════════════════════════
-   Step 3: Assign depths via BFS
+   Step 3: Assign depths via Kahn's algorithm
    ═══════════════════════════════════════════════ */
 
-function assignDepths(nodes: SankeyNode[], links: SankeyLink[]): void {
-    const remaining = new Set(nodes);
-    let currentDepth = 0;
+function assignDepths(nodes: SankeyNode[]): void {
+    if (nodes.length === 0) return;
 
-    /* Find source nodes (no incoming links) */
-    while (remaining.size > 0) {
-        const sources: SankeyNode[] = [];
-        for (const node of remaining) {
-            const hasIncoming = node.targetLinks.some((l) => remaining.has(l.source));
-            if (!hasIncoming) {
-                sources.push(node);
-            }
+    const inDegree = new Map<SankeyNode, number>();
+    for (const n of nodes) inDegree.set(n, 0);
+    for (const n of nodes) {
+        for (const link of n.sourceLinks) {
+            inDegree.set(link.target, (inDegree.get(link.target) || 0) + 1);
         }
+    }
 
-        /* Break cycles: if no source found, pick the first remaining */
-        if (sources.length === 0) {
-            const first = remaining.values().next().value;
-            if (first) {
-                sources.push(first);
-            }
+    const queue: SankeyNode[] = [];
+    for (const n of nodes) {
+        if (inDegree.get(n)! === 0) {
+            n.depth = 0;
+            queue.push(n);
         }
+    }
 
-        for (const node of sources) {
-            node.depth = currentDepth;
-            remaining.delete(node);
+    if (queue.length === 0) {
+        for (const n of nodes) n.depth = 0;
+        return;
+    }
+
+    let head = 0;
+    const processed = new Set<SankeyNode>();
+
+    while (head < queue.length) {
+        const node = queue[head++];
+        processed.add(node);
+        for (const link of node.sourceLinks) {
+            const target = link.target;
+            const newDepth = node.depth + 1;
+            if (newDepth > target.depth) target.depth = newDepth;
+
+            const remaining = inDegree.get(target)! - 1;
+            inDegree.set(target, remaining);
+            if (remaining === 0) queue.push(target);
         }
-        currentDepth++;
+    }
+
+    let maxD = 0;
+    for (const n of nodes) { if (n.depth > maxD) maxD = n.depth; }
+    for (const n of nodes) {
+        if (!processed.has(n)) n.depth = maxD;
     }
 }
 
@@ -170,41 +173,23 @@ function assignDepths(nodes: SankeyNode[], links: SankeyLink[]): void {
 
 function alignDepths(nodes: SankeyNode[], align: NodeAlign): number {
     let maxDepth = 0;
-    for (const n of nodes) {
-        if (n.depth > maxDepth) maxDepth = n.depth;
-    }
+    for (const n of nodes) { if (n.depth > maxDepth) maxDepth = n.depth; }
     if (maxDepth === 0) return 0;
 
-    if (align === "right") {
-        /* Push leaf nodes to the rightmost column */
+    if (align === "right" || align === "center") {
         for (const n of nodes) {
-            if (n.sourceLinks.length === 0) {
-                n.depth = maxDepth;
-            }
-        }
-    } else if (align === "center") {
-        /* Center nodes that are both source and target */
-        for (const n of nodes) {
-            if (n.sourceLinks.length === 0) {
-                n.depth = maxDepth;
-            }
+            if (n.sourceLinks.length === 0) n.depth = maxDepth;
         }
     } else if (align === "justify") {
-        /* Push leaf nodes (no outgoing) to the max depth */
         for (const n of nodes) {
             if (n.sourceLinks.length === 0 && n.targetLinks.length > 0) {
                 n.depth = maxDepth;
             }
         }
     }
-    /* "left" keeps depths as-is */
 
-    /* Recompute maxDepth */
     maxDepth = 0;
-    for (const n of nodes) {
-        if (n.depth > maxDepth) maxDepth = n.depth;
-    }
-
+    for (const n of nodes) { if (n.depth > maxDepth) maxDepth = n.depth; }
     return maxDepth;
 }
 
@@ -213,14 +198,11 @@ function alignDepths(nodes: SankeyNode[], align: NodeAlign): number {
    ═══════════════════════════════════════════════ */
 
 function assignXPositions(
-    nodes: SankeyNode[],
-    maxDepth: number,
-    width: number,
-    nodeWidth: number,
+    nodes: SankeyNode[], maxDepth: number,
+    width: number, nodeWidth: number,
 ): void {
     const columns = maxDepth + 1;
     const xStep = columns > 1 ? (width - nodeWidth) / (columns - 1) : 0;
-
     for (const node of nodes) {
         node.x0 = node.depth * xStep;
         node.x1 = node.x0 + nodeWidth;
@@ -228,38 +210,69 @@ function assignXPositions(
 }
 
 /* ═══════════════════════════════════════════════
+   Build columns (reusable)
+   ═══════════════════════════════════════════════ */
+
+function buildColumns(nodes: SankeyNode[], maxDepth: number): SankeyNode[][] {
+    const columns: SankeyNode[][] = [];
+    for (let d = 0; d <= maxDepth; d++) columns.push([]);
+    for (const node of nodes) {
+        if (node.depth >= 0 && node.depth <= maxDepth) {
+            columns[node.depth].push(node);
+        }
+    }
+    return columns;
+}
+
+/* ═══════════════════════════════════════════════
    Step 6: Sort nodes within columns
+   FIX: "Other" nodes always sort to bottom
    ═══════════════════════════════════════════════ */
 
 function sortNodesInColumns(
-    nodes: SankeyNode[],
-    maxDepth: number,
+    columns: SankeyNode[][],
     sortMode: SortNodeOption,
 ): void {
-    if (sortMode === "none") return;
-
-    /* Group by depth */
-    const columns = getColumns(nodes, maxDepth);
-
     for (const col of columns) {
-        switch (sortMode) {
-            case "name":
-                col.sort((a, b) => a.name.localeCompare(b.name));
-                break;
-            case "value":
-                col.sort((a, b) => b.value - a.value);
-                break;
-            case "auto":
-            default:
-                /* Sort by average y-position of incoming links for better crossing reduction */
-                col.sort((a, b) => {
-                    const aAvg = avgTargetY(a);
-                    const bAvg = avgTargetY(b);
-                    return aAvg - bAvg;
-                });
-                break;
+        if (sortMode !== "none") {
+            switch (sortMode) {
+                case "name":
+                    col.sort((a, b) => a.name.localeCompare(b.name));
+                    break;
+                case "value":
+                    col.sort((a, b) => b.value - a.value);
+                    break;
+                case "auto":
+                default:
+                    col.sort((a, b) => avgTargetY(a) - avgTargetY(b));
+                    break;
+            }
+        }
+
+        /*
+         * Post-sort pass: push "Other" bucket nodes to the
+         * bottom of their column regardless of sort mode.
+         * This keeps the catch-all out of the way of
+         * meaningful categories.
+         */
+        pushOtherToBottom(col);
+    }
+}
+
+function pushOtherToBottom(col: SankeyNode[]): void {
+    const others: SankeyNode[] = [];
+    const rest: SankeyNode[] = [];
+    for (const n of col) {
+        if (isOtherNode(n.name)) {
+            others.push(n);
+        } else {
+            rest.push(n);
         }
     }
+    if (others.length === 0) return;
+
+    col.length = 0;
+    col.push(...rest, ...others);
 }
 
 function avgTargetY(node: SankeyNode): number {
@@ -276,47 +289,38 @@ function avgTargetY(node: SankeyNode): number {
    ═══════════════════════════════════════════════ */
 
 function assignYPositions(
-    nodes: SankeyNode[],
-    maxDepth: number,
+    columns: SankeyNode[][],
     height: number,
     padding: number,
     iterations: number,
 ): void {
-    const columns = getColumns(nodes, maxDepth);
+    const maxDepth = columns.length - 1;
 
-    /* Initial: distribute evenly within each column */
-    for (const col of columns) {
-        initializeColumn(col, height, padding);
-    }
+    for (const col of columns) initializeColumn(col, height, padding);
 
-    /* Iterative relaxation */
-    const alpha = 1;
+    const convergenceThreshold = 0.5;
     for (let iter = 0; iter < iterations; iter++) {
-        const factor = alpha * Math.pow(0.99, iter);
+        const factor = Math.pow(0.99, iter);
+        let totalMovement = 0;
 
-        /* Forward pass: push nodes down based on source positions */
         for (let d = 1; d <= maxDepth; d++) {
-            relaxColumn(columns[d], height, padding, factor, "target");
+            totalMovement += relaxColumn(columns[d], factor, "target");
         }
-
-        /* Backward pass: pull nodes up based on target positions */
         for (let d = maxDepth - 1; d >= 0; d--) {
-            relaxColumn(columns[d], height, padding, factor, "source");
+            totalMovement += relaxColumn(columns[d], factor, "source");
         }
+        for (const col of columns) resolveOverlaps(col, height, padding);
 
-        /* Resolve overlaps */
-        for (const col of columns) {
-            resolveOverlaps(col, height, padding);
-        }
+        if (totalMovement < convergenceThreshold) break;
     }
 }
 
-function initializeColumn(
-    col: SankeyNode[],
-    height: number,
-    padding: number,
-): void {
-    const totalValue = col.reduce((s, n) => s + n.value, 0);
+function initializeColumn(col: SankeyNode[], height: number, padding: number): void {
+    if (col.length === 0) return;
+
+    let totalValue = 0;
+    for (const n of col) totalValue += n.value;
+
     const totalPadding = Math.max(0, (col.length - 1) * padding);
     const availableHeight = Math.max(0, height - totalPadding);
     const scale = totalValue > 0 ? availableHeight / totalValue : 0;
@@ -324,94 +328,62 @@ function initializeColumn(
     let y = 0;
     for (const node of col) {
         node.y0 = y;
-        const nodeHeight = Math.max(1, node.value * scale);
-        node.y1 = y + nodeHeight;
+        node.y1 = y + Math.max(1, node.value * scale);
         y = node.y1 + padding;
     }
 
-    /* Center the column if total is shorter than available height */
-    const totalH = col.length > 0 ? col[col.length - 1].y1 - col[0].y0 : 0;
+    const totalH = col[col.length - 1].y1 - col[0].y0;
     if (totalH < height) {
         const offset = (height - totalH) / 2;
-        for (const node of col) {
-            node.y0 += offset;
-            node.y1 += offset;
-        }
+        for (const node of col) { node.y0 += offset; node.y1 += offset; }
     }
 }
 
 function relaxColumn(
     col: SankeyNode[],
-    height: number,
-    padding: number,
     alpha: number,
     direction: "source" | "target",
-): void {
+): number {
+    let totalMovement = 0;
     for (const node of col) {
         let weightedY = 0;
         let totalWeight = 0;
-
-        if (direction === "target") {
-            /* Use source positions of incoming links */
-            for (const link of node.targetLinks) {
-                const sourceCenter = (link.source.y0 + link.source.y1) / 2;
-                weightedY += sourceCenter * link.value;
-                totalWeight += link.value;
-            }
-        } else {
-            /* Use target positions of outgoing links */
-            for (const link of node.sourceLinks) {
-                const targetCenter = (link.target.y0 + link.target.y1) / 2;
-                weightedY += targetCenter * link.value;
-                totalWeight += link.value;
-            }
+        const links = direction === "target" ? node.targetLinks : node.sourceLinks;
+        for (const link of links) {
+            const peer = direction === "target" ? link.source : link.target;
+            const center = (peer.y0 + peer.y1) / 2;
+            weightedY += center * link.value;
+            totalWeight += link.value;
         }
-
         if (totalWeight > 0) {
-            const desiredCenter = weightedY / totalWeight;
-            const currentCenter = (node.y0 + node.y1) / 2;
-            const dy = (desiredCenter - currentCenter) * alpha;
+            const dy = ((weightedY / totalWeight) - (node.y0 + node.y1) / 2) * alpha;
             node.y0 += dy;
             node.y1 += dy;
+            totalMovement += Math.abs(dy);
         }
     }
+    return totalMovement;
 }
 
-function resolveOverlaps(
-    col: SankeyNode[],
-    height: number,
-    padding: number,
-): void {
-    /* Sort by current y0 */
+function resolveOverlaps(col: SankeyNode[], height: number, padding: number): void {
+    if (col.length === 0) return;
     col.sort((a, b) => a.y0 - b.y0);
 
-    /* Push down overlapping nodes */
     let y = 0;
     for (const node of col) {
         const dy = y - node.y0;
-        if (dy > EPSILON) {
-            node.y0 += dy;
-            node.y1 += dy;
-        }
+        if (dy > EPSILON) { node.y0 += dy; node.y1 += dy; }
         y = node.y1 + padding;
     }
 
-    /* If last node extends beyond height, push everything up */
-    if (col.length > 0) {
-        const last = col[col.length - 1];
-        const overflow = last.y1 - height;
-        if (overflow > EPSILON) {
-            last.y0 -= overflow;
-            last.y1 -= overflow;
-            for (let i = col.length - 2; i >= 0; i--) {
-                const node = col[i];
-                const next = col[i + 1];
-                const gap = node.y1 + padding - next.y0;
-                if (gap > EPSILON) {
-                    node.y0 -= gap;
-                    node.y1 -= gap;
-                }
-            }
+    const last = col[col.length - 1];
+    const overflow = last.y1 - height;
+    if (overflow > EPSILON) {
+        last.y0 -= overflow;
+        last.y1 -= overflow;
+        for (let i = col.length - 2; i >= 0; i--) {
+            const gap = col[i].y1 + padding - col[i + 1].y0;
+            if (gap > EPSILON) { col[i].y0 -= gap; col[i].y1 -= gap; }
         }
     }
 }
@@ -422,52 +394,33 @@ function resolveOverlaps(
 
 function computeLinkPositions(nodes: SankeyNode[]): void {
     for (const node of nodes) {
-        /* Sort source links by target y-position for orderly layout */
         node.sourceLinks.sort((a, b) => a.target.y0 - b.target.y0);
         node.targetLinks.sort((a, b) => a.source.y0 - b.source.y0);
     }
 
-    /* Assign link y0 (source side) */
     for (const node of nodes) {
-        const nodeHeight = node.y1 - node.y0;
-        const totalOut = node.sourceLinks.reduce((s, l) => s + l.value, 0);
-        const scale = totalOut > 0 ? nodeHeight / totalOut : 0;
-
+        const h = node.y1 - node.y0;
+        let tot = 0;
+        for (const l of node.sourceLinks) tot += l.value;
+        const s = tot > 0 ? h / tot : 0;
         let y = node.y0;
         for (const link of node.sourceLinks) {
-            link.y0 = y + (link.value * scale) / 2;
-            link.width = link.value * scale;
-            y += link.value * scale;
+            link.width = link.value * s;
+            link.y0 = y + link.width / 2;
+            y += link.width;
         }
     }
 
-    /* Assign link y1 (target side) */
     for (const node of nodes) {
-        const nodeHeight = node.y1 - node.y0;
-        const totalIn = node.targetLinks.reduce((s, l) => s + l.value, 0);
-        const scale = totalIn > 0 ? nodeHeight / totalIn : 0;
-
+        const h = node.y1 - node.y0;
+        let tot = 0;
+        for (const l of node.targetLinks) tot += l.value;
+        const s = tot > 0 ? h / tot : 0;
         let y = node.y0;
         for (const link of node.targetLinks) {
-            link.y1 = y + (link.value * scale) / 2;
-            y += link.value * scale;
+            const w = link.value * s;
+            link.y1 = y + w / 2;
+            y += w;
         }
     }
-}
-
-/* ═══════════════════════════════════════════════
-   Helpers
-   ═══════════════════════════════════════════════ */
-
-function getColumns(nodes: SankeyNode[], maxDepth: number): SankeyNode[][] {
-    const columns: SankeyNode[][] = [];
-    for (let d = 0; d <= maxDepth; d++) {
-        columns.push([]);
-    }
-    for (const node of nodes) {
-        if (node.depth >= 0 && node.depth <= maxDepth) {
-            columns[node.depth].push(node);
-        }
-    }
-    return columns;
 }
