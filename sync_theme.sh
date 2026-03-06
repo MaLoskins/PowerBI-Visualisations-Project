@@ -338,31 +338,42 @@ replace_between_markers() {
         return 1
     fi
 
-    if ! grep -q "$start_marker" "$file"; then
+    if ! grep -qF "$start_marker" "$file"; then
         echo "  WARN (no start marker): $file"
         return 1
     fi
 
-    if ! grep -q "$end_marker" "$file"; then
+    if ! grep -qF "$end_marker" "$file"; then
         echo "  WARN (no end marker): $file"
         return 1
     fi
 
-    # Use awk to replace between markers (inclusive)
-    awk -v start="$start_marker" -v end="$end_marker" -v content="$new_content" '
+    # Write new content to a temp file, then use awk to splice it in.
+    # This avoids passing multi-line content via awk -v, which is
+    # unreliable on Windows/MINGW64 awk implementations.
+    local content_file
+    content_file="$(mktemp)"
+    printf '%s\n' "$new_content" > "$content_file"
+
+    # Use plain-string index() matching (no regex escaping needed)
+    # and read replacement content from the temp file.
+    awk -v start="$start_marker" -v end="$end_marker" -v cfile="$content_file" '
     BEGIN { printing=1; replaced=0 }
-    $0 ~ start && !replaced {
-        print content;
+    printing && index($0, start) && !replaced {
+        while ((getline line < cfile) > 0) print line;
+        close(cfile);
         printing=0;
         replaced=1;
         next;
     }
-    $0 ~ end && !printing {
+    !printing && index($0, end) {
         printing=1;
         next;
     }
     printing { print }
     ' "$file" > "${file}.tmp" && mv "${file}.tmp" "$file"
+
+    rm -f "$content_file"
 
     echo "  OK: $file"
     return 0
@@ -397,8 +408,8 @@ for dir in "${VISUAL_DIRS[@]}"; do
     # Sync constants.ts
     CONSTANTS_FILE="${TARGET}/src/constants.ts"
     if replace_between_markers "$CONSTANTS_FILE" \
-        "\\[SHARED THEME START\\]" \
-        "\\[SHARED THEME END\\]" \
+        "[SHARED THEME START]" \
+        "[SHARED THEME END]" \
         "$CONSTANTS_BLOCK"; then
         ((SYNCED++))
     else
@@ -408,8 +419,8 @@ for dir in "${VISUAL_DIRS[@]}"; do
     # Sync utils/color.ts
     COLOR_FILE="${TARGET}/src/utils/color.ts"
     if replace_between_markers "$COLOR_FILE" \
-        "\\[SHARED COLOR UTILS START\\]" \
-        "\\[SHARED COLOR UTILS END\\]" \
+        "[SHARED COLOR UTILS START]" \
+        "[SHARED COLOR UTILS END]" \
         "$COLOR_UTILS_BLOCK"; then
         ((SYNCED++))
     else
