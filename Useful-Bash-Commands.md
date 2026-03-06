@@ -39,7 +39,7 @@ for d in */; do
 
   echo "✅ ${vis} -> ${out}"
 done
-````
+```
 
 ---
 

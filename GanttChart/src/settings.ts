@@ -151,7 +151,7 @@ export class ColorCardSettings extends Card {
     milestoneFill = color("milestoneFill", "Milestone Color (Fallback)", "#EF4444");
     plannedBarColor = color("plannedBarColor", "Planned (Baseline) Bar Color", "#CBD5E1");
     criticalPathColor = color("criticalPathColor", "Critical Path Highlight Color", "#DC2626");
-    colorByResource = toggle("colorByResource", "Color Bars by Resource", true);
+    colorByResource = toggle("colorByResource", "Color Bars by Resource", false);
     colorByStatus = toggle("colorByStatus", "Color Bars by Status", false);
     rowEvenColor = color("rowEvenColor", "Even Row Background", "#FFFFFF");
     rowOddColor = color("rowOddColor", "Odd Row Background", "#F8FAFC");
