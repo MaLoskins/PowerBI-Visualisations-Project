@@ -10,6 +10,20 @@ import { CSS_PREFIX } from "../constants";
 import { formatValue, formatMinMax } from "../utils/format";
 
 /**
+ * Determine the color for the value label based on which range the value falls in.
+ * Returns the configured font color if no ranges, or the matching range color.
+ */
+function resolveValueLabelColor(data: GaugeData, cfg: RenderConfig): string {
+    if (!data.hasRanges) return cfg.labels.valueFontColor;
+
+    const v = data.value;
+    if (data.range1Max !== null && v <= data.range1Max) return cfg.ranges.range1Color;
+    if (data.range2Max !== null && v <= data.range2Max) return cfg.ranges.range2Color;
+    if (data.range3Max !== null && v <= data.range3Max) return cfg.ranges.range3Color;
+    return cfg.ranges.rangeBeyondColor;
+}
+
+/**
  * Render all text labels for the gauge.
  * Appends to the same SVG as the gauge arcs — positions are absolute (not relative to gauge group).
  */
@@ -21,7 +35,11 @@ export function renderLabels(
     locale: string,
 ): void {
     const d3svg = select(svg);
-    const { cx, cy, outerRadius, startAngleRad, endAngleRad } = layout;
+    const { cx, cy, outerRadius, innerRadius, startAngleRad, endAngleRad } = layout;
+
+    /* ── Responsive font scaling: scale down if gauge is small ── */
+    const gaugeSize = Math.min(outerRadius * 2, innerRadius * 3);
+    const scaleFactor = Math.min(1, Math.max(0.5, gaugeSize / 200));
 
     /* ── Value Label (centred inside the arc) ── */
     if (cfg.labels.showValueLabel) {
@@ -34,63 +52,85 @@ export function renderLabels(
             locale,
         );
 
+        /* Position value label in the center of the arc opening.
+           For gauges with a bottom gap (typical 270° gauge), move label
+           slightly upward so it sits visually centered in the arc bowl. */
+        const midAngle = (startAngleRad + endAngleRad) / 2;
+        const gapAngle = 2 * Math.PI - (endAngleRad - startAngleRad);
+        const hasBottomGap = gapAngle > 0.3 && Math.abs(midAngle) < 0.1;
+        const yOffset = hasBottomGap
+            ? innerRadius * 0.35
+            : 0;
+
+        const effectiveFontSize = Math.round(cfg.labels.valueFontSize * scaleFactor);
+        const valueColor = resolveValueLabelColor(data, cfg);
+
         d3svg.append("text")
             .attr("class", CSS_PREFIX + "value-label")
             .attr("x", cx)
-            .attr("y", cy + cfg.labels.valueFontSize * 0.15)
+            .attr("y", cy + yOffset)
             .attr("text-anchor", "middle")
             .attr("dominant-baseline", "central")
-            .attr("fill", cfg.labels.valueFontColor)
-            .attr("font-size", cfg.labels.valueFontSize + "px")
+            .attr("fill", valueColor)
+            .attr("font-size", effectiveFontSize + "px")
             .attr("font-weight", "600")
+            .attr("letter-spacing", "-0.01em")
             .text(formattedValue);
     }
 
     /* ── Min / Max Labels (at arc endpoints) ── */
     if (cfg.labels.showMinMaxLabels) {
-        const labelOffset = 6;
+        const labelOffset = 8;
+        const effectiveMinMaxSize = Math.round(cfg.labels.minMaxFontSize * scaleFactor);
 
-        // Min label (left end of arc)
+        // Min label (at start angle endpoint)
         const minSin = Math.sin(startAngleRad);
         const minCos = Math.cos(startAngleRad);
         const minX = cx + minSin * (outerRadius + labelOffset);
         const minY = cy - minCos * (outerRadius + labelOffset);
 
+        // Anchor based on position relative to center
+        const minAnchor = minSin < -0.1 ? "end" : minSin > 0.1 ? "start" : "middle";
+
         d3svg.append("text")
             .attr("class", CSS_PREFIX + "min-label")
             .attr("x", minX)
-            .attr("y", minY + cfg.labels.minMaxFontSize)
-            .attr("text-anchor", minSin < 0 ? "end" : "start")
+            .attr("y", minY + effectiveMinMaxSize * 0.5)
+            .attr("text-anchor", minAnchor)
             .attr("fill", cfg.labels.minMaxFontColor)
-            .attr("font-size", cfg.labels.minMaxFontSize + "px")
+            .attr("font-size", effectiveMinMaxSize + "px")
             .text(formatMinMax(data.minValue, locale));
 
-        // Max label (right end of arc)
+        // Max label (at end angle endpoint)
         const maxSin = Math.sin(endAngleRad);
         const maxCos = Math.cos(endAngleRad);
         const maxX = cx + maxSin * (outerRadius + labelOffset);
         const maxY = cy - maxCos * (outerRadius + labelOffset);
 
+        const maxAnchor = maxSin > 0.1 ? "end" : maxSin < -0.1 ? "start" : "middle";
+
         d3svg.append("text")
             .attr("class", CSS_PREFIX + "max-label")
             .attr("x", maxX)
-            .attr("y", maxY + cfg.labels.minMaxFontSize)
-            .attr("text-anchor", maxSin > 0 ? "end" : "start")
+            .attr("y", maxY + effectiveMinMaxSize * 0.5)
+            .attr("text-anchor", maxAnchor)
             .attr("fill", cfg.labels.minMaxFontColor)
-            .attr("font-size", cfg.labels.minMaxFontSize + "px")
+            .attr("font-size", effectiveMinMaxSize + "px")
             .text(formatMinMax(data.maxValue, locale));
     }
 
     /* ── Title (above the gauge) ── */
     if (cfg.labels.showTitle && cfg.labels.titleText) {
+        const effectiveTitleSize = Math.round(cfg.labels.titleFontSize * scaleFactor);
+
         d3svg.append("text")
             .attr("class", CSS_PREFIX + "title")
             .attr("x", cx)
-            .attr("y", cfg.labels.titleFontSize + 4)
+            .attr("y", effectiveTitleSize + 6)
             .attr("text-anchor", "middle")
-            .attr("dominant-baseline", "hanging")
+            .attr("dominant-baseline", "auto")
             .attr("fill", cfg.labels.titleFontColor)
-            .attr("font-size", cfg.labels.titleFontSize + "px")
+            .attr("font-size", effectiveTitleSize + "px")
             .attr("font-weight", "600")
             .text(cfg.labels.titleText);
     }

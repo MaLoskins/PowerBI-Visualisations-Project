@@ -32,7 +32,7 @@ export function resolveAutoFormat(
  * - "number":   locale-aware grouping separators, up to 2 decimal places
  * - "percent":  multiply by 100, append "%", up to 1 decimal place
  * - "currency": locale-aware number with currencyPrefix prepended
- * - "auto":     should already be resolved before calling this function
+ * - "auto":     resolved dynamically based on data range and format string
  */
 export function formatValue(
     value: number,
@@ -43,6 +43,8 @@ export function formatValue(
     locale?: string,
     currencyPrefix?: string,
 ): string {
+    if (!Number.isFinite(value)) return "–";
+
     const effectiveFormat = format === "auto"
         ? resolveAutoFormat(value, minValue, maxValue, formatString)
         : format;
@@ -54,7 +56,7 @@ export function formatValue(
             return pct.toFixed(decimals) + "%";
         }
         case "currency": {
-            const prefix = currencyPrefix ?? "";
+            const prefix = currencyPrefix ?? "$";
             return prefix + formatNumber(value, locale);
         }
         case "number":
@@ -63,15 +65,24 @@ export function formatValue(
     }
 }
 
-/** Format a number with locale-aware grouping separators, up to 2 decimals. */
+/** Format a number with locale-aware grouping separators, adaptive decimals. */
 function formatNumber(value: number, locale?: string): string {
+    if (!Number.isFinite(value)) return "–";
+
+    // Use appropriate decimal precision based on magnitude
+    const abs = Math.abs(value);
+    let maxDecimals: number;
+    if (abs >= 1000) maxDecimals = 0;
+    else if (abs >= 100) maxDecimals = 1;
+    else maxDecimals = 2;
+
     try {
         return value.toLocaleString(locale || undefined, {
             minimumFractionDigits: 0,
-            maximumFractionDigits: 2,
+            maximumFractionDigits: maxDecimals,
         });
     } catch {
-        return value.toFixed(2);
+        return value.toFixed(maxDecimals);
     }
 }
 
@@ -80,9 +91,16 @@ function formatNumber(value: number, locale?: string): string {
  * For large numbers, abbreviate with K/M/B suffixes.
  */
 export function formatMinMax(value: number, locale?: string): string {
+    if (!Number.isFinite(value)) return "–";
+
     const abs = Math.abs(value);
-    if (abs >= 1_000_000_000) return (value / 1_000_000_000).toFixed(1) + "B";
-    if (abs >= 1_000_000) return (value / 1_000_000).toFixed(1) + "M";
-    if (abs >= 10_000) return (value / 1_000).toFixed(1) + "K";
+    if (abs >= 1_000_000_000) return trimTrailingZero((value / 1_000_000_000).toFixed(1)) + "B";
+    if (abs >= 1_000_000) return trimTrailingZero((value / 1_000_000).toFixed(1)) + "M";
+    if (abs >= 10_000) return trimTrailingZero((value / 1_000).toFixed(1)) + "K";
     return formatNumber(value, locale);
+}
+
+/** Remove trailing ".0" from formatted strings for cleaner display. */
+function trimTrailingZero(s: string): string {
+    return s.endsWith(".0") ? s.slice(0, -2) : s;
 }

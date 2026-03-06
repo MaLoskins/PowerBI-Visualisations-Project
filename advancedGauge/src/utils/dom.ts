@@ -1,6 +1,6 @@
 /* ═══════════════════════════════════════════════
    Advanced Gauge – DOM Utilities
-   Element factories, clearing, clamping
+   Element factories, clamping
    ═══════════════════════════════════════════════ */
 "use strict";
 
@@ -16,11 +16,6 @@ export function el<K extends keyof HTMLElementTagNameMap>(
     if (className) node.className = CSS_PREFIX + className;
     if (parent) parent.appendChild(node);
     return node;
-}
-
-/** Remove all child nodes from an element. */
-export function clearChildren(node: HTMLElement | SVGElement): void {
-    while (node.firstChild) node.removeChild(node.firstChild);
 }
 
 /** Clamp a number between min and max. */

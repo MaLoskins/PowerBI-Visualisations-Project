@@ -81,6 +81,7 @@ export interface RenderConfig {
         targetMarkerLength: number;  /* 0–1 fraction */
         showTargetLabel: boolean;
         targetLabelFontSize: number;
+        targetLabelFontColor: string;
     };
     labels: {
         showValueLabel: boolean;

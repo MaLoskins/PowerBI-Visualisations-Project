@@ -7,6 +7,7 @@
 import { select, Selection } from "d3-selection";
 import { arc as d3Arc, Arc } from "d3-shape";
 import "d3-transition"; /* side-effect: adds .transition() to Selection prototype */
+import { easeCubicOut } from "d3-ease";
 import type { RenderConfig, GaugeData, GaugeLayout, GaugeCallbacks } from "../types";
 import { DEG_TO_RAD, GAUGE_MARGIN, CSS_PREFIX } from "../constants";
 import { hexToRgba } from "../utils/color";
@@ -111,7 +112,8 @@ export function renderGauge(
 
     /* ── Helper: value → angle ── */
     function valueToAngle(v: number): number {
-        const ratio = clamp((v - data.minValue) / (data.maxValue - data.minValue), 0, 1);
+        const range = data.maxValue - data.minValue;
+        const ratio = range === 0 ? 0.5 : clamp((v - data.minValue) / range, 0, 1);
         return startAngleRad + ratio * totalSweep;
     }
 
@@ -127,16 +129,43 @@ export function renderGauge(
         .attr("d", arcGen({ startAngle: startAngleRad, endAngle: endAngleRad }) ?? "")
         .attr("fill", hexToRgba(cfg.gauge.backgroundArcColor, cfg.gauge.backgroundArcOpacity));
 
+    /* ── Inner edge highlight for depth ── */
+    const innerHighlightGen: ArcGen = (d3Arc<unknown, ArcDatum>() as ArcGen)
+        .innerRadius(innerRadius)
+        .outerRadius(innerRadius + 1.5)
+        .cornerRadius(0);
+    g.append("path")
+        .attr("class", CSS_PREFIX + "inner-edge")
+        .attr("d", innerHighlightGen({ startAngle: startAngleRad, endAngle: endAngleRad }) ?? "")
+        .attr("fill", hexToRgba("#000000", 0.04));
+
     /* ── Foreground: range bands or single bar ── */
     if (data.hasRanges) {
         renderRangeBands(g, data, cfg, arcGen, startAngleRad, endAngleRad, valueToAngle);
     } else {
-        // Single bar from min to value
+        // Single bar from min to value with animation
         const valueAngle = valueToAngle(data.value);
-        g.append("path")
+        const valuePath = g.append("path")
             .attr("class", CSS_PREFIX + "value-arc")
-            .attr("d", arcGen({ startAngle: startAngleRad, endAngle: valueAngle }) ?? "")
             .attr("fill", cfg.colors.defaultBarColor);
+
+        if (isFirstRender && cfg.needle.animationDuration > 0) {
+            // Start from zero sweep and animate to target
+            valuePath
+                .attr("d", arcGen({ startAngle: startAngleRad, endAngle: startAngleRad }) ?? "")
+                .transition()
+                .duration(cfg.needle.animationDuration)
+                .ease(easeCubicOut)
+                .attrTween("d", function () {
+                    return function (t: number) {
+                        const interpAngle = startAngleRad + (valueAngle - startAngleRad) * t;
+                        return arcGen({ startAngle: startAngleRad, endAngle: interpAngle }) ?? "";
+                    };
+                });
+        } else {
+            valuePath
+                .attr("d", arcGen({ startAngle: startAngleRad, endAngle: valueAngle }) ?? "");
+        }
     }
 
     /* ── Ticks ── */
@@ -310,7 +339,7 @@ function renderTargetMarker(
         .attr("stroke-linecap", "round");
 
     if (cfg.target.showTargetLabel) {
-        const labelR = outerRadius + cfg.target.targetLabelFontSize * 0.8;
+        const labelR = outerRadius + cfg.target.targetLabelFontSize * 0.8 + 2;
         const lx = sinA * labelR;
         const ly = -cosA * labelR;
 
@@ -319,7 +348,7 @@ function renderTargetMarker(
             .attr("x", lx).attr("y", ly)
             .attr("text-anchor", "middle")
             .attr("dominant-baseline", "central")
-            .attr("fill", cfg.target.targetMarkerColor)
+            .attr("fill", cfg.target.targetLabelFontColor)
             .attr("font-size", cfg.target.targetLabelFontSize + "px")
             .text(formatTickValue(data.target));
     }
@@ -338,15 +367,20 @@ function renderNeedle(
     const angle = valueToAngle(data.value);
     const needleLen = layout.outerRadius * cfg.needle.needleLength;
     const halfBase = cfg.needle.needleWidth;
+    const pivot = cfg.needle.pivotRadius;
 
-    // Tapered polygon points (wider at pivot, pointed at tip)
+    // Smooth tapered needle with a gentle curve
     // Defined pointing straight up (0°), then rotated via transform
     const tipY = -needleLen;
-    const points = [
-        `0,${tipY}`,                    // tip
-        `${halfBase},${cfg.needle.pivotRadius * 0.3}`, // right base
-        `0,${cfg.needle.pivotRadius}`,    // bottom centre
-        `${-halfBase},${cfg.needle.pivotRadius * 0.3}`, // left base
+    const midY = -needleLen * 0.6;
+    const needlePath = [
+        `M 0,${tipY}`,                         // tip (sharp point)
+        `Q ${halfBase * 0.4},${midY} ${halfBase},${pivot * 0.3}`,  // right curve
+        `L ${halfBase * 0.6},${pivot * 0.5}`,   // right base taper
+        `A ${pivot},${pivot} 0 0 1 ${-halfBase * 0.6},${pivot * 0.5}`, // base arc
+        `L ${-halfBase},${pivot * 0.3}`,        // left base taper
+        `Q ${-halfBase * 0.4},${midY} 0,${tipY}`, // left curve back to tip
+        "Z",
     ].join(" ");
 
     const needleGroup = g.append("g")
@@ -358,23 +392,40 @@ function renderNeedle(
 
     needleGroup.attr("transform", `rotate(${startAngleDeg})`);
 
-    needleGroup.append("polygon")
+    // Needle body (path instead of polygon for smoother shape)
+    needleGroup.append("path")
         .attr("class", CSS_PREFIX + "needle")
-        .attr("points", points)
+        .attr("d", needlePath)
         .attr("fill", cfg.needle.needleColor);
+
+    // Pivot outer ring (subtle depth)
+    needleGroup.append("circle")
+        .attr("class", CSS_PREFIX + "needle-pivot-ring")
+        .attr("cx", 0).attr("cy", 0)
+        .attr("r", pivot + 1)
+        .attr("fill", hexToRgba(cfg.needle.pivotColor, 0.3))
+        .attr("stroke", "none");
 
     // Pivot circle
     needleGroup.append("circle")
         .attr("class", CSS_PREFIX + "needle-pivot")
         .attr("cx", 0).attr("cy", 0)
-        .attr("r", cfg.needle.pivotRadius)
+        .attr("r", pivot)
         .attr("fill", cfg.needle.pivotColor);
 
-    // Animate to target angle
+    // Pivot highlight dot (professional glossy effect)
+    needleGroup.append("circle")
+        .attr("cx", -pivot * 0.2).attr("cy", -pivot * 0.2)
+        .attr("r", pivot * 0.3)
+        .attr("fill", hexToRgba("#FFFFFF", 0.35))
+        .attr("pointer-events", "none");
+
+    // Animate to target angle with easing
     if (cfg.needle.animationDuration > 0 && startAngleDeg !== angle * (180 / Math.PI)) {
         needleGroup
             .transition()
             .duration(cfg.needle.animationDuration)
+            .ease(easeCubicOut)
             .attr("transform", `rotate(${angle * (180 / Math.PI)})`);
     }
 }

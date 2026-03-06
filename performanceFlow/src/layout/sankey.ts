@@ -9,6 +9,13 @@
  *    - Relaxation: early-exit when positions converge (< EPSILON movement)
  *    - getColumns: built once and reused instead of rebuilt per call
  *    - resolveOverlaps: guard against negative node heights
+ *    - initializeColumn: adaptive padding + minimum node height
+ *    - resolveOverlaps: clamp y0 >= 0 so nodes never leave viewport
+ *    - **Natural sizing**: the diagram computes a "natural" height from
+ *      the data (ensuring every link band is at least MIN_LINK_BAND_PX
+ *      wide) and uses min(natural, viewport) rather than always stretching
+ *      to fill the entire viewport. This keeps links distinguishable and
+ *      prevents the "solid rectangle of colour" problem.
  */
 "use strict";
 
@@ -21,6 +28,27 @@ import {
     SortNodeOption,
 } from "../types";
 import { EPSILON } from "../constants";
+
+/* ═══════════════════════════════════════════════
+   Sizing constants
+   ═══════════════════════════════════════════════ */
+
+/**
+ * Minimum rendered px per distinct link band on a node.
+ * If a node fans out to 4 targets equally, each link band
+ * will be at least this many pixels tall.
+ */
+const MIN_LINK_BAND_PX = 10;
+
+/** Absolute minimum rendered height for any node (px). */
+const MIN_NODE_PX = 4;
+
+/**
+ * When the natural height is smaller than the viewport,
+ * use at least this fraction of the viewport so the diagram
+ * doesn't look tiny in a very large tile.
+ */
+const MIN_VIEWPORT_FRACTION = 0.35;
 
 /* ═══════════════════════════════════════════════
    Public API
@@ -137,15 +165,12 @@ function computeNodeValues(nodes: SankeyNode[]): void {
 
 /* ═══════════════════════════════════════════════
    Step 3: Assign depths via Kahn's algorithm
-   FIX: Original used O(V²) set scan per layer.
-   Now O(V+E) topological sort with cycle handling.
    ═══════════════════════════════════════════════ */
 
 function assignDepths(nodes: SankeyNode[]): void {
     const nodeCount = nodes.length;
     if (nodeCount === 0) return;
 
-    /* Build in-degree map */
     const inDegree = new Map<SankeyNode, number>();
     for (const n of nodes) inDegree.set(n, 0);
     for (const n of nodes) {
@@ -154,7 +179,6 @@ function assignDepths(nodes: SankeyNode[]): void {
         }
     }
 
-    /* Seed queue with zero in-degree nodes */
     const queue: SankeyNode[] = [];
     for (const n of nodes) {
         if (inDegree.get(n)! === 0) {
@@ -163,7 +187,6 @@ function assignDepths(nodes: SankeyNode[]): void {
         }
     }
 
-    /* If entirely cyclic, break by assigning all depth 0 */
     if (queue.length === 0) {
         for (const n of nodes) n.depth = 0;
         return;
@@ -177,7 +200,6 @@ function assignDepths(nodes: SankeyNode[]): void {
         processed.add(node);
         for (const link of node.sourceLinks) {
             const target = link.target;
-            /* Track max depth through any path */
             const newDepth = node.depth + 1;
             if (newDepth > target.depth) target.depth = newDepth;
 
@@ -189,7 +211,6 @@ function assignDepths(nodes: SankeyNode[]): void {
         }
     }
 
-    /* Assign unprocessed (cycle members) to max depth seen */
     let maxD = 0;
     for (const n of nodes) {
         if (n.depth > maxD) maxD = n.depth;
@@ -214,15 +235,11 @@ function alignDepths(nodes: SankeyNode[], align: NodeAlign): number {
 
     if (align === "right") {
         for (const n of nodes) {
-            if (n.sourceLinks.length === 0) {
-                n.depth = maxDepth;
-            }
+            if (n.sourceLinks.length === 0) n.depth = maxDepth;
         }
     } else if (align === "center") {
         for (const n of nodes) {
-            if (n.sourceLinks.length === 0) {
-                n.depth = maxDepth;
-            }
+            if (n.sourceLinks.length === 0) n.depth = maxDepth;
         }
     } else if (align === "justify") {
         for (const n of nodes) {
@@ -231,14 +248,11 @@ function alignDepths(nodes: SankeyNode[], align: NodeAlign): number {
             }
         }
     }
-    /* "left" keeps depths as-is */
 
-    /* Recompute maxDepth */
     maxDepth = 0;
     for (const n of nodes) {
         if (n.depth > maxDepth) maxDepth = n.depth;
     }
-
     return maxDepth;
 }
 
@@ -263,7 +277,6 @@ function assignXPositions(
 
 /* ═══════════════════════════════════════════════
    Build columns (reusable)
-   FIX: built once, passed around instead of rebuilt
    ═══════════════════════════════════════════════ */
 
 function buildColumns(nodes: SankeyNode[], maxDepth: number): SankeyNode[][] {
@@ -315,73 +328,204 @@ function avgTargetY(node: SankeyNode): number {
 }
 
 /* ═══════════════════════════════════════════════
-   Step 7: Y positions with relaxation
-   FIX: Early-exit when total movement < threshold
+   Step 7: Y positions with natural sizing
+
+   Instead of stretching to fill the viewport, we compute
+   how tall the diagram *needs to be* so that every link
+   band is at least MIN_LINK_BAND_PX wide. The viewport
+   height is only used as a ceiling.
    ═══════════════════════════════════════════════ */
+
+/**
+ * Compute the ideal value-to-pixel scale factor so that
+ * every node's link bands are readable.
+ *
+ * For a node with value V and N distinct links, each link
+ * band ≈ (V / N) × scale px. We want that ≥ MIN_LINK_BAND_PX,
+ * i.e. scale ≥ N × MIN_LINK_BAND_PX / V.
+ *
+ * The global ideal scale is the max across all nodes
+ * (the most constrained node dictates the scale).
+ */
+function computeIdealScale(columns: SankeyNode[][]): number {
+    let idealScale = 0;
+
+    for (const col of columns) {
+        for (const node of col) {
+            if (node.value <= 0) continue;
+            const nLinks = Math.max(
+                node.sourceLinks.length,
+                node.targetLinks.length,
+                1,
+            );
+            const neededScale = (nLinks * MIN_LINK_BAND_PX) / node.value;
+            if (neededScale > idealScale) idealScale = neededScale;
+        }
+    }
+
+    return idealScale;
+}
+
+/**
+ * Compute the height a single column would need at a given scale.
+ */
+function columnNaturalHeight(
+    col: SankeyNode[],
+    scale: number,
+    padding: number,
+): number {
+    if (col.length === 0) return 0;
+
+    let totalNodeH = 0;
+    for (const node of col) {
+        totalNodeH += Math.max(MIN_NODE_PX, node.value * scale);
+    }
+    const totalPadding = Math.max(0, col.length - 1) * padding;
+    return totalNodeH + totalPadding;
+}
 
 function assignYPositions(
     columns: SankeyNode[][],
-    height: number,
+    viewportHeight: number,
     padding: number,
     iterations: number,
 ): void {
-    const maxDepth = columns.length - 1;
+    /*
+     * 1. Compute ideal scale from link density.
+     * 2. Compute the natural height each column would need at that scale.
+     * 3. The effective diagram height = max column height, clamped to
+     *    [MIN_VIEWPORT_FRACTION × viewport, viewport].
+     *
+     * This means the diagram only fills the viewport when the data
+     * actually needs that much space. Sparse diagrams stay compact
+     * with clear link spacing.
+     */
+    const idealScale = computeIdealScale(columns);
 
-    /* Initial: distribute evenly within each column */
+    /* Natural height = tallest column at ideal scale */
+    let naturalHeight = 0;
     for (const col of columns) {
-        initializeColumn(col, height, padding);
+        const ch = columnNaturalHeight(col, idealScale, padding);
+        if (ch > naturalHeight) naturalHeight = ch;
+    }
+
+    /* Clamp: never exceed viewport, never be tiny */
+    const minHeight = viewportHeight * MIN_VIEWPORT_FRACTION;
+    const effectiveHeight = Math.max(
+        minHeight,
+        Math.min(naturalHeight, viewportHeight),
+    );
+
+    /* Vertical offset to centre within viewport */
+    const yOffset = (viewportHeight - effectiveHeight) / 2;
+
+    /* Initial: distribute evenly within effectiveHeight */
+    for (const col of columns) {
+        initializeColumn(col, effectiveHeight, padding);
     }
 
     /* Iterative relaxation with convergence check */
-    const convergenceThreshold = 0.5; // px total movement to consider converged
+    const convergenceThreshold = 0.5;
+    const maxDepth = columns.length - 1;
+
     for (let iter = 0; iter < iterations; iter++) {
         const factor = Math.pow(0.99, iter);
         let totalMovement = 0;
 
-        /* Forward pass: push nodes down based on source positions */
         for (let d = 1; d <= maxDepth; d++) {
-            totalMovement += relaxColumn(columns[d], height, padding, factor, "target");
+            totalMovement += relaxColumn(columns[d], factor, "target");
         }
-
-        /* Backward pass: pull nodes up based on target positions */
         for (let d = maxDepth - 1; d >= 0; d--) {
-            totalMovement += relaxColumn(columns[d], height, padding, factor, "source");
+            totalMovement += relaxColumn(columns[d], factor, "source");
         }
-
-        /* Resolve overlaps */
         for (const col of columns) {
-            resolveOverlaps(col, height, padding);
+            resolveOverlaps(col, effectiveHeight, padding);
         }
 
-        /* Early exit if converged */
         if (totalMovement < convergenceThreshold) break;
+    }
+
+    /* Apply centering offset so diagram sits in the middle of the viewport */
+    if (Math.abs(yOffset) > EPSILON) {
+        for (const col of columns) {
+            for (const node of col) {
+                node.y0 += yOffset;
+                node.y1 += yOffset;
+            }
+        }
     }
 }
 
+/**
+ * Initialize a single column's Y positions.
+ *
+ * Uses adaptive padding when many nodes would overflow, and enforces
+ * MIN_NODE_PX so every node is distinguishable.
+ */
 function initializeColumn(
     col: SankeyNode[],
     height: number,
-    padding: number,
+    requestedPadding: number,
 ): void {
     if (col.length === 0) return;
 
+    const n = col.length;
     let totalValue = 0;
-    for (const n of col) totalValue += n.value;
+    for (const node of col) totalValue += node.value;
 
-    const totalPadding = Math.max(0, (col.length - 1) * padding);
-    const availableHeight = Math.max(0, height - totalPadding);
-    const scale = totalValue > 0 ? availableHeight / totalValue : 0;
+    const gapCount = Math.max(0, n - 1);
 
-    let y = 0;
-    for (const node of col) {
-        node.y0 = y;
-        const nodeHeight = Math.max(1, node.value * scale);
-        node.y1 = y + nodeHeight;
-        y = node.y1 + padding;
+    /* Adaptive padding: shrink if minimum nodes + padding exceed height */
+    const minRequired = n * MIN_NODE_PX + gapCount * requestedPadding;
+    let effectivePadding: number;
+
+    if (minRequired > height && gapCount > 0) {
+        const availableForGaps = Math.max(gapCount, height - n * MIN_NODE_PX);
+        effectivePadding = Math.max(1, availableForGaps / gapCount);
+    } else {
+        effectivePadding = requestedPadding;
     }
 
-    /* Center the column if total is shorter than available height */
-    const totalH = col[col.length - 1].y1 - col[0].y0;
+    const totalPadding = gapCount * effectivePadding;
+    const availableHeight = Math.max(n * MIN_NODE_PX, height - totalPadding);
+
+    /* Two-pass: proportional heights, then enforce minimum */
+    const rawScale = totalValue > 0 ? availableHeight / totalValue : 0;
+    const nodeHeights: number[] = new Array(n);
+    let deficit = 0;
+    let eligibleValue = 0;
+
+    for (let i = 0; i < n; i++) {
+        const rawH = col[i].value * rawScale;
+        if (rawH < MIN_NODE_PX) {
+            nodeHeights[i] = MIN_NODE_PX;
+            deficit += MIN_NODE_PX - rawH;
+        } else {
+            nodeHeights[i] = rawH;
+            eligibleValue += col[i].value;
+        }
+    }
+
+    if (deficit > EPSILON && eligibleValue > 0) {
+        const shrinkScale = deficit / (eligibleValue * rawScale);
+        for (let i = 0; i < n; i++) {
+            if (nodeHeights[i] > MIN_NODE_PX) {
+                const reduction = nodeHeights[i] * shrinkScale;
+                nodeHeights[i] = Math.max(MIN_NODE_PX, nodeHeights[i] - reduction);
+            }
+        }
+    }
+
+    /* Place nodes sequentially */
+    let y = 0;
+    for (let i = 0; i < n; i++) {
+        col[i].y0 = y;
+        col[i].y1 = y + nodeHeights[i];
+        y = col[i].y1 + effectivePadding;
+    }
+
+    /* Centre if total is shorter than height */
+    const totalH = col[n - 1].y1 - col[0].y0;
     if (totalH < height) {
         const offset = (height - totalH) / 2;
         for (const node of col) {
@@ -394,8 +538,6 @@ function initializeColumn(
 /** Returns total absolute movement for convergence checking */
 function relaxColumn(
     col: SankeyNode[],
-    _height: number,
-    _padding: number,
     alpha: number,
     direction: "source" | "target",
 ): number {
@@ -432,6 +574,9 @@ function relaxColumn(
     return totalMovement;
 }
 
+/**
+ * Resolve overlaps within a column and clamp to [0, height].
+ */
 function resolveOverlaps(
     col: SankeyNode[],
     height: number,
@@ -439,26 +584,35 @@ function resolveOverlaps(
 ): void {
     if (col.length === 0) return;
 
-    /* Sort by current y0 */
     col.sort((a, b) => a.y0 - b.y0);
 
+    /* Clamp first node to y >= 0 */
+    if (col[0].y0 < 0) {
+        const shift = -col[0].y0;
+        col[0].y0 = 0;
+        col[0].y1 += shift;
+    }
+
     /* Push down overlapping nodes */
-    let y = 0;
-    for (const node of col) {
-        const dy = y - node.y0;
-        if (dy > EPSILON) {
+    for (let i = 1; i < col.length; i++) {
+        const prev = col[i - 1];
+        const node = col[i];
+        const minY = prev.y1 + padding;
+        if (node.y0 < minY) {
+            const dy = minY - node.y0;
             node.y0 += dy;
             node.y1 += dy;
         }
-        y = node.y1 + padding;
     }
 
     /* If last node extends beyond height, push everything up */
     const last = col[col.length - 1];
     const overflow = last.y1 - height;
+
     if (overflow > EPSILON) {
         last.y0 -= overflow;
         last.y1 -= overflow;
+
         for (let i = col.length - 2; i >= 0; i--) {
             const node = col[i];
             const next = col[i + 1];
@@ -466,6 +620,33 @@ function resolveOverlaps(
             if (gap > EPSILON) {
                 node.y0 -= gap;
                 node.y1 -= gap;
+            }
+        }
+
+        /* If first node went negative, compress spacing to fit [0, height] */
+        if (col[0].y0 < -EPSILON) {
+            const totalNodeHeight = col.reduce((s, nd) => s + (nd.y1 - nd.y0), 0);
+            const gapCount = Math.max(0, col.length - 1);
+            const availableForGaps = Math.max(0, height - totalNodeHeight);
+            const compressedPad = gapCount > 0
+                ? Math.max(0, availableForGaps / gapCount)
+                : 0;
+
+            let y = 0;
+            for (const node of col) {
+                const h = node.y1 - node.y0;
+                node.y0 = y;
+                node.y1 = y + h;
+                y = node.y1 + compressedPad;
+            }
+
+            const used = col[col.length - 1].y1;
+            if (used < height) {
+                const shift = (height - used) / 2;
+                for (const node of col) {
+                    node.y0 += shift;
+                    node.y1 += shift;
+                }
             }
         }
     }
@@ -477,12 +658,10 @@ function resolveOverlaps(
 
 function computeLinkPositions(nodes: SankeyNode[]): void {
     for (const node of nodes) {
-        /* Sort source links by target y-position for orderly layout */
         node.sourceLinks.sort((a, b) => a.target.y0 - b.target.y0);
         node.targetLinks.sort((a, b) => a.source.y0 - b.source.y0);
     }
 
-    /* Assign link y0 (source side) */
     for (const node of nodes) {
         const nodeHeight = node.y1 - node.y0;
         let totalOut = 0;
@@ -497,7 +676,6 @@ function computeLinkPositions(nodes: SankeyNode[]): void {
         }
     }
 
-    /* Assign link y1 (target side) */
     for (const node of nodes) {
         const nodeHeight = node.y1 - node.y0;
         let totalIn = 0;

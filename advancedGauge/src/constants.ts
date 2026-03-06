@@ -1,33 +1,8 @@
 /* ═══════════════════════════════════════════════
    Advanced Gauge – Constants
-   Palette arrays, magic numbers, shared config
+   Palette tokens, magic numbers, shared config
    ═══════════════════════════════════════════════ */
 "use strict";
-
-/* ── Resource & Category Palette (shared across visuals) ── */
-
-export const RESOURCE_COLORS = [
-    "#3B82F6", "#F59E0B", "#10B981", "#8B5CF6", "#EF4444",
-    "#06B6D4", "#F97316", "#EC4899", "#6366F1", "#14B8A6",
-    "#84CC16", "#A855F7", "#0EA5E9", "#D946EF", "#78716C",
-] as const;
-
-/* ── Status Palette ── */
-
-export const STATUS_COLORS: Record<string, string> = {
-    complete: "#10B981",
-    success: "#10B981",
-    good: "#10B981",
-    onTrack: "#10B981",
-    warning: "#F59E0B",
-    atRisk: "#F97316",
-    caution: "#F59E0B",
-    onHold: "#F59E0B",
-    danger: "#EF4444",
-    critical: "#DC2626",
-    blocked: "#DC2626",
-    cancelled: "#64748B",
-};
 
 /* ── Slate + Blue Palette Tokens ── */
 

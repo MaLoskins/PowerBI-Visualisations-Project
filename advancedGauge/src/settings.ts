@@ -111,7 +111,7 @@ class GaugeSettingsCard extends FormattingSettingsCard {
     arcThickness = num("arcThickness", "Arc Thickness", 28, 8, 60);
     arcCornerRadius = num("arcCornerRadius", "Corner Radius", 4, 0, 20);
     backgroundArcColor = color("backgroundArcColor", "Background Arc Color", "#E2E8F0");
-    backgroundArcOpacity = pct("backgroundArcOpacity", "Background Arc Opacity", 30);
+    backgroundArcOpacity = pct("backgroundArcOpacity", "Background Arc Opacity", 50);
 
     name: string = "gaugeSettings";
     displayName: string = "Gauge";
@@ -161,12 +161,14 @@ class TargetSettingsCard extends FormattingSettingsCard {
     targetMarkerLength = pct("targetMarkerLength", "Marker Length (%)", 100);
     showTargetLabel = toggle("showTargetLabel", "Show Label", false);
     targetLabelFontSize = num("targetLabelFontSize", "Label Font Size", 10, 7, 18);
+    targetLabelFontColor = color("targetLabelFontColor", "Label Font Color", "#334155");
 
     name: string = "targetSettings";
     displayName: string = "Target";
     slices: FormattingSettingsSlice[] = [
         this.showTarget, this.targetMarkerColor, this.targetMarkerWidth,
         this.targetMarkerLength, this.showTargetLabel, this.targetLabelFontSize,
+        this.targetLabelFontColor,
     ];
 }
 
@@ -310,6 +312,7 @@ export function buildRenderConfig(model: VisualFormattingSettingsModel): RenderC
             targetMarkerLength: t.targetMarkerLength.value / 100,  /* pct → fraction */
             showTargetLabel: t.showTargetLabel.value,
             targetLabelFontSize: t.targetLabelFontSize.value,
+            targetLabelFontColor: t.targetLabelFontColor.value.value,
         },
         labels: {
             showValueLabel: l.showValueLabel.value,

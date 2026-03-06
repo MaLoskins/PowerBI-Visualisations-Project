@@ -9,6 +9,10 @@
  *    3. Callbacks are built once and reused (not recreated per render).
  *    4. Resize-only path skips data pipeline entirely.
  *    5. Update gating properly distinguishes data vs. resize vs. format changes.
+ *
+ *  VIEWPORT FIXES:
+ *    6. chartHeight is passed to renderNodes so drag is clamped to viewport bounds.
+ *    7. Layout algorithm now uses adaptive padding + min node height (see sankey.ts).
  */
 "use strict";
 
@@ -91,6 +95,9 @@ export class Visual implements IVisual {
     private currentGraph: SankeyGraph | null = null;
     private renderConfig: RenderConfig | null = null;
     private hasRenderedOnce: boolean = false;
+
+    /** Current inner chart height (viewport minus margins). Used for drag clamping. */
+    private chartHeight: number = 0;
 
     /* ── Drag RAF debounce ── */
     private dragRafId: number = 0;
@@ -249,6 +256,9 @@ export class Visual implements IVisual {
 
         if (w <= 0 || h <= 0) return;
 
+        /* Store chart height for drag clamping */
+        this.chartHeight = h;
+
         /* Compute Sankey layout */
         const layoutOpts: SankeyLayoutOptions = {
             width: w,
@@ -276,7 +286,7 @@ export class Visual implements IVisual {
 
     private renderAll(layout: SankeyLayout, cfg: RenderConfig, chartWidth: number): void {
         renderLinks(this.linkGroup, this.defs, layout.links, cfg, this.linkCallbacks);
-        renderNodes(this.nodeGroup, layout.nodes, cfg, this.nodeCallbacks);
+        renderNodes(this.nodeGroup, layout.nodes, cfg, this.nodeCallbacks, this.chartHeight);
         renderLabels(this.labelGroup, layout.nodes, cfg, chartWidth);
 
         this.applySelection();

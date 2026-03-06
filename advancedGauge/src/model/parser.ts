@@ -44,17 +44,19 @@ export function parseGaugeData(
     const minValue = cols.minValue >= 0 ? toNumber(row[cols.minValue]) ?? 0 : 0;
 
     /* ── Determine max value ── */
+    const rawMax = cols.maxValue >= 0 ? toNumber(row[cols.maxValue]) : null;
     let maxValue: number;
-    if (cols.maxValue >= 0 && toNumber(row[cols.maxValue]) !== null) {
-        maxValue = toNumber(row[cols.maxValue])!;
+    if (rawMax !== null) {
+        maxValue = rawMax;
     } else {
         // Auto: pick a sensible max from the data
         maxValue = autoMax(rawValue, target);
     }
 
-    // Ensure max > min
+    // Ensure max > min (with a meaningful gap)
     if (maxValue <= minValue) {
-        maxValue = minValue + Math.abs(rawValue) * 1.5 + 1;
+        const absRef = Math.abs(rawValue) || 1;
+        maxValue = minValue + absRef * 1.5 + 1;
     }
 
     /* ── Range boundaries ── */
@@ -110,7 +112,10 @@ function toNumber(val: unknown): number | null {
 function autoMax(value: number, target: number | null): number {
     const ref = target !== null ? Math.max(Math.abs(value), Math.abs(target)) : Math.abs(value);
     if (ref === 0) return 100;
-    // Round up to a nice number
-    const magnitude = Math.pow(10, Math.floor(Math.log10(ref)));
+    // Guard against log10(0) or negative magnitudes
+    const logRef = Math.log10(ref);
+    if (!Number.isFinite(logRef)) return 100;
+    const magnitude = Math.pow(10, Math.floor(logRef));
+    if (magnitude <= 0) return ref * 1.5;
     return Math.ceil((ref * 1.2) / magnitude) * magnitude;
 }

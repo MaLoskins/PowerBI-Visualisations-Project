@@ -40,6 +40,14 @@
     pointer-events: none;
 }
 
+.agauge-value-arc {
+    filter: drop-shadow(0 1px 2px rgba(0, 0, 0, 0.08));
+}
+
+.agauge-range-arc {
+    filter: drop-shadow(0 0.5px 1px rgba(0, 0, 0, 0.06));
+}
+
 /* ── Hit Area (transparent overlay for interaction) ── */
 
 .agauge-hit-area {
@@ -50,10 +58,12 @@
 
 .agauge-needle {
     pointer-events: none;
+    filter: drop-shadow(0 1px 2px rgba(0, 0, 0, 0.15));
 }
 
 .agauge-needle-pivot {
     pointer-events: none;
+    filter: drop-shadow(0 0.5px 1px rgba(0, 0, 0, 0.12));
 }
 
 .agauge-needle-group {
@@ -64,11 +74,13 @@
 
 .agauge-target-marker {
     pointer-events: none;
+    filter: drop-shadow(0 0.5px 1px rgba(0, 0, 0, 0.1));
 }
 
 .agauge-target-label {
     pointer-events: none;
     user-select: none;
+    font-family: "Segoe UI", "wf_segoe-ui_normal", "Helvetica Neue", Helvetica, Arial, sans-serif;
 }
 
 /* ── Ticks ── */
@@ -126,9 +138,91 @@
     margin: 0;
 }
 
+/* ── Selection State ── */
+
+.agauge-svg {
+    transition: opacity 0.2s ease;
+}
+
 /* ── Hover Feedback ── */
 
-.agauge-hit-area:hover ~ .agauge-needle-group .agauge-needle-pivot {
-    filter: brightness(1.1);
-    transition: filter 0.1s ease;
+.agauge-hit-area:hover {
+    fill: rgba(0, 0, 0, 0.02) !important;
+}
+
+/* ── Landing Page ── */
+
+.agauge-landing {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 16px;
+    gap: 12px;
+    background: #FFFFFF;
+    z-index: 10;
+}
+
+.agauge-landing-icon {
+    opacity: 0.6;
+}
+
+.agauge-landing-text {
+    text-align: center;
+    color: #94A3B8;
+    font-size: 13px;
+    line-height: 1.5;
+    margin: 0;
+}
+
+/* ── Keyboard Focus ── */
+
+.agauge-container:focus {
+    outline: 2px solid #3B82F6;
+    outline-offset: -2px;
+}
+
+.agauge-container:focus:not(:focus-visible) {
+    outline: none;
+}
+
+/* ── High Contrast Support ── */
+
+@media (forced-colors: active) {
+    .agauge-value-arc,
+    .agauge-range-arc {
+        fill: Highlight !important;
+    }
+
+    .agauge-bg-arc {
+        fill: Canvas !important;
+        stroke: CanvasText;
+        stroke-width: 1;
+    }
+
+    .agauge-needle,
+    .agauge-needle-pivot {
+        fill: CanvasText !important;
+    }
+
+    .agauge-value-label,
+    .agauge-min-label,
+    .agauge-max-label,
+    .agauge-title,
+    .agauge-tick-label,
+    .agauge-target-label {
+        fill: CanvasText !important;
+    }
+
+    .agauge-tick,
+    .agauge-target-marker {
+        stroke: CanvasText !important;
+    }
+
+    .agauge-error-msg,
+    .agauge-landing-text {
+        color: CanvasText !important;
+    }
 }

@@ -131,6 +131,9 @@
                 },
                 "targetLabelFontSize": {
                     "type": { "numeric": true }
+                },
+                "targetLabelFontColor": {
+                    "type": { "fill": { "solid": { "color": true } } }
                 }
             }
         },
@@ -232,7 +235,7 @@
                         { "for": { "in": "tooltipFields" } }
                     ],
                     "dataReductionAlgorithm": {
-                        "top": { "count": 10000 }
+                        "top": { "count": 1 }
                     }
                 }
             }
@@ -242,5 +245,9 @@
         "supportedTypes": { "default": true, "canvas": true },
         "roles": ["tooltipFields"]
     },
+    "supportsHighlight": true,
+    "supportsKeyboardFocus": true,
+    "supportsMultiVisualSelection": true,
+    "supportsLandingPage": true,
     "privileges": []
 }

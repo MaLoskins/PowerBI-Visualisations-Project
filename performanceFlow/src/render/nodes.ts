@@ -5,6 +5,8 @@
  *  FIX: Uses D3 join (enter/update/exit) instead of
  *       selectAll("*").remove() + re-append on every render.
  *       Drag only updates the single rect's y attribute.
+ *  FIX: Drag is clamped to [0, chartHeight] so nodes can never
+ *       be dragged outside the visible viewport.
  */
 "use strict";
 
@@ -17,12 +19,18 @@ import { CSS_PREFIX } from "../constants";
    Public API
    ═══════════════════════════════════════════════ */
 
-/** Render all Sankey nodes into the given SVG group */
+/**
+ * Render all Sankey nodes into the given SVG group.
+ *
+ * @param chartHeight  The usable chart height (viewport minus margins).
+ *                     Used to clamp drag so nodes cannot leave the viewport.
+ */
 export function renderNodes(
     container: SVGGElement,
     nodes: SankeyNode[],
     cfg: RenderConfig,
     callbacks: NodeCallbacks,
+    chartHeight: number,
 ): void {
     const g = select(container);
     const className = CSS_PREFIX + "node";
@@ -52,7 +60,7 @@ export function renderNodes(
         .attr("fill-opacity", cfg.node.opacity)
         .attr("stroke", "none");
 
-    /* Re-bindall event handlers (safe to re-bind on update) */
+    /* Re-bind all event handlers (safe to re-bind on update) */
     merged
         .on("click", function (_ev: MouseEvent, d: SankeyNode) {
             callbacks.onClick(d, _ev);
@@ -67,12 +75,23 @@ export function renderNodes(
             callbacks.onMouseOut();
         });
 
-    /* Drag behaviour for vertical repositioning */
+    /*
+     * Drag behaviour for vertical repositioning.
+     * FIX: Clamp y0/y1 to [0, chartHeight] so the node always stays
+     * within the visible area.
+     */
     const dragBehavior = drag<SVGRectElement, SankeyNode>()
         .on("drag", function (event, d) {
-            const dy = event.dy as number;
-            d.y0 += dy;
-            d.y1 += dy;
+            const nodeHeight = d.y1 - d.y0;
+            let newY0 = d.y0 + (event.dy as number);
+
+            /* Clamp to viewport bounds */
+            newY0 = Math.max(0, Math.min(chartHeight - nodeHeight, newY0));
+
+            const dy = newY0 - d.y0;
+            d.y0 = newY0;
+            d.y1 = newY0 + nodeHeight;
+
             select(this).attr("y", d.y0);
             callbacks.onDrag(d, dy);
         });
